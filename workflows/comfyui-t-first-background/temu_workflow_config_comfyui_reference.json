@@ -1,0 +1,38 @@
+{
+  "source_workbook": "D:/Desktop/jit/新店铺/0608-1.xlsx",
+  "output_dir": "C:/Users/Administrator/Documents/Codex/2026-06-08/comfyui/outputs",
+  "sku_roots": [
+    "E:/JIT制图--新店",
+    "E:/jit制图"
+  ],
+  "background_roots": [
+    "E:/JIT制图--新店/背景素材",
+    "E:/jit制图/背景素材"
+  ],
+  "stages": {
+    "rewrite_titles": true,
+    "generate_j_preview": true,
+    "generate_t_first": true,
+    "sync_u_with_t_first": true,
+    "validate": true
+  },
+  "t_first_backend": "comfyui",
+  "comfyui": {
+    "url": "http://127.0.0.1:8188",
+    "workflow_api_json": "C:/Users/Administrator/Documents/Codex/2026-06-08/comfyui/work/comfyui_t_first_workflow_api.json",
+    "input_image_node_id": "",
+    "positive_prompt_node_id": "6",
+    "negative_prompt_node_id": "7",
+    "seed_node_id": "3",
+    "output_node_id": "9",
+    "composite_foreground_after_generation": true,
+    "timeout_seconds": 1800
+  },
+  "rules": {
+    "preserve_t_fourth": true,
+    "sync_u_to_t_first": true,
+    "max_t_images": 10,
+    "skip_blank_d": true,
+    "same_d_same_title": true
+  }
+}
