@@ -1,0 +1,17 @@
+# Large generated packages and image outputs should not be committed by default.
+*.zip
+*.7z
+*.rar
+*.png
+*.jpg
+*.jpeg
+*.webp
+*.xlsx
+
+# Keep manifests, docs, scripts, and JSON records.
+!*.md
+!*.json
+!*.py
+!*.yaml
+!*.yml
+

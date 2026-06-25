@@ -1,0 +1,4 @@
+interface:
+  display_name: "Temu Workbook Image Ops"
+  short_description: "Temu表格首图J图变体匹配写回校验完整复用工作流"
+  default_prompt: "Use $temu-xuanxshop-image-workbook to process a Temu/Xuanxshop workbook with T first images, J previews, variant matching, review pages, and validation."
