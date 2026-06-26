@@ -45,3 +45,16 @@ Use unbranded premium cues only:
 
 Avoid brand logos, monograms, recognizable luxury packaging, counterfeit-like props, readable brand text, and risky objects.
 
+
+## Seedream Realistic Usage Context Rule
+
+When generating T first images with Seedream/Jimeng, scene realism is a hard requirement before visual styling.
+
+Prompt order should be:
+
+1. Product identity and fixed structure.
+2. Realistic usage context: function, support surface, installation method, weight, gravity, buyer use case.
+3. Product-category placement constraints and impossible-scene exclusions.
+4. Premium unbranded styling and differentiation.
+
+Do not accept beautiful scenes if the product would not realistically be used or supported there.

@@ -65,3 +65,15 @@ The full package includes:
 - Skill files
 - Records JSON and review HTML copies
 
+
+## 2026-06-26 Seedream Prompt Skill Update
+
+Added `skills/product-lifestyle-scene` to Git memory.
+
+Key update:
+
+- Seedream/Jimeng prompts must enforce realistic product usage context before premium styling.
+- Product placement must match actual function, weight, contact surface, support/attachment method, gravity, and buyer use case.
+- Reject physically absurd placements such as barbecue grills on beds, heavy racks floating on fabric, garden arches on sofas, pet mats on kitchen counters, or kitchen storage on bedroom bedding.
+- For racks/shelves/trays/baskets/organizers, loose contents may be replaced for differentiation, but product hardware/body must remain fixed.
+- Local prompt builder copies are stored under `skills/product-lifestyle-scene/references/` for audit and reuse.

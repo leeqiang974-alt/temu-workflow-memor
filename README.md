@@ -1,4 +1,4 @@
-# Temu/Xuanxshop Cloud Memory
+﻿# Temu/Xuanxshop Cloud Memory
 
 This repository is the cloud memory for the Temu/Xuanxshop image-workbook workflow.
 
@@ -25,6 +25,7 @@ Store large assets as release attachments, Git LFS objects, external cloud links
 ```text
 skills/
   temu-xuanxshop-image-workbook/
+  product-lifestyle-scene/
 memory/
   current-state.md
   decisions.md
@@ -40,4 +41,5 @@ scripts/
 
 - `temu_xuanxshop_j_skill_portable_20260625_155407.zip`: J skill + J source SKU PNG library.
 - `temu_xuanxshop_full_tj_assets_portable_20260625_155823.zip`: full T/J handoff with T source PNGs, J source PNGs, generated T/J review images, records, and skill.
+
 
