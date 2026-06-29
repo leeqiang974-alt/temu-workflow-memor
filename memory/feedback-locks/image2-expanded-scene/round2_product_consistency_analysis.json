@@ -1,0 +1,20 @@
+{
+  "principle": "Scene/layout approval is separate from product-consistency approval. Only images passing both can enter the reusable library.",
+  "keep_patterns": {
+    "L081": "Clean product source, simple drawer/frame structure, compatible kitchen/patio sideboard scenes, no competing rack-like style object; product stayed supported and recognizable.",
+    "L086": "Living room sideboard and modern kitchen scenes matched real use; product remained front-facing/counter-supported and style references did not strongly compete with the two-drawer rack structure.",
+    "L088": "The kept luxury dining image used the black/high-contrast source and inset; rods and basket silhouette were easier to preserve than low-contrast white source outputs."
+  },
+  "reject_patterns": {
+    "L086_industrial_studio_storage_scene": "Industrial workshop reference contained shelves/racks; model merged scene shelving logic into the product, causing proportion and product appearance drift.",
+    "L088_cafe_dessert_scene": "Cafe dessert-table prompt plus white low-contrast source made the model simplify the offset fruit rack into a generic dessert stand and lose the middle vertical support.",
+    "L088_coastal_breakfast_counter_scene": "Scene became dominant and product geometry drifted into a different display tower/rack; outline changed despite good lifestyle atmosphere."
+  },
+  "updated_rules": [
+    "Do not keep images only because layout and differentiation are good; product hardware must pass separately.",
+    "Avoid structurally similar style references for high-structure products unless product scale is larger and hardware locks are stricter.",
+    "For L088, freeze offset stepped basket layout, central/vertical support rods, side rods, feet, connectors, and color; not a generic three-tier dessert stand.",
+    "For L086, avoid industrial shelf/workshop references with many shelving objects; preserve two drawer/basket units, front grid/transparent drawer face, top board, vertical supports, side frame, legs, and proportions.",
+    "Prefer high-contrast product PNGs or product inset when thin rods/supports are important."
+  ]
+}
