@@ -1,0 +1,62 @@
+[
+  {
+    "library_id": "image2_round2_keep::L081_wide_bright_kitchen_scene",
+    "name": "L081_wide_bright_kitchen_scene",
+    "prefix": "L081",
+    "decision": "keep",
+    "provider": "APIMart",
+    "model": "gpt-image-2",
+    "approved_at": "2026-06-29T21:05:23",
+    "image_url": "https://getapib.org/image/9998217263497895-5ac179e5-88bd-409c-9bd0-3f19f6c36402-gpt_image_2_codex_image_8f0578d7-de5e-4aa8-a080-7e3bdb39400b_0.png",
+    "source_ids": ["L081 black SKU cutout", "kitchen competitor-style scene reference"],
+    "notes": "Approved: bright premium kitchen layout, product consistency passed, useful for L081 black variant style reuse."
+  },
+  {
+    "library_id": "image2_round2_keep::L081_wide_patio_sideboard_scene",
+    "name": "L081_wide_patio_sideboard_scene",
+    "prefix": "L081",
+    "decision": "keep",
+    "provider": "APIMart",
+    "model": "gpt-image-2",
+    "approved_at": "2026-06-29T21:05:23",
+    "image_url": "https://getapib.org/tokens/5c229ab8-1b6e-492c-ad32-854a0b4e72b8.png",
+    "source_ids": ["L081 white SKU cutout", "patio sideboard competitor-style scene reference"],
+    "notes": "Approved: outdoor/patio sideboard scene, product consistency passed, useful for L081 white variant style reuse."
+  },
+  {
+    "library_id": "image2_round2_keep::L086_living_room_storage_scene",
+    "name": "L086_living_room_storage_scene",
+    "prefix": "L086",
+    "decision": "keep",
+    "provider": "APIMart",
+    "model": "gpt-image-2",
+    "approved_at": "2026-06-29T21:05:23",
+    "image_url": "https://getapib.org/image/9998217263578896-15dbc585-059f-4188-97e5-c6ad45cdbdeb-gpt_image_2_codex_image_88d96186-6a0e-46cf-abdd-248eaa3dd202_0.png",
+    "source_ids": ["L086 natural-color SKU cutout", "living room storage competitor-style scene reference"],
+    "notes": "Approved: warm living room storage sideboard direction, product consistency passed; useful for non-white L086 replacement candidates."
+  },
+  {
+    "library_id": "image2_round2_keep::L086_wide_modern_kitchen_scene",
+    "name": "L086_wide_modern_kitchen_scene",
+    "prefix": "L086",
+    "decision": "keep",
+    "provider": "APIMart",
+    "model": "gpt-image-2",
+    "approved_at": "2026-06-29T21:05:23",
+    "image_url": "https://getapib.org/tokens/2864399f-17ef-4693-aa87-97ab9d53ce16.png",
+    "source_ids": ["L086 black SKU cutout", "modern kitchen competitor-style scene reference"],
+    "notes": "Approved: modern kitchen appliance station direction, product consistency passed; avoid industrial shelf references for L086."
+  },
+  {
+    "library_id": "image2_round2_keep::L088_luxury_dining_inset_scene",
+    "name": "L088_luxury_dining_inset_scene",
+    "prefix": "L088",
+    "decision": "keep",
+    "provider": "APIMart",
+    "model": "gpt-image-2",
+    "approved_at": "2026-06-29T21:05:23",
+    "image_url": "https://getapib.org/image/9998217263328671-dd87ab34-6d8c-4b70-bd0c-82c5bdd901c7-gpt_image_2_codex_image_9d38513d-5f57-4a33-be86-bd2e46e5038c_0.png",
+    "source_ids": ["L088 black SKU cutout", "luxury dining competitor-style scene reference"],
+    "notes": "Approved: luxury dining fruit/pastry display direction, product consistency passed; keep central/vertical support rods and stepped basket geometry locked."
+  }
+]
