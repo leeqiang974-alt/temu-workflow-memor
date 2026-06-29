@@ -58,3 +58,9 @@ Prompt order should be:
 4. Premium unbranded styling and differentiation.
 
 Do not accept beautiful scenes if the product would not realistically be used or supported there.
+## 2026-06-29 — Image2 T-First Scene Generation Rules
+
+- Do not treat beautiful expanded scenes as automatically usable; product consistency is a separate gate.
+- Use color palette lanes to avoid first-screen sameness across T-first images.
+- Put approved generated scene records into a manifest-only library and lock rejected samples globally.
+- For products that repeatedly hallucinate under image fusion, switch to deterministic product PNG compositing.
