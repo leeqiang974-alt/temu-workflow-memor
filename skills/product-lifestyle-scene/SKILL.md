@@ -1,6 +1,6 @@
 ---
 name: product-lifestyle-scene
-description: Use when generating AI ecommerce lifestyle images from product SKU/reference images, especially when the product must stay visually consistent while scenes, people, scale, orientation, and contained items vary for bulk listing differentiation. Covers Seedream/Jimeng-style prompt strategy, clean PNG/cutout workflow, scene-only generation, product compositing, and tableware/object replacement inside racks or storage products.
+description: Use when generating AI ecommerce lifestyle images from product SKU/reference images, especially when the product must stay visually consistent while scenes, people, scale, orientation, and contained items vary for bulk listing differentiation. Covers Seedream/Jimeng-style prompt strategy, clean PNG/cutout workflow, competitor-style expanded scenes, product compositing, and tableware/object replacement inside racks or storage products.
 metadata:
   short-description: Ecommerce product lifestyle scene generation
 ---
@@ -45,6 +45,62 @@ If exact product fidelity matters, generate the scene separately and composite a
    - Composite the original product PNG with scale, mirror, shadow, and color matching.
    - Add top-right circular product inset afterward for consistency.
 
+## Competitor-Style Expanded Scene Workflow
+
+Use this when the user asks for “像截图那种场景图”, “扩图”, “扩场景”, “高价值场景”, or wants Temu competitor-style lifestyle images.
+
+Core idea: use **product PNG + competitor screenshot/style reference**. The product PNG defines the product; the screenshot only teaches room scale, camera distance, lighting, spatial depth, and ecommerce composition.
+
+Input order matters:
+
+1. First image: clean product PNG or best product reference.
+2. Second image: competitor-style screenshot for composition/scene mood only.
+3. Optional extra images: safe alternate product angles or variants.
+
+Prompt structure:
+
+```text
+The first input image is the exact product PNG for [product].
+The second input image is only a competitor-style scene/composition reference; learn room scale, camera distance, lighting mood, premium space design and ecommerce composition, but do not copy its person, product, brand, logo, text, layout or exact objects.
+Freeze product hardware exactly: [fixed parts].
+Only loose removable contents may change: [safe contents].
+Create a wide expanded lifestyle scene: [scene].
+Realistic use context: [where product is actually used].
+The product must sit/stand/hang/attach on a believable support surface with correct gravity and natural contact shadow.
+Product occupies about 18-32% of image height; the premium room and lifestyle context occupy most of the image.
+People may appear only as softly blurred background lifestyle atmosphere, modest and not touching, holding, leaning on, blocking or merging with the product.
+No readable text, logos, watermark, alcohol, fire, candles, electronic screens, toys, medicines, weapons, adult or political content.
+Square 1:1. Polished Temu competitor lifestyle image with a larger believable scene.
+```
+
+Good expanded-scene directions:
+
+- kitchen organizers/racks: bright luxury kitchen, marble island, glass-front cabinets, pantry sideboard, coffee station, safe patio kitchenette.
+- storage drawers/shelves: warm living room sideboard, entryway cabinet, closet shelf, modern kitchen appliance station, industrial loft storage corner.
+- fruit/dessert stands: cafe dessert table, luxury dining room, breakfast counter, marble tabletop, coastal kitchen counter.
+
+Do not let “premium” override product realism. A beautiful room is wrong if the product is placed where a buyer would never use it.
+
+Quality gate for this workflow:
+
+- product is smaller but still recognizable
+- room scale feels real, not flat wallpaper
+- product contacts the correct surface
+- no copied competitor product/person/logo/text
+- hardware is not changed
+- color palette is intentionally differentiated from sibling images, not all warm yellow or beige
+- scene differs meaningfully from sibling images
+- if the model drifts, keep the scene idea but redo with stricter fixed-product language or use deterministic compositing
+
+Round2 feedback learning:
+
+- Treat scene quality and product consistency as two separate approvals. A beautiful, premium, differentiated scene is not usable unless the product structure also passes.
+- When the style reference contains objects structurally similar to the product, such as shelves, racks, baskets, drawers, or stands, the model may merge the style object with the product and silently redesign the product. Use these references only with stricter fixed-hardware language, larger product scale, a high-contrast product source, or switch to deterministic compositing.
+- For high-structure products, prefer a clean high-contrast source PNG. Low-contrast white cutouts are more likely to lose thin rods, supports, basket edges, rails, and small vertical parts.
+- Do not let “replaceable contents” become “replaceable hardware”. Contents can change only when they are loose objects placed on or inside the product; rods, frames, baskets, shelves, drawers, rails, handles, wheels, legs, and supports remain fixed.
+- If a product has a historically repeated failure, add a product-specific lock before generating again instead of relying on generic “do not change product” wording.
+- Control color tone as a first-class differentiation variable. Do not let every premium scene become warm yellow, beige, or sunset-toned. Rotate between cool white daylight, blue-gray marble, fresh green outdoor, dark luxury, warm wood, soft cream pastel, clean black-white contrast, and neutral overcast daylight.
+
 ## Temu T-Column First Carousel Workflow
 
 Use this workflow when making the first image inserted into the workbook `T` carousel column.
@@ -55,34 +111,43 @@ Use this workflow when making the first image inserted into the workbook `T` car
    - If the same `D` has multiple workbook rows or variants, insert the same generated OSS URL as the first `T` image for all rows with that `D`.
    - Do not generate separate first-carousel images for each row unless the user explicitly asks.
 
-2. **SKU selection from variants**
+2. **T first-image source priority**
+   - For AI product-fusion T first images, do **not** default to one SKU preview image per `L0xx`.
+   - Use the reviewed product-material PNG registry first, especially selected new-original/象寄 cutout PNGs such as `xiangji_final_png_material_registry.json`.
+   - Rotate different approved product PNGs across different exact `D` values under the same `L0xx` so one table does not reuse the same product cutout repeatedly.
+   - Exclude any material locked by feedback as bad, rejected, duplicated, hallucination-prone, background-contaminated, blurry, or “不要”.
+   - Use SKU variant PNGs only as fallback when a `L0xx` has no approved new-original/product cutout material, or when the task is specifically J preview/SKU variant work.
+
+3. **SKU selection from variants**
    - Use the clean final transparent SKU PNGs as product source images.
    - For single-SKU products, use that one SKU image.
    - For multi-SKU products, include only the distinct variant images represented by that `D` group, not repeated quantity variants.
    - Example: for `L043`, use only white and gray SKU images; do not create four separate foregrounds for `15 white`, `30 white`, `15 gray`, and `30 gray`.
    - Match variants by stable SKU keywords such as black/white/gray/green/pink/purple, walnut/original wood, and numeric variants like 2 or 3.
+   - This SKU logic is mainly for J previews, U/SKU material consistency, or last-resort T fallback; it is not the primary source-selection logic for high-differentiation AI T first images.
 
-3. **Model layering strategy**
+4. **Model layering strategy**
    - Use Alibaba/DashScope background generation for the final high-fidelity pass when the product structure must stay exact.
    - Use Seedream/Jimeng for creative exploration when stronger lifestyle variation, contents changes, mirror direction, scale variation, or composition ideation matters.
    - For bulk listing safety, prefer hybrid: Seedream/Jimeng explores scenes, then the true SKU PNG is composited back or passed through Alibaba/fixed compositing to preserve product fidelity.
    - Never rely on a Seedream/Jimeng output without checking product drift.
 
-4. **Differentiation within the same L0xx**
+5. **Differentiation within the same L0xx**
    - For different `D` values under the same `L0xx`, vary at least three dimensions: scene, background, product scale, position, orientation/mirror, object arrangement, and foreground grouping.
+   - Also vary the source product PNG itself whenever an approved material library has enough usable cutouts for that `L0xx`.
    - Keep product appearance stable while using controlled variation such as horizontal mirroring, different left/right placement, different product size in frame, and slight angle-like composition changes.
    - For racks, shelves, trays, baskets, boxes, organizers, and similar container products, use replaceable loose contents as a major differentiation axis: tableware, bowls, cups, utensils, towels, files, fruit, flowers, greenery, small household items, or other category-safe props may change when they sit on or inside the product.
    - When replacing loose contents, explicitly freeze the product hardware/body: do not change rods, holes, shelves, tiers, baskets, handles, hooks, wheels, frames, rails, supports, product color, outline, or quantity of structural parts.
    - Avoid making all first-carousel images for one `L0xx` look templated or near-identical.
 
-5. **Temu-safe scene constraints**
+6. **Temu-safe scene constraints**
    - Prefer safe home/kitchen/patio/dining scenes with natural daylight, cabinets, countertops, sinks, curtains, plants, neutral tableware, towels, and generic household props.
    - Avoid toys, child-focused objects, electronic devices, screens, visible brand logos, branded packaging, fire, flames, candles, decorative lights, bulbs, balloons, dangerous goods, chemicals, alcohol, smoking items, medicines, medical devices, weapons, and prohibited or risky items.
    - People, if used, must remain background-only and must not touch, block, or visually merge with the product.
    - Enforce realistic use-context fit. The product must appear in a scene where a real buyer would naturally use, place, support, hang, store, or display it. Do not put products in visually attractive but physically absurd contexts, such as a barbecue grill on a bed, a heavy rack floating on fabric, a garden arch indoors on a sofa, a pet mat on a kitchen counter, or kitchen storage on bedroom bedding.
    - Match contact surface and gravity. Floor products stand on floor/grass/tile; countertop products sit on counters/tables/shelves; wall/fence products attach to walls/fences/railings; outdoor garden products stay on lawn/path/patio/flower bed; cleaning products sit on bathroom/laundry/utility floors. If a product requires support, show believable support.
 
-6. **Workbook insertion**
+7. **Workbook insertion**
    - During review, generate local images only; do not upload or insert until approved.
    - After approval, compress/export final images to the requested marketplace size, upload to OSS, then insert the new URL at the beginning of each matching `T` cell.
    - Insert, do not replace the rest of the carousel unless the user gives a reordering rule.
@@ -216,6 +281,20 @@ Use correct contact surface and gravity; do not place the product on an impossib
 Only add natural contact shadow and slight environmental light matching.
 ```
 
+### Current Product-Specific Corrections
+
+- **L042 garden edging strip**: high risk for AI redraw. Direct product-fusion often reconstructs the green strip surface, perforated fixing tabs, holes, and black spiral stakes incorrectly. Prefer deterministic compositing or scene-only generation plus exact PNG overlay. If using image generation, freeze the green flexible strip, edge fixing tabs, hole pattern, roll shape, and black spiral stakes; reject any output where the strip surface texture, hole count, tab structure, stake shape, or roll geometry is redesigned.
+- **L071 mobile adjustable table**: expanded lifestyle scenes can look good but may alter the product into a generic side table. Freeze rectangular tabletop, white adjustable vertical support, black adjustment knob, X-shaped white base, and four black caster wheels. Avoid dark lounge scenes that hide or simplify the base/wheels. Reject any output with changed leg/base geometry, missing wheels, added shelves/drawers, or wrong support structure.
+- **L072 flip-door shoe cabinet rack**: high hallucination risk. Freeze silver metal rods, black connector rings, vertically stacked flip-door drawers, top double black curved handles, three round handles on each drawer front, and no wheels. Do not let it become a generic shoe cabinet, dresser, drawer chest, or sideboard. Reject if drawer fronts, handles, rod frame, or connector rings are redesigned.
+- **L076 gray plush pet mat**: do not use images where the product becomes a cushion, blanket, rug, pet bed with side walls, or patterned fabric. Freeze one flat rectangular gray long-plush mat with white edge binding and visible thickness. Avoid pets covering the product; a pet may be nearby only if the mat surface remains visible. Reject if plush surface, shape, border, thickness, or color is changed.
+- **L047 garden arch**: do not let the source pool collapse to one or two near-identical PNGs. If approved `kept_cutout` material is limited after reject filtering, include safe `retry_new_original` product references that are not in the reject list. Keep one black arch only; flowers/ribbons may be added onto the existing arch but must not create an extra arch.
+- **L063 fitness board**: do not generate people using the product. The product should be fused as a fixed reference into an empty gym, fitness studio, training room, garage gym, rubber gym floor, or exercise mat scene. Avoid ordinary cozy home/bedroom styling unless explicitly requested. No hands, body parts, models, demonstrations, or product-use action shots. Do not change holes, rails, pedals, bands, handles, board outline, or surface structure. If a source PNG is identified as the wrong product, lock that source out immediately.
+- **L086 kitchen/storage rack**: keep the two drawer/basket units, front grid/transparent drawer face, top board, vertical supports, side frame, legs, and proportions unchanged. Use kitchen counter, sideboard, pantry, coffee station, closet/storage counter, or home appliance station scenes. Avoid industrial shelf/workshop references when they contain many racks or shelving units, because the model may merge them into the product and change scale/proportion.
+- **L088 stepped fruit basket rack**: this is an offset stepped multi-basket rack, not a straight generic dessert stand. Freeze the offset basket layout, long bottom basket, upper baskets, central/vertical support rods, side rods, feet, color, outline, and all visible connectors. Do not simplify it into a three-tier tower, remove the middle vertical support, merge baskets, straighten the stepped layout, or convert it into a cafe dessert display stand. Prefer black/high-contrast product PNGs or add a clear product inset when rods are easy to lose.
+- **L091 drawer organizer**: avoid same-tone closet scenes. Rotate warm walnut closet, cool white closet, dark premium closet, and entryway cabinet palettes while keeping the front-view drawer surface, transparent door, black handle, white frame, and exact top structure/groove/grid pattern unchanged. Prefer strict front-facing views when the top structure tends to hallucinate.
+- **L092 cutting board set**: vary kitchen color palettes strongly: cool gray marble, warm wood, dark stone, and white-tile sink-side scenes. Keep exact hole count and hole positions.
+- **L094 fruit bowl**: cross-use 2-layer and 3-layer specifications for differentiation. Alternate 2-tier foreground, 3-tier foreground, and natural scenes with both variants where appropriate. Keep bamboo stand, white ceramic bowls, screws, rods, and tier structure correct.
+
 ## Scene Differentiation Matrix
 
 Vary at least 3 dimensions per image:
@@ -227,6 +306,21 @@ Vary at least 3 dimensions per image:
 - **Orientation**: original direction or horizontally mirrored.
 - **Contents**: white plates, blue plates, cream plates, matte gray plates, green bowls, beige bowls, glass cups, smoke-gray glasses, bamboo chopsticks, silver cutlery.
 - **Lighting**: morning daylight, warm sunset, soft overcast, natural window light, premium dark kitchen ambient daylight. Avoid visible bulbs, string lights, candles, fire, or screen glow for Temu-safe outputs.
+
+### Color Palette Rotation
+
+For bulk T-first images, rotate visual color tone deliberately. First-screen differentiation should be visible even before checking product details.
+
+- **Cool White Daylight**: white cabinets, pale marble, silver-gray accents, clean morning light.
+- **Blue-Gray Premium**: slate, soft blue-gray walls, cool marble, calm overcast daylight.
+- **Fresh Green Outdoor**: lawn, garden, plants, natural green and stone, bright but not cartoon-like.
+- **Dark Luxury**: charcoal, dark wood, black metal, controlled daylight, premium contrast.
+- **Warm Wood**: walnut, oak, beige fabric, home warmth; use sparingly so the set does not turn uniformly yellow.
+- **Soft Cream Pastel**: ivory, pale peach, mint, butter blue, gentle ecommerce softness.
+- **Black-White Contrast**: white room with black frame accents, crisp modern composition.
+- **Neutral Overcast**: gray-white natural light, low saturation, realistic product catalog style.
+
+When generating multiple images in the same batch, explicitly assign one palette lane per image in the prompt, for example: `Color palette lane: cool white daylight, avoid warm yellow cast.`
 
 ## Dish Rack Example
 
