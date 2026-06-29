@@ -77,3 +77,12 @@ Key update:
 - Reject physically absurd placements such as barbecue grills on beds, heavy racks floating on fabric, garden arches on sofas, pet mats on kitchen counters, or kitchen storage on bedroom bedding.
 - For racks/shelves/trays/baskets/organizers, loose contents may be replaced for differentiation, but product hardware/body must remain fixed.
 - Local prompt builder copies are stored under `skills/product-lifestyle-scene/references/` for audit and reuse.
+
+## 2026-06-29 Image2 Expanded Scene T-First Updates
+
+- Product lifestyle scene skill now separates scene-quality approval from product-consistency approval.
+- T-first AI workflow now rotates color palette lanes: cool white, blue-gray, fresh outdoor green, dark luxury, warm wood, soft cream pastel, black-white contrast, neutral overcast.
+- Approved Image2 expanded-scene library currently has 5 user-approved records; manifests only are synced, not large images.
+- Rejected Round4 Image2 outputs locked out: `L042_premium_garden_border`, `L071_luxury_side_table`, `L072_entryway_shoe_storage`, `L076_premium_pet_corner`.
+- High-risk products `L042/L071/L072/L076` should prefer scene-only generation plus exact PNG compositing instead of direct product-fusion redraw.
+- Synced at 2026-06-29T22:41:36.
