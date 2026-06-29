@@ -1,0 +1,66 @@
+[
+  {
+    "name": "L042_premium_garden_border",
+    "prefix": "L042",
+    "provider": "APIMart",
+    "model": "gpt-image-2",
+    "local_path": "C:\\Users\\Administrator\\Documents\\Codex\\2026-06-08\\comfyui\\outputs\\image2_other_l0xx_round4_more\\images\\L042_premium_garden_border.png",
+    "image_url": "https://getapib.org/image/9998217259736614-bcdb463b-901b-4340-8511-30ae443bb65b-gpt_image_2_backup_task_01KW9SK8EQF3SWYP379R6S5TPJ_0.png",
+    "source_ids": [
+      "kept_cutout_L042_NEW_0006_0003",
+      "patio_counter"
+    ],
+    "decision": "reject",
+    "feedback": "L042 老问题：产品外观/表面重构严重，失误率太高；后续优先 deterministic compositing 或严格 exact PNG overlay。",
+    "recorded_at": "2026-06-29T22:22:13",
+    "batch": "image2_other_l0xx_round4_more"
+  },
+  {
+    "name": "L071_luxury_side_table",
+    "prefix": "L071",
+    "provider": "APIMart",
+    "model": "gpt-image-2",
+    "local_path": "C:\\Users\\Administrator\\Documents\\Codex\\2026-06-08\\comfyui\\outputs\\image2_other_l0xx_round4_more\\images\\L071_luxury_side_table.png",
+    "image_url": "https://getapib.org/image/9998217259550456-2af95e8b-fb00-4a15-8fd8-293efb40ab5c-gpt_image_2_codex_image_00b0971c-ba11-4cce-a5db-7941b471846f_0.png",
+    "source_ids": [
+      "kept_cutout_L071_NEW_0002_0073",
+      "luxury_living_table"
+    ],
+    "decision": "reject",
+    "feedback": "场景方案好，但把移动升降桌产品外观做错；深色客厅方案容易隐藏/改错支架和轮子。",
+    "recorded_at": "2026-06-29T22:22:13",
+    "batch": "image2_other_l0xx_round4_more"
+  },
+  {
+    "name": "L072_entryway_shoe_storage",
+    "prefix": "L072",
+    "provider": "APIMart",
+    "model": "gpt-image-2",
+    "local_path": "C:\\Users\\Administrator\\Documents\\Codex\\2026-06-08\\comfyui\\outputs\\image2_other_l0xx_round4_more\\images\\L072_entryway_shoe_storage.png",
+    "image_url": "https://getapib.org/image/9998217259469980-889df1ea-506f-415f-879e-94fbf40106b2-gpt_image_2_codex_image_57c3d2bc-883a-4e4f-8168-e76b6f95f5a2_0.png",
+    "source_ids": [
+      "kept_cutout_L072_NEW_0002_0078",
+      "living_room_inset"
+    ],
+    "decision": "reject",
+    "feedback": "太臆想产品，多余改动外观；不能变成泛化鞋柜/抽屉柜。",
+    "recorded_at": "2026-06-29T22:22:13",
+    "batch": "image2_other_l0xx_round4_more"
+  },
+  {
+    "name": "L076_premium_pet_corner",
+    "prefix": "L076",
+    "provider": "APIMart",
+    "model": "gpt-image-2",
+    "local_path": "C:\\Users\\Administrator\\Documents\\Codex\\2026-06-08\\comfyui\\outputs\\image2_other_l0xx_round4_more\\images\\L076_premium_pet_corner.png",
+    "image_url": "https://getapib.org/image/9998217259300939-c3510f1b-2cb5-4042-a37e-8d2690a32734-gpt_image_2_codex_image_978fa3cf-a5e5-4120-a5fd-514295ccbffe_0.png",
+    "source_ids": [
+      "kept_cutout_L076_NEW_0001_0112",
+      "living_room_inset"
+    ],
+    "decision": "reject",
+    "feedback": "宠物垫产品缺失/表面被臆想改动；宠物不能遮挡，必须保持灰色长毛绒矩形垫和白色包边。",
+    "recorded_at": "2026-06-29T22:22:13",
+    "batch": "image2_other_l0xx_round4_more"
+  }
+]
