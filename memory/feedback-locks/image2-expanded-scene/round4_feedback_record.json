@@ -1,0 +1,22 @@
+{
+  "L042_premium_garden_border": {
+    "decision": "reject",
+    "feedback": "L042 老问题：产品外观/表面重构严重，失误率太高；后续优先 deterministic compositing 或严格 exact PNG overlay。",
+    "ts": "2026-06-29T22:32:09"
+  },
+  "L071_luxury_side_table": {
+    "decision": "reject",
+    "feedback": "场景方案好，但把移动升降桌产品外观做错；深色客厅方案容易隐藏/改错支架和轮子。",
+    "ts": "2026-06-29T22:32:09"
+  },
+  "L072_entryway_shoe_storage": {
+    "decision": "reject",
+    "feedback": "太臆想产品，多余改动外观；不能变成泛化鞋柜/抽屉柜。",
+    "ts": "2026-06-29T22:32:09"
+  },
+  "L076_premium_pet_corner": {
+    "decision": "reject",
+    "feedback": "宠物垫产品缺失/表面被臆想改动；宠物不能遮挡，必须保持灰色长毛绒矩形垫和白色包边。",
+    "ts": "2026-06-29T22:32:09"
+  }
+}
