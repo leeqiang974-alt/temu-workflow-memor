@@ -23,3 +23,9 @@
 - J 预览图按行、按变体匹配 SKU PNG；不能错配颜色/规格。
 - 复检过程表格不入 D 查询库；只以最终确认并上传/提交的表格入库。
 - 所有生成批次必须保留 provider/model/source_png/prompt/status/feedback。
+
+## GitHub Memory Rule
+
+Before doing future project work, check the GitHub-tracked docs first. Any technical workflow or skill update must be committed and pushed to GitHub; chat memory alone is not enough.
+
+See `docs/github-memory-policy.md`.
