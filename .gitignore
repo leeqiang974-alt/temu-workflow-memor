@@ -1,0 +1,11 @@
+﻿# local debug / recovery leftovers
+_preflight_image2.py
+_read_xlsx_fast.py
+log.log
+recovered_panel/
+recovered_panel_u6/
+
+# generated / caches
+__pycache__/
+*.pyc
+.DS_Store
