@@ -29,3 +29,7 @@
 Before doing future project work, check the GitHub-tracked docs first. Any technical workflow or skill update must be committed and pushed to GitHub; chat memory alone is not enough.
 
 See `docs/github-memory-policy.md`.
+
+6. workflows/claude-nvidia-review-agent-workflow.md`n   - Claude Code + NVIDIA/Kimi 作为开发计划、项目审查、表格审查、结果裁判 agent。
+
+审查清单见：docs/review-checklists.md。
