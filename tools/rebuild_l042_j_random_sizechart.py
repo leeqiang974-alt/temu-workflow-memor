@@ -9,6 +9,7 @@ from pathlib import Path
 
 from openpyxl import load_workbook
 from PIL import Image, ImageDraw, ImageFilter
+import numpy as np
 
 
 WORKBOOK = Path(
@@ -33,12 +34,52 @@ def variant_key(g_value: object, sku_value: object) -> tuple[str, str]:
     return "black", "黑色"
 
 
+def color_scores(path: Path) -> dict[str, float]:
+    image = Image.open(path).convert("RGB").resize((400, 400), Image.LANCZOS)
+    arr = np.array(image).astype(int)
+    r, g, b = arr[:, :, 0], arr[:, :, 1], arr[:, :, 2]
+    overall_green = float(((g > r + 18) & (g > b + 12) & (g > 55)).mean())
+    title = arr[:48, :130, :]
+    tr, tg, tb = title[:, :, 0], title[:, :, 1], title[:, :, 2]
+    title_green = float(((tg > tr + 12) & (tg > tb + 8) & (tg > 40)).mean())
+    return {"overall_green": overall_green, "title_green": title_green}
+
+
+def green_score(path: Path) -> float:
+    return color_scores(path)["overall_green"]
+
+
 def first_level_sources(color_cn: str) -> list[Path]:
     folder = SKU_ROOT / color_cn
     files = [p for p in sorted(folder.iterdir()) if p.is_file()]
     if not files:
         raise FileNotFoundError(f"No first-level files in {folder}")
-    return files
+    filtered: list[Path] = []
+    rejected: list[dict] = []
+    for path in files:
+        scores = color_scores(path)
+        score = scores["overall_green"]
+        title_score = scores["title_green"]
+        if color_cn == "绿色":
+            keep = score >= 0.05 and title_score >= 0.03
+        else:
+            keep = score < 0.05 and title_score < 0.03
+        if keep:
+            filtered.append(path)
+        else:
+            rejected.append(
+                {
+                    "path": str(path),
+                    "overall_green": round(score, 4),
+                    "title_green": round(title_score, 4),
+                }
+            )
+    if not filtered:
+        raise RuntimeError(f"No visually valid {color_cn} first-level files in {folder}")
+    rejected_path = OUT_ROOT / f"L042_rejected_{color_cn}_visual_mismatch.json"
+    rejected_path.parent.mkdir(parents=True, exist_ok=True)
+    rejected_path.write_text(json.dumps(rejected, ensure_ascii=False, indent=2), encoding="utf-8")
+    return filtered
 
 
 def deterministic_pick(files: list[Path], row: int, d_value: str, g_value: object, sku_value: object) -> Path:
@@ -169,7 +210,16 @@ def main() -> None:
         seed = int(hashlib.sha256(f"{row['row']}|{source}".encode("utf-8")).hexdigest()[:12], 16)
         j_path = OUT_ROOT / f"L042_row{row['row']}_{row['variant']}_random_fivegrid.jpg"
         make_five_grid(source, j_path, seed)
-        records.append({**row, "source": str(source), "j_path": str(j_path)})
+        records.append(
+            {
+                **row,
+                "source": str(source),
+                "source_color_scores": {
+                    key: round(value, 4) for key, value in color_scores(source).items()
+                },
+                "j_path": str(j_path),
+            }
+        )
     report = {
         "workbook": str(WORKBOOK),
         "source_rule": "first-level E:\\jit制图\\L042\\sku\\黑色 and 绿色 only; no nested folders",
