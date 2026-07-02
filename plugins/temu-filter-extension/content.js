@@ -861,10 +861,12 @@
   function realClick(el) {
     if (!el) return;
     try { el.scrollIntoView({ block: "center", inline: "center" }); } catch (e) {}
+    try { if (typeof el.focus === "function") el.focus(); } catch (e0) {}
     var rect = el.getBoundingClientRect();
     var x = Math.max(0, Math.min(window.innerWidth - 1, rect.left + rect.width / 2));
     var y = Math.max(0, Math.min(window.innerHeight - 1, rect.top + rect.height / 2));
     var target = document.elementFromPoint(x, y) || el;
+    try { el.click(); } catch (e1) {}
     ["pointerdown", "mousedown", "pointerup", "mouseup", "click"].forEach(function (type) {
       var eventOptions = {
         bubbles: true,
@@ -883,9 +885,7 @@
       }
       target.dispatchEvent(event);
     });
-    if (target !== el) {
-      try { el.click(); } catch (e2) {}
-    }
+    if (target !== el) try { el.click(); } catch (e2) {}
   }
 
   function clickAtPoint(x, y) {
@@ -1279,12 +1279,21 @@
 
       var beforeSignature = getTableSignatureForWait();
       console.log("[TemuFilter v9] click next page:", currentPage, "=>", currentPage + 1);
-      if (nextButton) clickElementCenter(nextButton);
+      if (nextButton) realClick(nextButton);
       else if (!clickRecordedNextPageReplay()) {
         console.warn("[TemuFilter v9] no next button and no recorded replay");
         break;
       }
-      await waitForProductTableChanged(beforeSignature, currentPage, 18000);
+      var moved = await waitForProductTableChanged(beforeSignature, currentPage, 18000);
+      if (!moved && nextButton) {
+        console.warn("[TemuFilter v9] DOM next click did not move, retry recorded/fallback click");
+        if (!clickRecordedNextPageReplay()) clickPaginationRightFallback();
+        moved = await waitForProductTableChanged(beforeSignature, currentPage, 12000);
+      }
+      if (!moved) {
+        console.warn("[TemuFilter v9] stop global scan because next page did not load");
+        break;
+      }
     }
     console.log("[TemuFilter v9] global scan complete, records:", records.length);
     return records;
