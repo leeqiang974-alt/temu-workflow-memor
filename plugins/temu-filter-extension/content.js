@@ -1317,26 +1317,31 @@
       totalPage = getStableTotalPageNumber(pagination) || totalPage;
       nextButton = getStableNextPageButton(pagination);
       var hasReplayNext = !!(loadPageReplayConfig().selector || loadPageReplayConfig().xRatio);
-      if ((totalPage && currentPage >= totalPage) || (!nextButton && !hasReplayNext)) {
+      var nextPageNumber = currentPage + 1;
+      var nextPageButton = findPageButtonByNumber(nextPageNumber);
+      if ((totalPage && currentPage >= totalPage) || (!nextPageButton && !nextButton && !hasReplayNext)) {
         console.log("[TemuFilter v9] global scan finished at page:", currentPage, "total:", totalPage, "records:", records.length);
         break;
       }
 
       var beforeSignature = getTableSignatureForWait();
-      console.log("[TemuFilter v9] click next page:", currentPage, "=>", currentPage + 1);
-      if (nextButton) realClick(nextButton);
-      else if (!clickRecordedNextPageReplay()) {
-        console.warn("[TemuFilter v9] no next button and no recorded replay");
+      console.log("[TemuFilter v9] click sequential page:", currentPage, "=>", nextPageNumber);
+      if (nextPageButton) {
+        realClick(nextPageButton);
+      } else {
+        console.warn("[TemuFilter v9] sequential page button not found, refuse jump paging:", nextPageNumber);
         break;
       }
       var moved = await waitForProductTableChanged(beforeSignature, currentPage, 18000);
-      if (!moved && nextButton) {
-        console.warn("[TemuFilter v9] DOM next click did not move, retry recorded/fallback click");
-        if (!clickRecordedNextPageReplay()) clickPaginationRightFallback();
-        moved = await waitForProductTableChanged(beforeSignature, currentPage, 12000);
-      }
       if (!moved) {
         console.warn("[TemuFilter v9] stop global scan because next page did not load");
+        break;
+      }
+      var afterPagination = findPaginationContainer();
+      var afterPage = getStableCurrentPageNumber(afterPagination) || getCurrentPageNumber();
+      if (afterPage && afterPage !== nextPageNumber) {
+        console.warn("[TemuFilter v9] stop global scan because pagination jumped:", currentPage, "=>", afterPage, "expected", nextPageNumber);
+        if (typeof onProgress === "function") onProgress({ page: currentPage, totalPage: totalPage, total: records.length, stoppedByJump: true, jumpedPage: afterPage });
         break;
       }
       try {
