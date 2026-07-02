@@ -272,8 +272,9 @@
   async function collectGlobalRecordsStable(seen, minPct, maxPct, rounds) {
     var result = [];
     rounds = rounds || 3;
+    var pageIdentity = getStableCurrentPageNumber(findPaginationContainer()) || getCurrentPageNumber() || getTableSignature().slice(0, 80);
     for (var round = 0; round < rounds; round++) {
-      var batch = collectGlobalScanRecordsFromVisible(seen, minPct, maxPct);
+      var batch = collectGlobalScanRecordsFromVisible(seen, minPct, maxPct, pageIdentity);
       if (batch.length > 0) result = result.concat(batch);
       await wait(Math.max(60, Math.floor(AUTO_SCROLL_DELAY / 3)));
     }
@@ -549,16 +550,20 @@
     return qualifiedRecords.length ? qualifiedRecords : null;
   }
 
-  function collectGlobalScanRecordsFromVisible(seen, minPct, maxPct) {
+  function collectGlobalScanRecordsFromVisible(seen, minPct, maxPct, pageIdentity) {
     var rows = getVisibleRows();
     var headerIndexes = getHeaderIndexes();
     var records = [];
-    rows.forEach(function (row) {
+    rows.forEach(function (row, rowIndex) {
       var rowRecords = getGlobalScanRecord(row, headerIndexes, minPct, maxPct);
       if (!rowRecords) return;
       rowRecords.forEach(function (record) {
-        if (record && !seen[record.key]) {
-          seen[record.key] = true;
+        if (record) {
+          var rowSignature = (row.innerText || row.textContent || "").replace(/\s+/g, " ").slice(0, 220);
+          var dedupeKey = [pageIdentity || "page?", rowIndex, record.key, rowSignature].join("|");
+          if (seen[dedupeKey]) return;
+          seen[dedupeKey] = true;
+          record.key = dedupeKey;
           records.push(record);
         }
       });
@@ -1334,6 +1339,11 @@
         console.warn("[TemuFilter v9] stop global scan because next page did not load");
         break;
       }
+      try {
+        var nextDataContainer = findDataScrollContainer();
+        setScrollTop(nextDataContainer, 0);
+        await wait(900);
+      } catch (e) {}
     }
     console.log("[TemuFilter v9] global scan complete, records:", records.length);
     return records;
