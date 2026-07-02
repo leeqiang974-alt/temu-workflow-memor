@@ -53,9 +53,9 @@
 
 ## 2026-07-02 最新入库检索基准
 
-后续检索、回查、继续表格处理，以以下硬校验修复后的入库表作为唯一基准：
+后续检索、回查、继续表格处理，以以下硬校验修复并按用户反馈删除 L051060505 C 列第 1 张简介图后的入库表作为唯一基准：
 
-- `D:\Desktop\jit\DXXmall\outputs\store_newskill_final_199_writeback_20260702_fix_feedback_20260702\0616-2_197_最终回传_按新197D清单从199同步删除_L091两D_硬校验修复_20260702.xlsx`
+- `D:\Desktop\jit\DXXmall\outputs\store_newskill_final_199_writeback_20260702_fix_feedback_20260702\0616-2_197_最终回传_硬校验修复_L051060505_C列删第1图_20260702.xlsx`
 
 所有带 `过程`、`不入库`、中间修复、插件临时导出的表都不再作为检索基准。该入库表来自今天已修改成功的 199 表，并按新插件 197 D 清单删除 `L091060503`、`L091060507` 后生成，保留 199 表中已通过的 T/J/标题等成功修改结果。
 
@@ -64,3 +64,7 @@
 已按正确链路完成 Claude Code + NVIDIA 复核：通过 `D:\Desktop\jit\temu自动化\scripts\claude-code-nvidia.ps1` 启动 `Claude Code -> LiteLLM -> NVIDIA qwen-next`，审查输出 `decision=pass`。审查日志：
 
 - `D:\Desktop\jit\DXXmall\outputs\store_newskill_final_199_writeback_20260702_fix_feedback_20260702\claude_nvidia_197_intake_review_20260702.md`
+
+L051060505 C 列 `产品描述` 已按用户反馈只删除第 1 张图 `https://img.cdnfe.com/product/fancy/16bc3b57-e236-4923-9ca8-24718b8d3d43.jpg`，C 列图片从 4 张变 3 张；未修改 J/T/U/标题/D/G/SKU/其它字段。修复后硬校验 `pass_hard_checks=true`，Claude Code + NVIDIA 复核 `decision=pass`。审查日志：
+
+- `D:\Desktop\jit\DXXmall\outputs\store_newskill_final_199_writeback_20260702_fix_feedback_20260702\claude_nvidia_L051_C_delete_review_20260702.md`
