@@ -48,6 +48,9 @@
 8. U 是否跟随 T1。
 9. 过程表是否被隔离，不入 D 查询库。
 10. 用户 reject/redo/delete 反馈是否进入锁定，不回流。
+11. L043 等同前缀图片是否避免素材过于统一；若用户反馈素材太统一，是否切换了不同产品 PNG 或先补素材。
+12. 复核页导出反馈是否读取当前输入框内容，而不是只导出旧 localStorage，确保中文反馈不丢。
+13. 对用户标记 redo 的 image2 结果，是否作为复检失败处理，进入 Seedream/即梦 fallback 或明确重做计划，而不是直接写回。
 
 ## 输出格式
 
@@ -70,10 +73,20 @@
     "t4_size_image": "pass|fail",
     "u_follows_t1": "pass|fail",
     "reject_lock_respected": "pass|fail",
-    "process_file_not_indexed": "pass|fail"
+    "process_file_not_indexed": "pass|fail",
+    "same_prefix_material_rotation": "pass|fail",
+    "review_feedback_export_complete": "pass|fail",
+    "redo_items_not_written_back": "pass|fail"
   },
   "notes": []
 }
 ```
 
 如果任何硬规则 fail，decision 必须是 `block` 或 `revise`，不能输出 pass。
+
+## 当前对话新增硬规则
+
+- 本项目任何开发计划、项目审查、表格审查、图片结果判断，都必须先读 GitHub 记忆，再交叉检查当前 workflow 文档。
+- 审查 agent 必须主动寻找“旧办法回退”风险：尤其旧 Seedream 库、ComfyUI 背景贴图、阿里单 SKU 图、`all_sku_tfirst`、历史通过库直接回填 T。
+- L043 折衣板下一轮重构不能继续使用过于统一的 PNG；必须轮换不同源 PNG，保留孔洞、小孔、后凸起和真实比例。
+- 用户在复核页填写的中文反馈是决策依据；导出 JSON 不完整时，必须从页面输入框、记录 JSON 或截图中恢复，不能把空反馈当成无原因 redo。

@@ -15,9 +15,11 @@
 - [ ] 每个 D 有 provider/model/source_png/prompt/status。
 - [ ] 没有直接拿旧 Seedream/ComfyUI/阿里贴图填新表。
 - [ ] 同一 L0xx 已轮换不同 source PNG。
+- [ ] 用户反馈“素材太统一”的 L0xx 已扩大/切换素材池；L043 不继续使用单一外观 PNG 硬套多个 D。
 - [ ] reject lock 未被绕过。
 - [ ] 同 L0xx 的场景/色调/构图有明显差异。
 - [ ] 产品放置场景符合真实用途。
+- [ ] 用户标记 redo 的 image2 图未被当成通过图写回；已进入 fallback/重做计划。
 
 ## J 五格审查
 
@@ -46,6 +48,15 @@
 ## 失败处理
 
 - [ ] 用户反馈已写入 feedback/reject lock。
+- [ ] 反馈 JSON 导出包含当前输入框中文备注，不只读取旧 localStorage。
 - [ ] 明确错误图不再回流。
 - [ ] PNG 源素材错误时锁源，不只锁输出图。
 - [ ] 修改后的规则已提交 GitHub。
+
+## Claude/NVIDIA 外部审查
+
+- [ ] 开发计划、脚本修改、表格处理结果、图片复核结果已交给 Claude Code + NVIDIA 审查提示词。
+- [ ] 审查明确检查是否先读 GitHub 记忆。
+- [ ] 审查明确拦截旧 T 链路回退：旧 Seedream/ComfyUI/阿里/all_sku_tfirst/历史通过库直接写回。
+- [ ] 审查明确检查 L043 素材轮换和同前缀差异化。
+- [ ] 审查结论为 `pass` 之前，所有硬规则必须为 pass。
