@@ -60,3 +60,7 @@
 所有带 `过程`、`不入库`、中间修复、插件临时导出的表都不再作为检索基准。该入库表来自今天已修改成功的 199 表，并按新插件 197 D 清单删除 `L091060503`、`L091060507` 后生成，保留 199 表中已通过的 T/J/标题等成功修改结果。
 
 修复版已删除入库阻塞项：L058 历史污染 URL `l058-extra-fixed-under145k` / `L058_extra_fixed_800_under145k`，以及 L095 T 列中的非 URL 文本 `保持产品和标尺、数字、文字信息不做.jpg`。硬校验结果：`323` 有效行、`197` 个唯一 D、L091 两 D 不存在、T<=10、U=T1、T4 尺寸位通过、J/T 非空；`redo` 字样仅作为已通过重做图路径提醒，不作为阻塞。
+
+已按正确链路完成 Claude Code + NVIDIA 复核：通过 `D:\Desktop\jit\temu自动化\scripts\claude-code-nvidia.ps1` 启动 `Claude Code -> LiteLLM -> NVIDIA qwen-next`，审查输出 `decision=pass`。审查日志：
+
+- `D:\Desktop\jit\DXXmall\outputs\store_newskill_final_199_writeback_20260702_fix_feedback_20260702\claude_nvidia_197_intake_review_20260702.md`
