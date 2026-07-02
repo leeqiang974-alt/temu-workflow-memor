@@ -68,3 +68,22 @@
 L051060505 C 列 `产品描述` 已按用户反馈只删除第 1 张图 `https://img.cdnfe.com/product/fancy/16bc3b57-e236-4923-9ca8-24718b8d3d43.jpg`，C 列图片从 4 张变 3 张；未修改 J/T/U/标题/D/G/SKU/其它字段。修复后硬校验 `pass_hard_checks=true`，Claude Code + NVIDIA 复核 `decision=pass`。审查日志：
 
 - `D:\Desktop\jit\DXXmall\outputs\store_newskill_final_199_writeback_20260702_fix_feedback_20260702\claude_nvidia_L051_C_delete_review_20260702.md`
+
+## 2026-07-02 197 D x 3 套 image2 T 首图候选池
+
+按用户纠正后的 `197` 入库基准表，已生成 3 套 APIMart / GPT-Image-2 T 首图候选池，仅作后续替换备用，不回写 Excel：
+
+- 输入表：`D:\Desktop\jit\DXXmall\outputs\store_newskill_final_199_writeback_20260702_fix_feedback_20260702\0616-2_197_最终回传_硬校验修复_L051060505_C列删第1图_20260702.xlsx`
+- 输出目录：`D:\Desktop\jit\DXXmall\outputs\store_newskill_image2_197x3_t_candidates_20260702`
+- 最终复核页：`D:\Desktop\jit\DXXmall\outputs\store_newskill_image2_197x3_t_candidates_20260702\0616_2_image2_197x3_t_candidates_review.html`
+- 干净结果：`candidate_results_197x3.json`
+- 补跑历史：`candidate_results_197x3_with_retry_history.json`
+- 清理摘要：`candidate_results_197x3_clean_summary.json`
+
+最终计数：`591/591` 本地图片成功，`set1=197`、`set2=197`、`set3=197`、最终 error `0`，估算 image2 成本约 `$3.546`。期间出现过 26 条 APIMart processing/SSL EOF 网络层失败，已补跑成功；历史保留在 retry history，不进入干净复核结果。
+
+执行前已按硬规则完成 Claude Code + NVIDIA 计划审查，审查结论 `decision=pass`：
+
+- `D:\Desktop\jit\DXXmall\outputs\store_newskill_image2_197x3_t_candidates_20260702\claude_nvidia_197x3_t_plan_review_20260702.md`
+
+本候选池是未来替换用素材池，不代表用户已复核通过，也不得直接写回 T/U。后续如要用于表格，仍需打开复核页筛选，并继续执行：删除/不要/死刑图锁定、T4 尺寸图、T<=10、U=T1、J 行级 SKU 变体匹配、标题指纹按当前入库表 D 精确恢复、Claude Code + NVIDIA 写回前审查。
