@@ -60,6 +60,7 @@ Prefer local review outputs first. Upload/write back only after user approval.
    - Match SKU/material candidates before generating or uploading.
    - Report missing folders, missing clean first-level images, variant ambiguity, and forbidden paths.
    - Never silently recurse into generated folders such as `九宫格`, `9grid`, `out`, `output`, or background/output directories.
+   - Do not trust folder names alone for color variants. When a batch has known mixed source folders, verify visual color/title signals and write rejected source files to a machine-readable reject list.
 
 4. **Create review artifacts before writeback**
    - For image-heavy work, build an HTML review page.
@@ -89,12 +90,13 @@ Prefer local review outputs first. Upload/write back only after user approval.
    - J preview images are SKU/variant driven and may use SKU PNGs; this does not imply T first images should use the same SKU preview source.
    - Use the established five-preview textured composition, not a plain white background, unless the user explicitly asks for white.
    - Print or review every row-level match: `D`, row, `G`, `SKU货号`, matched tokens, selected SKU source, and warning if fallback was used.
+   - For color variants, build a pair/group audit page when practical: show same-D rows side by side with `G`, `SKU货号`, source path, visual source checks, and generated J.
    - If many rows have no positive token match, stop before writeback and ask for better SKU folders or mapping.
 
 7. **Write back only after approval**
    - Insert approved T first image as first URL in T for all rows with same `D`.
    - Preserve or reorder existing T according to user instruction.
-   - Keep fourth image as the size image when the workbook expects that.
+   - Keep the fourth image as the size image when the workbook expects that. Detect size images by filename/title clues, not merely by original position.
    - Set U equal to T first image.
    - Write J row by row from approved variant previews.
 
@@ -108,6 +110,11 @@ Prefer local review outputs first. Upload/write back only after user approval.
 - New workbook T images must not bypass image2/APIMart first pass. Seedream/Jimeng is only the fallback for reviewed image2 failures unless the user explicitly overrides the model order.
 - Reviewed image2 `redo` items are failures for final writeback. They must enter feedback lock first, then go to Seedream/Jimeng fallback or a specific redo plan; do not write those image2 outputs back to T/U.
 - Future image generation, reconstruction, Seedream fallback, or image2 redo must pass Claude Code + NVIDIA review before execution. The review package must include GitHub memory evidence, redo/fallback D list with Chinese feedback, source PNG allocation, scene/color/composition plan, and high-risk product locks.
+- T fourth image is a hard size-image slot. If a delete/reject removes the current fourth image, find another valid size image and force it back to T[4]. If none exists, do not deliver a final workbook.
+- T must contain at most 10 URLs after all deletes, T1 replacements, and T4 repairs.
+- Deleted/rejected/不要/死刑/wrong-color images must not return through existing workbook values, approved registries, or source folders.
+- Review feedback export must read live DOM/input/textarea values so Chinese comments are preserved even when localStorage or POST saving fails.
+- L042 J special rule: use first-level `黑色` and `绿色` source folders only, match by row `G` + `SKU货号`, reject visually mixed source files, and compose true five-cell grid previews from whole SKU size-chart images unless the user explicitly asks for cutouts.
 - Do not let a previous round’s approved registry skip a D that appears in the current redo list.
 - Never write into the only source workbook. Always copy first.
 - Never expose access keys or credentials in chat or reports.
