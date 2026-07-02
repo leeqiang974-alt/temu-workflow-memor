@@ -989,7 +989,7 @@
   }
 
   function startRecordNextPageReplay() {
-    showToast("请点击一次分页栏的「下一页 >」按钮；我会只记录，不会真的翻页");
+    showToast("请点击一次分页栏的下一页按钮；我会记录并真实点击翻页");
     var overlay = document.createElement("div");
     overlay.id = "temu-page-replay-recording";
     Object.assign(overlay.style, {
@@ -1050,7 +1050,19 @@
       };
       savePageReplayConfig(config);
       cleanup();
-      showToast("已记录翻页按钮。全局翻页筛选会在DOM失败时自动回放。");
+      showToast("已记录翻页按钮，并正在执行一次真实翻页。");
+      setTimeout(function () {
+        var replayTarget = null;
+        try { replayTarget = document.querySelector(config.rawSelector || config.selector); } catch (e) {}
+        if (!replayTarget && config.selector) {
+          try { replayTarget = document.querySelector(config.selector); } catch (e2) {}
+        }
+        if (replayTarget && isVisibleElement(replayTarget) && !isDisabledElement(replayTarget)) {
+          realClick(replayTarget);
+        } else {
+          clickAtPoint(event.clientX, event.clientY);
+        }
+      }, 120);
     }
     document.addEventListener("click", onClick, true);
     document.addEventListener("keydown", onKey, true);
@@ -1168,6 +1180,17 @@
       if (maxPage === null || num > maxPage) maxPage = num;
     });
     return maxPage;
+  }
+
+  function findStablePageButtonByNumber(container, pageNumber) {
+    var links = getPaginationLinks(container);
+    for (var i = 0; i < links.length; i++) {
+      var text = (links[i].innerText || links[i].textContent || "").trim();
+      if (isPurePageNumberText(text) && parseInt(text, 10) === pageNumber && !isDisabledElement(links[i])) {
+        return links[i];
+      }
+    }
+    return null;
   }
 
   function getStableNextPageButton(container) {
@@ -1318,7 +1341,7 @@
       nextButton = getStableNextPageButton(pagination);
       var hasReplayNext = !!(loadPageReplayConfig().selector || loadPageReplayConfig().xRatio);
       var nextPageNumber = currentPage + 1;
-      var nextPageButton = findPageButtonByNumber(nextPageNumber);
+      var nextPageButton = findStablePageButtonByNumber(pagination, nextPageNumber) || findPageButtonByNumber(nextPageNumber);
       if ((totalPage && currentPage >= totalPage) || (!nextPageButton && !nextButton && !hasReplayNext)) {
         console.log("[TemuFilter v9] global scan finished at page:", currentPage, "total:", totalPage, "records:", records.length);
         break;
