@@ -634,6 +634,40 @@
     return el.scrollHeight - el.clientHeight;
   }
 
+  function describeScrollElement(el) {
+    if (!el) return "null";
+    if (el === document.scrollingElement || el === document.documentElement || el === document.body) return "document";
+    return el.tagName + "." + String(el.className || "").replace(/\s+/g, ".").slice(0, 90);
+  }
+
+  function getPaginationScrollCandidates() {
+    var candidates = [];
+    function add(el) {
+      if (!el || candidates.indexOf(el) >= 0) return;
+      if (el === document.body || el === document.documentElement) {
+        el = document.scrollingElement || document.documentElement;
+      }
+      if (candidates.indexOf(el) < 0) candidates.push(el);
+    }
+
+    add(document.scrollingElement || document.documentElement);
+    var anchor = getVisibleRows()[0] || document.querySelector("tbody") || document.querySelector("table");
+    var el = anchor;
+    while (el && el !== document.body && el !== document.documentElement) {
+      if (isScrollableY(el)) add(el);
+      el = el.parentElement;
+    }
+
+    Array.from(document.querySelectorAll("div, main, section")).forEach(function (node) {
+      if (!isScrollableY(node)) return;
+      var rect = node.getBoundingClientRect();
+      if (rect.width < 500 || rect.height < 180) return;
+      if (node.closest("#temu-filter-panel") || node.closest("#temu-filter-modal")) return;
+      add(node);
+    });
+    return candidates;
+  }
+
   async function autoScrollCollectMatchingRows(minPct, maxPct, onProgress) {
     var container = findDataScrollContainer();
     var originalTop = getScrollTop(container);
@@ -998,8 +1032,10 @@
       var target = document.elementFromPoint(event.clientX, event.clientY);
       var clickable = target && (target.closest("button,a,[role=\"button\"],li") || target);
       var rect = clickable && clickable.getBoundingClientRect ? clickable.getBoundingClientRect() : { left: event.clientX, top: event.clientY, width: 1, height: 1 };
+      var pgtNext = target && target.closest("li[class*=\"PGT_next\"], button[class*=\"PGT_next\"], a[class*=\"PGT_next\"]");
       var config = {
-        selector: cssPathForElement(clickable),
+        selector: pgtNext ? "li[class*=\"PGT_next\"], button[class*=\"PGT_next\"], a[class*=\"PGT_next\"]" : cssPathForElement(clickable),
+        rawSelector: cssPathForElement(clickable),
         text: clickable ? ((clickable.innerText || clickable.textContent || "").trim()) : "",
         xRatio: event.clientX / Math.max(1, window.innerWidth),
         yRatio: event.clientY / Math.max(1, window.innerHeight),
@@ -1034,9 +1070,13 @@
 
   // ── 稳定分页识别：基于「共有XX条 每页100条」分页栏 ─────────────
   function scrollToPageBottomForPagination() {
-    try {
-      window.scrollTo(0, Math.max(document.body.scrollHeight, document.documentElement.scrollHeight));
-    } catch (e) {}
+    var candidates = getPaginationScrollCandidates();
+    candidates.forEach(function (el) {
+      try {
+        setScrollTop(el, Math.max(0, getScrollMax(el)));
+        console.log("[TemuFilter v9] scroll pagination candidate bottom:", describeScrollElement(el), getScrollTop(el), "/", getScrollMax(el));
+      } catch (e) {}
+    });
   }
 
   function findPaginationContainer() {
@@ -1044,12 +1084,12 @@
     var pgtContainers = Array.from(document.querySelectorAll("ul[class*=\"PGT_outerWrapper\"], ul[class*=\"TB_pgtOuterWrapper\"]"));
     for (var p = 0; p < pgtContainers.length; p++) {
       var pgt = pgtContainers[p];
-      if (!isVisibleElement(pgt)) continue;
       var pgtNext = pgt.querySelector("li[class*=\"PGT_next\"], button[class*=\"PGT_next\"], a[class*=\"PGT_next\"]");
       var pageItems = Array.from(pgt.querySelectorAll("li, a, button")).filter(function (el) {
         return isPurePageNumberText(el.innerText || el.textContent || "");
       });
       if (pgtNext || pageItems.length > 0) {
+        try { pgt.scrollIntoView({ block: "center", inline: "nearest" }); } catch (e) {}
         console.log("[TemuFilter v9] PGT pagination container found");
         return pgt;
       }
