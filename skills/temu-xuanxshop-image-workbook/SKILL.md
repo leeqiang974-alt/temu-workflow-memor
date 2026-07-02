@@ -75,7 +75,9 @@ Prefer local review outputs first. Upload/write back only after user approval.
    - Reuse approved outputs only if no later user feedback rejects or marks them similar/wrong.
    - For AI product-fusion T first images, use the approved product-material PNG registry first, such as selected new-original/象寄 cutout PNG records. Do not repeatedly use the same SKU preview PNG for every `D` under one `L0xx`.
    - Rotate different approved source PNGs across same-`L0xx` D groups and record `source_kind`, `source_id`, and source path in the review artifact.
-   - If the user says a same-`L0xx` group uses overly uniform PNG material, the next redo must switch or expand the source material pool instead of reusing one near-identical product cutout across many exact `D` values.
+   - Before image generation, build a source-material allocation plan for every `L0xx`: exact `D`, `source_png/source_kind/source_id`, scene lane, color lane, product scale, placement, and composition difference.
+   - Every `L0xx` must satisfy both PNG material differentiation and scene differentiation. Do not pass a batch that only varies scenes while reusing one near-identical PNG, or only varies PNGs while keeping templated scenes.
+   - If the user says a same-`L0xx` group uses overly uniform PNG material, the next redo must switch or expand the source material pool instead of reusing one near-identical product cutout across many exact `D` values. Current known risk groups include L042 and L043.
    - Current L043 rule: folding-board T redos must rotate distinct source PNGs and preserve board holes, small center hole, rear raised detail, outline, and realistic scale against clothing. Do not continue using one unified-looking PNG across the whole L043 group; if the material pool is insufficient, pause to add/select better source PNGs or use fixed-PNG compositing.
    - Record each generated T first image with `provider`, `model`, `source_png`, `prompt`, `status`, and `fallback_of` when Seedream is used after image2 failure.
    - Treat SKU variant PNGs as T fallback only when no approved product-material cutout exists, or when the user explicitly asks to use SKU images for T.
@@ -105,6 +107,7 @@ Prefer local review outputs first. Upload/write back only after user approval.
 - User feedback beats historical approved state. If the user says a D/image/PNG is wrong, similar, hallucinated, or “不要”, lock it out before rerunning.
 - New workbook T images must not bypass image2/APIMart first pass. Seedream/Jimeng is only the fallback for reviewed image2 failures unless the user explicitly overrides the model order.
 - Reviewed image2 `redo` items are failures for final writeback. They must enter feedback lock first, then go to Seedream/Jimeng fallback or a specific redo plan; do not write those image2 outputs back to T/U.
+- Future image generation, reconstruction, Seedream fallback, or image2 redo must pass Claude Code + NVIDIA review before execution. The review package must include GitHub memory evidence, redo/fallback D list with Chinese feedback, source PNG allocation, scene/color/composition plan, and high-risk product locks.
 - Do not let a previous round’s approved registry skip a D that appears in the current redo list.
 - Never write into the only source workbook. Always copy first.
 - Never expose access keys or credentials in chat or reports.

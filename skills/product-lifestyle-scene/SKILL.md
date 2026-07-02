@@ -100,6 +100,8 @@ Round2 feedback learning:
 - Do not let “replaceable contents” become “replaceable hardware”. Contents can change only when they are loose objects placed on or inside the product; rods, frames, baskets, shelves, drawers, rails, handles, wheels, legs, and supports remain fixed.
 - If a product has a historically repeated failure, add a product-specific lock before generating again instead of relying on generic “do not change product” wording.
 - Control color tone as a first-class differentiation variable. Do not let every premium scene become warm yellow, beige, or sunset-toned. Rotate between cool white daylight, blue-gray marble, fresh green outdoor, dark luxury, warm wood, soft cream pastel, clean black-white contrast, and neutral overcast daylight.
+- Treat source PNG allocation as a first-class differentiation variable for every L0xx, not just L043. Before running a new batch, prepare a per-D source PNG allocation table and a scene/color/composition plan. Every same-prefix group must vary both source PNG material and scene design. Current known source-uniformity risk groups include L042 and L043; this batch is not retroactively reworked, but all future execution must pass this gate.
+- Do not execute image generation, Seedream fallback, image2 redo, or bulk reconstruction until a Claude Code + NVIDIA review has checked the source PNG allocation plan, scene differentiation plan, product locks, and latest GitHub memory rules.
 
 ## Temu T-Column First Carousel Workflow
 
@@ -143,6 +145,7 @@ Use this workflow when making the first image inserted into the workbook `T` car
 5. **Differentiation within the same L0xx**
    - For different `D` values under the same `L0xx`, vary at least three dimensions: scene, background, product scale, position, orientation/mirror, object arrangement, and foreground grouping.
    - Also vary the source product PNG itself whenever an approved material library has enough usable cutouts for that `L0xx`.
+   - Source PNG variation is mandatory, not optional, whenever the material library has multiple safe product cutouts. If the library does not have enough variety, pause to select/add material or use fixed-PNG compositing rather than pretending scene-only variation is enough.
    - Keep product appearance stable while using controlled variation such as horizontal mirroring, different left/right placement, different product size in frame, and slight angle-like composition changes.
    - For racks, shelves, trays, baskets, boxes, organizers, and similar container products, use replaceable loose contents as a major differentiation axis: tableware, bowls, cups, utensils, towels, files, fruit, flowers, greenery, small household items, or other category-safe props may change when they sit on or inside the product.
    - When replacing loose contents, explicitly freeze the product hardware/body: do not change rods, holes, shelves, tiers, baskets, handles, hooks, wheels, frames, rails, supports, product color, outline, or quantity of structural parts.

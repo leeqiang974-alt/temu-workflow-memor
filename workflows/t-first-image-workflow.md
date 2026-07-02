@@ -25,10 +25,13 @@
 
 同一 L0xx 下：
 
-- 必须轮换不同 PNG。
+- 必须轮换不同 PNG；这是全局规则，不只针对 L043。
 - 不允许全 L0xx 只用一张 SKU 预览图。
 - source_png/source_kind/source_id 必须写入结果记录。
+- 每个 L0xx 在执行作图前必须先产出素材调配计划：列出每个 exact D 使用的 `source_png/source_kind/source_id`、场景 lane、色调 lane、构图/位置/比例差异。没有这个计划，不允许开跑。
+- 同一 L0xx 必须同时满足两类差异化：`PNG 素材差异化` 和 `场景差异化`。不能只换场景不换 PNG，也不能只换 PNG 但画面场景模板化。
 - 如果用户指出某个 L0xx 的 PNG 素材“太统一”，下一轮重构必须扩大可用素材池，优先切换不同 `kept_cutout` / `retry_new_original` / 安全产品 cutout，不得继续用同一外观源图套不同 D。
+- 当前已发现：L042、L043 都存在 PNG 素材过于统一风险；这批已生成结果暂不返工，但下一次执行必须先做素材调配并过审。
 
 ## Prompt 关键规则
 
@@ -68,6 +71,19 @@
 - 未先读取 GitHub 记忆就开始执行。
 - T 首图绕过 image2/APIMart 首轮，直接使用旧 Seedream/ComfyUI/阿里/all_sku_tfirst。
 - image2 复检失败项未进入 feedback lock 就被写回或复用。
-- 同一 L0xx 素材未轮换，尤其 L043 继续使用过于统一的 PNG。
+- 同一 L0xx 素材未轮换，或只有场景差异、没有 PNG 素材差异。
+- 没有在作图前提交 source PNG 调配计划、场景 lane、色调 lane、构图差异计划。
+- L042/L043 或任意被用户点名“PNG 太统一”的组继续使用过于统一的 PNG。
 - 复核页导出反馈时没有读取当前输入框中文备注，导致用户填写的中文原因丢失。
 - T4 尺寸图、U 跟随 T1、J 行级 SKU 变体匹配未校验。
+
+## 作图执行前强制过审
+
+后续每次真正开跑 T 首图、Seedream fallback、image2 redo、批量重构前，都必须先把执行计划交给 Claude Code + NVIDIA 审查。审查包必须包含：
+
+- GitHub 记忆和当前 workflow 已读取的证据。
+- redo / fallback 的 D 清单与用户中文反馈。
+- 每个 L0xx 的 source PNG 调配表，证明 PNG 差异化。
+- 每个 L0xx 的场景、色调、构图、产品比例计划，证明场景差异化。
+- 高风险结构冻结规则和产品专项 prompt。
+- 明确说明本批是否只是沿用已生成图；本批 199 image2 首轮已生成结果不因本条新规则自动返工，但下一次执行必须执行本规则。

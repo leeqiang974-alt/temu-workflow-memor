@@ -15,7 +15,9 @@
 - [ ] 每个 D 有 provider/model/source_png/prompt/status。
 - [ ] 没有直接拿旧 Seedream/ComfyUI/阿里贴图填新表。
 - [ ] 同一 L0xx 已轮换不同 source PNG。
-- [ ] 用户反馈“素材太统一”的 L0xx 已扩大/切换素材池；L043 不继续使用单一外观 PNG 硬套多个 D。
+- [ ] 作图执行前已生成每个 L0xx 的 source PNG 调配表。
+- [ ] 所有 L0xx 都同时满足 PNG 素材差异化和场景差异化，不只针对 L043。
+- [ ] 用户反馈“素材太统一”的 L0xx 已扩大/切换素材池；当前已知 L042、L043 下次执行必须重点检查。
 - [ ] reject lock 未被绕过。
 - [ ] 同 L0xx 的场景/色调/构图有明显差异。
 - [ ] 产品放置场景符合真实用途。
@@ -56,7 +58,9 @@
 ## Claude/NVIDIA 外部审查
 
 - [ ] 开发计划、脚本修改、表格处理结果、图片复核结果已交给 Claude Code + NVIDIA 审查提示词。
+- [ ] 图片生成/重构/Seedream fallback/image2 redo 开跑前已交给 Claude Code + NVIDIA 过审。
 - [ ] 审查明确检查是否先读 GitHub 记忆。
 - [ ] 审查明确拦截旧 T 链路回退：旧 Seedream/ComfyUI/阿里/all_sku_tfirst/历史通过库直接写回。
-- [ ] 审查明确检查 L043 素材轮换和同前缀差异化。
+- [ ] 审查明确检查所有 L0xx 的 source PNG 调配、场景 lane、色调 lane、构图差异。
+- [ ] 审查明确检查 L042/L043 等已知“PNG 太统一”风险组。
 - [ ] 审查结论为 `pass` 之前，所有硬规则必须为 pass。
