@@ -19,12 +19,24 @@ If headers differ, ask the user to map columns before processing.
 - Effective row: row with non-empty `产品货号`.
 - Group key: exact `产品货号`, not only `L0xx` prefix.
 - Prefix: first four characters, such as `L042`.
+- Row identity is the original Excel row plus exact `D`, `G`, and `SKU货号`; preserve row order unless the user explicitly asks to reorder rows.
 - Same exact D must have:
   - identical title
   - identical T URL list
   - identical U URL
   - same first T image
 - J may differ by row because J follows variant.
+
+## Cell Preservation And Allowed Writes
+
+Before editing, snapshot all effective rows and headers. For ordinary image/title writeback:
+
+- Allowed write columns are only the requested output columns, typically `产品标题`, `预览图` (J), `轮播图` (T), and `产品素材图` (U).
+- Preserve row count, row order, `产品货号` (D), `变种属性值一` (G), `SKU货号`, variant/spec columns, formula cells, and unrequested shop fields.
+- Do not rewrite X/AC or other helper/status columns unless the current shop workflow explicitly requires it. If updated, document the rule and row-level before/after values.
+- Preserve formulas and number/date/text types in non-target columns.
+- Produce a cell-level diff summary listing every changed cell by row, header, old value, and new value.
+- If a non-target/protected cell changed, treat it as a validation error unless explicitly approved.
 
 ## T URL Rules
 
@@ -56,6 +68,11 @@ Same D gets same title. If rewriting titles:
 - Add a deterministic tracking code like `Q7M`: letter-digit-letter.
 - Keep category accurate from product image/source.
 - Avoid unsupported claims and prohibited terms.
+- The tracking code/fingerprint is scoped to the workbook and exact D. Never borrow a code from another workbook, another D, or a process/candidate table.
+- If building a final writeback after image/T/J repair, recover the reconstructed title by exact D from the original final-confirmed/source workbook so the existing tracking code stays unchanged.
+- Do not generate a new title/code during late-stage T/J writeback unless the user explicitly asks to rerun title reconstruction.
+- Validate same-D title equality and per-D title-code uniqueness within the file.
+- Keep process tables (`过程`, `复检前`, candidate/failure files) out of the title/D fingerprint registry.
 
 Avoid terms:
 
@@ -68,6 +85,8 @@ Before final delivery, report:
 - effective row count
 - unique exact D count
 - same-D title mismatch count
+- row count/order mismatch count
+- protected cell changed count
 - title length/forbidden-word count if titles were changed
 - empty J count
 - empty T count
@@ -82,5 +101,6 @@ Before final delivery, report:
 - missing source assets
 - generated image local existence and dimensions
 - upload URL prefix checks if OSS/CDN writeback was done
+- changed-cell diff summary by column
 
 If any count is nonzero, list examples and do not claim the workbook is finished.

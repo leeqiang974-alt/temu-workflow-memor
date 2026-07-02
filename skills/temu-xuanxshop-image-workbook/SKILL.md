@@ -50,11 +50,13 @@ Prefer local review outputs first. Upload/write back only after user approval.
    - Detect header columns by name, not column letters.
    - Treat blank `产品货号` rows as separators and do not process them.
    - Count effective rows and unique exact `D` values.
+   - Snapshot immutable/key columns before changes: row index, D, G, SKU, source title, existing J/T/U, and any shop-specific helper columns such as X/AC.
 
 2. **Build group model**
    - Exact `D` is the product group.
    - Same `D` rows share title, T first image, T carousel, and U first material.
    - J is row-level: each row may have its own variant preview based on `G` and `SKU货号`.
+   - Title fingerprints/tracking codes are per workbook and per exact D; do not reuse a title code from another file or another D.
 
 3. **Preflight assets**
    - Match SKU/material candidates before generating or uploading.
@@ -99,6 +101,7 @@ Prefer local review outputs first. Upload/write back only after user approval.
    - Keep the fourth image as the size image when the workbook expects that. Detect size images by filename/title clues, not merely by original position.
    - Set U equal to T first image.
    - Write J row by row from approved variant previews.
+   - Do not change unrequested columns. If helper/status columns such as X/AC require updates for the shop workflow, validate them against the current shop rule and list the exact rows changed.
 
 8. **Validate**
    - Run the checklist in `references/workbook-contract.md`.
@@ -112,6 +115,8 @@ Prefer local review outputs first. Upload/write back only after user approval.
 - Future image generation, reconstruction, Seedream fallback, or image2 redo must pass Claude Code + NVIDIA review before execution. The review package must include GitHub memory evidence, redo/fallback D list with Chinese feedback, source PNG allocation, scene/color/composition plan, and high-risk product locks.
 - T fourth image is a hard size-image slot. If a delete/reject removes the current fourth image, find another valid size image and force it back to T[4]. If none exists, do not deliver a final workbook.
 - T must contain at most 10 URLs after all deletes, T1 replacements, and T4 repairs.
+- Reconstructed titles must stay same-D consistent and keep the deterministic per-file/per-D tracking code. When creating a final writeback from a source/final-confirmed workbook, recover titles by exact D from that workbook so the original tracking code is preserved.
+- Preserve row identity and unrequested cells. D, G, SKU, row order, variant rows, formulas, and shop helper columns must not drift during T/J/U/title writeback.
 - Deleted/rejected/不要/死刑/wrong-color images must not return through existing workbook values, approved registries, or source folders.
 - Review feedback export must read live DOM/input/textarea values so Chinese comments are preserved even when localStorage or POST saving fails.
 - L042 J special rule: use first-level `黑色` and `绿色` source folders only, match by row `G` + `SKU货号`, reject visually mixed source files, and compose true five-cell grid previews from whole SKU size-chart images unless the user explicitly asks for cutouts.
@@ -131,3 +136,4 @@ For a complete run, create:
 - Generated records JSON: prompts, source material, local output, model response, status
 - Final workbook copy
 - Validation JSON/summary
+- Cell-level diff summary for all changed columns, with unchanged protected columns explicitly checked.
