@@ -16,6 +16,16 @@
 - 复制的是该指纹匹配到的完整 D 变体行，不带表头。
 - 同 D 多行必须一起复制。
 - 已复制记录按店铺保存，后续显示“已复制”。
+- 插件前端依赖本地 `8765` 后台接口；后台不能停留在只支持 outputs 浏览的应急版。
+- 当前必须可用接口：
+  - `GET /api/d-groups?d=<指纹或D或SKU>&store=<店铺>`：返回最新店铺最终表中完整 D 组 TSV。
+  - `POST /api/price-copy-event`：记录店铺、D、指纹、标题、来源表、行数和价格信息。
+  - `GET /api/price-copy-status?store=<店铺>&fingerprint=<指纹>` 或 `&d=<D>`：返回已复制提醒。
+  - `GET /api/store-passed-d?store=<店铺>`：预览该店铺已复制/通过 D。
+  - `GET /api/store-pruned-workbook?store=<店铺>`：从该店铺最新最终表生成 `剔除已复制D_过程_不入库` 底表。
+  - `GET /api/store-full-preflight?store=<店铺>`：检查剔除底表是否仍残留已复制 D、标题指纹是否缺失/重复。
+- `GET /api/store-pruned-workbook` 只能生成过程底表，不能入 D 搜索库。
+- `POST /api/run` 不得在应急修复版里绕过最新 T/J/T4 规则直接启动完整新表。
 
 ## 多店铺
 
@@ -46,3 +56,6 @@
 - 不要因为同 D 在多个最终表出现就自动否定。
 - 指纹用于找行和复制，不用于阻止后续同 D 出现。
 - 过程表不入库，否则搜索指纹会出现多个过程结果。
+- 后台查行必须带 `store` 并按店铺目录过滤，避免同 D/同指纹命中旧店铺或旧批次。
+- 后台索引应优先最终/回传/提交类表格，并跳过 `过程`、`不入库`、`复检前`、`候选`、`review` 文件。
+- 2026-07-02 已把运行后台源码镜像到 `tools/temu_control_panel.py`；如果本机 `C:\Users\Administrator\Documents\Codex\2026-06-08\comfyui\work\temu_control_panel.py` 再次损坏，应以 GitHub 版本为恢复依据。
