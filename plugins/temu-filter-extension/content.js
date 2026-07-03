@@ -1873,6 +1873,45 @@
     return Promise.resolve();
   }
 
+  function copyHtmlBySelection(html, text) {
+    if (!html) return Promise.reject(new Error("没有 HTML 表格可复制"));
+    var bodyMatch = String(html).match(/<body[^>]*>([\s\S]*?)<\/body>/i);
+    var bodyHtml = bodyMatch ? bodyMatch[1] : String(html);
+    var wrapper = document.createElement("div");
+    wrapper.setAttribute("contenteditable", "true");
+    wrapper.style.position = "fixed";
+    wrapper.style.left = "-99999px";
+    wrapper.style.top = "0";
+    wrapper.style.width = "1px";
+    wrapper.style.height = "1px";
+    wrapper.style.overflow = "hidden";
+    wrapper.innerHTML = bodyHtml;
+    document.body.appendChild(wrapper);
+    var selection = window.getSelection();
+    var previousRanges = [];
+    if (selection) {
+      for (var i = 0; i < selection.rangeCount; i++) {
+        previousRanges.push(selection.getRangeAt(i));
+      }
+      selection.removeAllRanges();
+      var range = document.createRange();
+      range.selectNodeContents(wrapper);
+      selection.addRange(range);
+    }
+    var ok = false;
+    try {
+      ok = document.execCommand("copy");
+    } finally {
+      if (selection) {
+        selection.removeAllRanges();
+        previousRanges.forEach(function (range) { selection.addRange(range); });
+      }
+      wrapper.remove();
+    }
+    if (ok) return Promise.resolve("html-selection");
+    return copyText(text).then(function () { return "plain-text"; });
+  }
+
   function rowsDataToClipboardPayload(rowsData) {
     var text = String((rowsData && (rowsData.text || rowsData.tsv)) || "");
     var html = rowsData && rowsData.html ? String(rowsData.html) : "";
@@ -1893,13 +1932,16 @@
           "text/plain": new Blob([text], { type: "text/plain;charset=utf-8" }),
         });
         return navigator.clipboard.write([item]).catch(function () {
-          return copyText(text);
+          return copyHtmlBySelection(html, text);
+        }).then(function (method) {
+          return method || "html-clipboard";
         });
       } catch (err) {
-        return copyText(text);
+        return copyHtmlBySelection(html, text);
       }
     }
-    return copyText(text);
+    if (html) return copyHtmlBySelection(html, text);
+    return copyText(text).then(function () { return "plain-text"; });
   }
 
   function combineRowsPayloads(payloads) {
@@ -2462,17 +2504,34 @@
           return;
         }
         setBatchBusy("正在写入剪贴板：" + matchedRecords.length + " 组D行");
-        await copyTablePayload(combineRowsPayloads(payloads));
-        setBatchBusy("剪贴板已写入，正在记录复制状态...");
-        for (var j = 0; j < matchedRecords.length; j++) {
-          await recordCopiedEvent(matchedRecords[j].record, matchedRecords[j].item);
+        var combinedPayload = combineRowsPayloads(payloads);
+        var copyMethod = "";
+        try {
+          copyMethod = await copyTablePayload(combinedPayload);
+        } catch (copyErr) {
+          showPreparedBatchCopyRetry(combinedPayload, matchedRecords, copyErr);
+          showToast("批量数据已准备好，请点击状态栏里的“立即复制已准备数据”");
+          return;
         }
-        showToast("已复制并记录 " + matchedRecords.length + " 组D行");
-        setNewWorkbookStatus("已复制并记录 " + matchedRecords.length + " 组D行", false);
-        refreshCopiedBadges();
+        if (copyMethod === "plain-text" && combinedPayload.html) {
+          showPreparedBatchCopyRetry(combinedPayload, matchedRecords, new Error("浏览器本次只允许纯文本复制，未记录已复制状态"));
+          showToast("已准备富格式表格，请点击状态栏里的“立即复制已准备数据”");
+          return;
+        }
+        await markBatchCopied(matchedRecords, copyMethod);
       } finally {
         clearBatchBusy();
       }
+    }
+
+    async function markBatchCopied(matchedRecords, copyMethod) {
+      setNewWorkbookStatus("剪贴板已写入，正在记录复制状态...", false);
+      for (var j = 0; j < matchedRecords.length; j++) {
+        await recordCopiedEvent(matchedRecords[j].record, matchedRecords[j].item);
+      }
+      showToast("已复制并记录 " + matchedRecords.length + " 组D行");
+      setNewWorkbookStatus("已复制并记录 " + matchedRecords.length + " 组D行" + (copyMethod ? "\n复制方式：" + copyMethod : ""), false);
+      refreshCopiedBadges();
     }
 
     function setNewWorkbookStatus(message, isError) {
@@ -2483,6 +2542,39 @@
       box.style.background = isError ? "#fff1f0" : "#f6ffed";
       box.style.color = isError ? "#a8071a" : "#135200";
       box.textContent = message;
+    }
+
+    function showPreparedBatchCopyRetry(payload, matchedRecords, err) {
+      var box = document.getElementById("temu-new-workbook-status");
+      if (!box) return;
+      box.style.display = "block";
+      box.style.borderColor = "#faad14";
+      box.style.background = "#fffbe6";
+      box.style.color = "#ad6800";
+      box.innerHTML =
+        "<div style=\"font-weight:700;margin-bottom:6px;\">批量 D 行已经查好，但浏览器没有完成富格式剪贴板写入。</div>" +
+        "<div style=\"white-space:pre-wrap;margin-bottom:8px;\">" + escapeHTML(err && err.message ? err.message : String(err || "")) + "</div>" +
+        "<button id=\"temu-copy-prepared-batch\" style=\"padding:6px 12px;background:#fa8c16;color:#fff;border:none;border-radius:6px;cursor:pointer;margin-right:8px;\">立即复制已准备数据</button>" +
+        "<span style=\"font-size:12px;color:#8c6d1f;\">不再重新查行，点击后直接写入 Excel/WPS 富格式表格。</span>";
+      var retryBtn = document.getElementById("temu-copy-prepared-batch");
+      if (!retryBtn) return;
+      retryBtn.addEventListener("click", function () {
+        retryBtn.disabled = true;
+        retryBtn.style.opacity = "0.65";
+        retryBtn.textContent = "复制中...";
+        copyTablePayload(payload).then(function (method) {
+          if (method === "plain-text" && payload.html) {
+            retryBtn.disabled = false;
+            retryBtn.style.opacity = "1";
+            retryBtn.textContent = "再次尝试富格式复制";
+            throw new Error("浏览器仍只允许纯文本复制，请保持当前页焦点后再点一次");
+          }
+          return markBatchCopied(matchedRecords, method);
+        }).catch(function (retryErr) {
+          console.error("[TemuFilter v9] prepared batch copy retry failed:", retryErr);
+          showPreparedBatchCopyRetry(payload, matchedRecords, retryErr);
+        });
+      });
     }
 
     async function previewCopiedDForStore() {

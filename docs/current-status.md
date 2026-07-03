@@ -114,6 +114,37 @@ L051060505 C 列 `产品描述` 已按用户反馈只删除第 1 张图 `https:/
 
 使用新版插件时，需要在浏览器扩展管理页重新加载 Temu 价差筛选插件，然后刷新 Temu 页面；旧页面里的 content script 不会自动替换。
 
+## 2026-07-03 Temu 筛选插件批量复制二次修复
+
+用户反馈：
+
+- `一键复制全页`、`一键复制未复制` 两个按钮响应仍有问题。
+
+根因判断：
+
+- 事件绑定存在，后台 `/api/d-groups` 查行链路也可用。
+- 批量复制会先异步查多个 D 行，再写剪贴板。Chrome/扩展环境下，长异步等待后用户点击激活可能过期，导致 `navigator.clipboard.write()` 或 `execCommand("copy")` 被拒绝；之前只显示 toast，用户侧容易表现为“没响应”。
+- 另外，富 HTML 失败后直接退到纯 TSV，可能又回到 Excel/WPS 格式不一致的问题。
+
+修复：
+
+- `plugins\temu-filter-extension\content.js`
+  - 新增 `copyHtmlBySelection()`：`ClipboardItem text/html` 失败后，临时渲染 HTML 表格、选中表格再执行 `execCommand("copy")`，尽量保住 Excel/WPS 富表格格式。
+  - `copyTablePayload()` 返回复制方式：`html-clipboard`、`html-selection` 或 `plain-text`。
+  - `copyRecordsBatch()` 若只复制到纯文本，或浏览器拒绝复制，不再记录“已复制”，而是在状态栏生成 `立即复制已准备数据` 按钮。
+  - 二次按钮不重新查行，直接复制已缓存 payload，避免再次丢失用户点击激活。
+  - 二次复制失败时继续保留重试入口，不再把按钮覆盖掉。
+- `plugins\temu-filter-extension\manifest.json` 版本升为 `1.5`。
+- `workflows\pricing-plugin-workflow.md` 写入批量复制死规则。
+
+验证：
+
+- `node --check plugins\temu-filter-extension/content.js` 通过。
+
+使用注意：
+
+- 必须在浏览器扩展管理页重新加载插件，并刷新 Temu 页面；旧页面中的 content script 仍是旧版本。
+
 ## 2026-07-03 197x3 复核页图片显示修复
 
 用户反馈 `197x3` 复核页右侧网页没有图片显示。排查结论：旧复核页 HTML 虽统计了 `591/591` 候选，但页面仍按原 `197` 个 D 渲染，生成图栏为 `src=""` 且显示 `pending`；源 PNG 使用 `C:/...` 绝对路径，HTTP 页面无法直接加载。
