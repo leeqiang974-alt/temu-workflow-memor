@@ -1,0 +1,16 @@
+{
+  "review": "l043060503_redo3_fixed_review",
+  "locked_at": "2026-07-03T12:57:02",
+  "feedback": {
+    "fixed_method": {
+      "decision": "redo",
+      "feedback": "不要合成png和背景的图片，还是要ai做的，就拿这两个png去试一下",
+      "ts": "2026-07-03"
+    }
+  },
+  "locked_bad_source_ids": [
+    "L043_NEW_0008",
+    "L043_NEW_0025"
+  ],
+  "next_action": "Run image2/APIMart AI with L043_NEW_0038 and L043_NEW_0043 only."
+}

@@ -316,3 +316,48 @@ C 盘空间处理：为恢复仓库记忆写入能力，已将 C 盘 outputs 中
 - AI 成本：`$0`
 
 这 2 张仍需用户复核选择后才可用于替换；当前未改 T/U/J/标题。
+
+## 2026-07-03 L043060503 redo4 两 PNG 走 AI/image2
+
+用户否决固定 PNG 合成路线，反馈：
+
+- `不要合成png和背景的图片，还是要ai做的，就拿这两个png去试一下`
+
+按该反馈，固定合成候选只作为过程记录，不进入可用池；继续使用两个 PNG 源跑 AI/image2：
+
+- source `L043_NEW_0038`
+- source `L043_NEW_0043`
+
+继续锁定失败源：
+
+- `L043_NEW_0008`
+- `L043_NEW_0025`
+
+执行前已完成 Claude Code + NVIDIA 审查，结论 `PASS`：
+
+- `D:\Desktop\jit\DXXmall\outputs\store_newskill_l043060503_ai_redo4_two_pngs_20260703\claude_nvidia_l043060503_ai_redo4_two_pngs_review_20260703.md`
+
+输出：
+
+- 脚本：`scripts\run_l043060503_ai_redo4_from_two_pngs.py`
+- 输出目录：`D:\Desktop\jit\DXXmall\outputs\store_newskill_l043060503_ai_redo4_two_pngs_20260703`
+- 反馈锁：`D:\Desktop\jit\DXXmall\outputs\store_newskill_l043060503_ai_redo4_two_pngs_20260703\feedback_lock_l043060503_ai_redo4_two_pngs_20260703.json`
+- 仓库反馈锁：`docs\feedback-locks\feedback_lock_l043060503_ai_redo4_two_pngs_20260703.json`
+- 仓库计划摘要：`docs\feedback-locks\l043060503_ai_redo4_two_pngs_plan.md`
+- 结果：`D:\Desktop\jit\DXXmall\outputs\store_newskill_l043060503_ai_redo4_two_pngs_20260703\l043060503_ai_redo4_two_pngs_results.json`
+- 8765 复核页：`http://127.0.0.1:8765/outputs/store_newskill_l043060503_ai_redo4_two_pngs_20260703/l043060503_ai_redo4_two_pngs_review.html`
+
+生成统计：
+
+- 计划：`2`
+- 成功：`2/2`
+- 失败：`0`
+- 本地图片缺失：`0`
+- 估算 image2 成本：`$0.012`
+
+新生成候选：
+
+- `L043060503__set3__redo1__redo4_ai_a`，source `L043_NEW_0038`
+- `L043060503__set3__redo1__redo4_ai_b`，source `L043_NEW_0043`
+
+这 2 张仍需用户复核通过后才可用于替换；当前未改 T/U/J/标题。
