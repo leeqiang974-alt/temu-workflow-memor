@@ -501,34 +501,152 @@ def _index_html():
 <html lang="zh-CN">
 <head>
   <meta charset="utf-8" />
-  <title>Temu 自动化控制面板（应急版）</title>
+  <title>Temu 自动化控制面板</title>
   <style>
-    body {{ font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; margin: 24px; background: #fffaf2; color: #261407; }}
-    .card {{ background: #fff; border: 1px solid #f0d7b8; border-radius: 14px; padding: 18px; margin: 14px 0; box-shadow: 0 6px 20px rgba(99, 52, 0, .08); }}
-    a.button, button {{ display: inline-block; padding: 10px 14px; border-radius: 10px; border: 1px solid #d88b35; background: #fff4e6; color: #8a3b00; text-decoration: none; font-weight: 700; margin-right: 8px; cursor: pointer; }}
+    body {{ font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; margin: 0; background: #f6f7fb; color: #1f2937; }}
+    header {{ background: #111827; color: #fff; padding: 18px 24px; }}
+    header h1 {{ margin: 0 0 6px; font-size: 22px; }}
+    header p {{ margin: 0; color: #cbd5e1; }}
+    main {{ max-width: 1280px; margin: 0 auto; padding: 18px; }}
+    .grid {{ display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }}
+    .card {{ background: #fff; border: 1px solid #d9e1ec; border-radius: 10px; padding: 16px; box-shadow: 0 4px 18px rgba(15, 23, 42, .06); }}
+    .card h2 {{ margin: 0 0 10px; font-size: 17px; }}
+    a.button, button {{ display: inline-block; padding: 8px 12px; border-radius: 7px; border: 1px solid #2563eb; background: #2563eb; color: #fff; text-decoration: none; font-weight: 700; margin: 4px 6px 4px 0; cursor: pointer; }}
+    button.secondary, a.secondary {{ background: #fff; color: #2563eb; }}
+    input, select {{ padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 7px; margin: 4px 6px 4px 0; }}
+    textarea {{ width: 100%; min-height: 180px; border: 1px solid #cbd5e1; border-radius: 7px; padding: 8px; white-space: pre; overflow: auto; }}
     table {{ border-collapse: collapse; width: 100%; margin-top: 10px; }}
-    th, td {{ border: 1px solid #efd3af; padding: 8px; text-align: left; vertical-align: top; }}
-    code {{ background: #f8ead8; padding: 2px 5px; border-radius: 5px; }}
+    th, td {{ border: 1px solid #d9e1ec; padding: 7px; text-align: left; vertical-align: top; }}
+    code {{ background: #eef2ff; padding: 2px 5px; border-radius: 5px; }}
+    .ok {{ color: #15803d; font-weight: 700; }}
     .warn {{ color: #b45309; font-weight: 700; }}
+    .muted {{ color: #64748b; font-size: 12px; }}
+    #queryResult, #storeResult, #statusBox {{ white-space: pre-wrap; background: #f8fafc; border: 1px solid #d9e1ec; border-radius: 8px; padding: 10px; min-height: 70px; overflow: auto; }}
+    @media (max-width: 900px) {{ .grid {{ grid-template-columns: 1fr; }} }}
   </style>
 </head>
 <body>
-  <h1>Temu 自动化控制面板（应急版）</h1>
-  <div class="card">
-    <p class="warn">说明：完整控制面板源码被破坏后，当前先恢复 outputs 浏览、T 主图资产库和状态接口。D 查询/插件任务等完整功能需要继续恢复。</p>
-    <a class="button" href="/outputs/t_image_asset_registry/t_image_asset_registry.html">打开 T 主图资产库</a>
-    <a class="button" href="/api/t-image-assets">查看资产库 API</a>
-    <button onclick="fetch('/api/t-image-assets?force=1').then(r=>r.json()).then(j=>alert('已重建：'+JSON.stringify(j.summary||j)))">重建资产库</button>
-  </div>
-  <div class="card">
-    <h2>资产库摘要</h2>
-    <table>{summary_rows}</table>
-  </div>
-  <div class="card">
-    <h2>路径</h2>
-    <p>outputs：<code>{OUTPUTS_DIR}</code></p>
-    <p>work：<code>{WORK_DIR}</code></p>
-  </div>
+  <header>
+    <h1>Temu 自动化控制面板</h1>
+    <p>核心接口已恢复：D 查行、插件复制记录、店铺剔除底表、完整流程预检、outputs 浏览、T 资产库。</p>
+  </header>
+  <main>
+    <div class="grid">
+      <section class="card">
+        <h2>D 查行 / 指纹复制测试</h2>
+        <select id="store"><option>DXXmall</option><option>CXXmall</option><option>FXXmall</option></select>
+        <input id="lookup" placeholder="D值 / 标题指纹 / SKU" />
+        <button onclick="queryD()">查询</button>
+        <button class="secondary" onclick="copyFirst()">复制首个命中D行</button>
+        <div id="queryResult" class="muted">输入 D 值、标题指纹或 SKU 后查询。复制会同时写入 text/html 表格和 TSV。</div>
+      </section>
+      <section class="card">
+        <h2>店铺新表</h2>
+        <button onclick="previewPassed()">预览已复制D</button>
+        <button onclick="generatePruned()">生成剔除D底表</button>
+        <button class="secondary" onclick="preflightFull()">预检完整流程</button>
+        <button class="secondary" onclick="runFull()">生成完整新表（受保护）</button>
+        <div id="storeResult" class="muted">先复制通过 D，再生成剔除D底表。完整新表入口当前受最新规则保护。</div>
+      </section>
+      <section class="card">
+        <h2>T 主图资产库</h2>
+        <a class="button" href="/outputs/t_image_asset_registry/t_image_asset_registry.html">打开资产库</a>
+        <a class="button secondary" href="/api/t-image-assets">查看资产库 API</a>
+        <button class="secondary" onclick="rebuildAssets()">重建资产库</button>
+        <table>{summary_rows}</table>
+      </section>
+      <section class="card">
+        <h2>状态与路径</h2>
+        <button onclick="loadStatus()">刷新状态</button>
+        <a class="button secondary" href="/outputs/">浏览 outputs</a>
+        <div id="statusBox">outputs：<code>{OUTPUTS_DIR}</code><br>work：<code>{WORK_DIR}</code></div>
+      </section>
+    </div>
+  </main>
+  <script>
+    let lastQuery = null;
+    const $ = (id) => document.getElementById(id);
+    function store() {{ return $("store").value || "DXXmall"; }}
+    async function api(path, opts) {{
+      const res = await fetch(path, Object.assign({{cache:"no-store"}}, opts || {{}}));
+      const text = await res.text();
+      let data;
+      try {{ data = JSON.parse(text); }} catch (err) {{ data = {{ok:false,error:text}}; }}
+      if (!res.ok) throw new Error(data.error || text || ("HTTP " + res.status));
+      return data;
+    }}
+    function summarizeItem(item) {{
+      if (!item) return "无命中";
+      return [
+        "D: " + item.D,
+        "文件: " + item.file_name,
+        "行: " + item.row_range + " / " + item.row_count + " 行",
+        "列数: " + (item.column_count || "-"),
+        "标题: " + (item.title || "-"),
+        "首图: " + (item.t_first || "-")
+      ].join("\\n");
+    }}
+    async function queryD() {{
+      const q = $("lookup").value.trim();
+      if (!q) {{ $("queryResult").textContent = "请输入查询值"; return; }}
+      $("queryResult").textContent = "查询中……";
+      const data = await api("/api/d-groups?d=" + encodeURIComponent(q) + "&store=" + encodeURIComponent(store()));
+      lastQuery = data;
+      $("queryResult").textContent = "命中: " + ((data.items || []).length) + "\\n\\n" + summarizeItem((data.items || [])[0]);
+    }}
+    async function copyPayload(text, html) {{
+      if (html && navigator.clipboard && navigator.clipboard.write && window.ClipboardItem) {{
+        await navigator.clipboard.write([new ClipboardItem({{
+          "text/html": new Blob([html], {{type:"text/html;charset=utf-8"}}),
+          "text/plain": new Blob([text || ""], {{type:"text/plain;charset=utf-8"}})
+        }})]);
+      }} else {{
+        await navigator.clipboard.writeText(text || "");
+      }}
+    }}
+    async function copyFirst() {{
+      const item = lastQuery && lastQuery.items && lastQuery.items[0];
+      if (!item) {{ await queryD(); }}
+      const fresh = lastQuery && lastQuery.items && lastQuery.items[0];
+      if (!fresh) {{ $("queryResult").textContent += "\\n无可复制行"; return; }}
+      await copyPayload(fresh.tsv || "", fresh.html || "");
+      $("queryResult").textContent += "\\n\\n已复制首个命中 D 行（HTML表格+TSV）。";
+    }}
+    async function previewPassed() {{
+      $("storeResult").textContent = "读取中……";
+      const data = await api("/api/store-passed-d?store=" + encodeURIComponent(store()));
+      $("storeResult").textContent = "店铺: " + data.store + "\\n复制事件: " + data.event_count + "\\n唯一D: " + data.d_count + "\\n\\n" + (data.d_values || []).join("\\n");
+    }}
+    async function generatePruned() {{
+      $("storeResult").textContent = "生成剔除D底表中……";
+      const data = await api("/api/store-pruned-workbook?store=" + encodeURIComponent(store()));
+      $("storeResult").textContent = JSON.stringify(data, null, 2);
+      if (data.output) await navigator.clipboard.writeText(data.output);
+    }}
+    async function preflightFull() {{
+      $("storeResult").textContent = "预检中……";
+      const data = await api("/api/store-full-preflight?store=" + encodeURIComponent(store()));
+      $("storeResult").textContent = JSON.stringify(data, null, 2);
+    }}
+    async function runFull() {{
+      $("storeResult").textContent = "请求启动完整流程……";
+      try {{
+        const data = await api("/api/run", {{method:"POST", body:new URLSearchParams({{action:"store_full_workflow", store:store()}})}});
+        $("storeResult").textContent = JSON.stringify(data, null, 2);
+      }} catch (err) {{
+        $("storeResult").textContent = "已阻止旧完整流程入口：\\n" + err.message;
+      }}
+    }}
+    async function rebuildAssets() {{
+      const data = await api("/api/t-image-assets?force=1");
+      alert("已重建：" + JSON.stringify(data.summary || data));
+    }}
+    async function loadStatus() {{
+      const data = await api("/api/status");
+      $("statusBox").textContent = JSON.stringify(data, null, 2);
+    }}
+    loadStatus().catch(()=>{{}});
+  </script>
 </body>
 </html>"""
 
@@ -558,7 +676,7 @@ class ControlPanelHandler(BaseHTTPRequestHandler):
                 return _html_response(self, _index_html())
 
             if path == "/api/ping":
-                return _json_response(self, {"ok": True, "mode": "emergency", "port": PORT})
+                return _json_response(self, {"ok": True, "mode": "restored-lite", "port": PORT})
 
             if path == "/api/d-groups":
                 lookup = (params.get("d") or params.get("fingerprint") or [""])[0]
@@ -623,10 +741,10 @@ class ControlPanelHandler(BaseHTTPRequestHandler):
                     self,
                     {
                         "ok": True,
-                        "mode": "emergency",
+                        "mode": "restored-lite",
                         "outputs_dir": str(OUTPUTS_DIR),
                         "work_dir": str(WORK_DIR),
-                        "note": "完整控制面板待从备份/历史恢复；当前可浏览 outputs 与 T 主图资产库。",
+                        "note": "轻量控制台已恢复核心插件接口；完整新表入口仍按最新规则保护。",
                     },
                 )
 
@@ -697,7 +815,7 @@ class ControlPanelHandler(BaseHTTPRequestHandler):
 def main():
     OUTPUTS_DIR.mkdir(parents=True, exist_ok=True)
     server = ThreadingHTTPServer((HOST, PORT), ControlPanelHandler)
-    print(f"Temu emergency control panel: http://{HOST}:{PORT}/")
+    print(f"Temu control panel: http://{HOST}:{PORT}/")
     server.serve_forever()
 
 

@@ -511,3 +511,39 @@ L043060503 主池最终 3 套：
 
 - 浏览器扩展需要在扩展管理页点击重新加载，且 Temu 页面刷新后新 content script 才会生效。
 - 当前修复只改变复制格式，不改查行逻辑、不写回 Excel、不上传。
+
+## 2026-07-03 8765 控制台前端恢复为轻量版
+
+用户反馈：
+
+- 8765 前端为什么是临时网页，不是之前那个，是否坏了。
+
+排查结论：
+
+- 当前 `http://127.0.0.1:8765/` 确实仍显示 `Temu 自动化控制面板（应急版）`。
+- 2026-07-02 记忆中已记录：完整旧控制面板源码损坏/丢失，后续为了先恢复插件接口，运行的是应急版后台。
+- `C:\Users\Administrator\Documents\Codex\2026-06-08\comfyui\work\temu_control_panel.py.emergency_backup_20260702_ pluginfix` 也是更早的应急版，不是旧完整 Tab 前端，无法直接切回。
+- 旧 README 记录了完整面板功能，但当前源码中不存在对应实现。
+
+修复：
+
+- 将 `tools\temu_control_panel.py` 的首页从应急说明页改为轻量控制台：
+  - D 查行 / 指纹复制测试
+  - 店铺新表：预览已复制D、生成剔除D底表、完整流程预检
+  - T 主图资产库入口与重建
+  - outputs 浏览入口
+  - 状态查看
+- 同步到运行文件：
+  - `C:\Users\Administrator\Documents\Codex\2026-06-08\comfyui\work\temu_control_panel.py`
+- `/api/ping`、`/api/status` 的 mode 改为 `restored-lite`。
+- `POST /api/run` 仍按最新规则保护，不启用旧的完整新表入口，避免绕过 image2/APIMart、J 变体、T4 尺寸图等硬规则。
+- 已重启 8765 后台，当前监听进程：`31764`。
+
+验证：
+
+- 首页 HTTP 状态：`200`
+- 首页 title：`Temu 自动化控制面板`
+- 首页不再包含 `应急版`
+- 首页包含 `D 查行 / 指纹复制测试`
+- `/api/status` 返回 mode：`restored-lite`
+- `/api/d-groups?d=E9A&store=DXXmall` 仍返回：`items=6`、`html=True`、`htmlRows=True`、`column_count=54`、首个命中 `row_count=3`
