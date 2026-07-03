@@ -949,3 +949,32 @@ L043060503 主池最终 3 套：
 - T 张数行级分布：`10` 张 `251` 行、`9` 张 `36` 行、`8` 张 `23` 行、`7` 张 `6` 行、`6` 张 `6` 行。
 - 所有行 T1 均为本次 OSS 回填地址。
 - T4 原位保留、T<=10、T>=6、U=T1、无本地 `/outputs` URL。
+
+后续补丁：
+
+- 上传时报错的 `L095060505` T4 尺寸图不是 OSS 丢失，而是 URL 在中文逗号处被截断。
+- OSS bucket 中真实对象为：
+  - `https://ozonshanghai.oss-cn-shanghai.aliyuncs.com/temu-jit/carousel-ocr-size/20260605/85ef73d852584a65aaf05a1c5615dac7_L095_尺寸_jimeng-2026-05-08-1613-这张图片，保持产品和标尺、数字、文字信息不做.jpg`
+- 根因：`scripts\writeback_196_with_197x3_t_pool.py` 旧 URL 正则把 `, ; ， ；` 全部当作分隔符，导致带中文逗号的 OSS 文件名被截断为无 `.jpg` 的 404 地址。
+- 已修复：URL 解析只在逗号/分号后面紧跟下一个 `http` 时才分隔；文件名里的中文逗号必须保留。
+- 已生成修复副本：
+  - `D:\Desktop\jit\DXXmall\outputs\store_newskill_196_writeback_197x3_t_20260703\0616-2_196_最终回传_197x3通过T首图回填_T4保留_T够6_不跨D旧图轮换_修复L095060505尺寸图完整URL_20260703.xlsx`
+  - 报告：`D:\Desktop\jit\DXXmall\outputs\store_newskill_196_writeback_197x3_t_20260703\0616-2_196_最终回传_197x3通过T首图回填_T4保留_T够6_不跨D旧图轮换_修复L095060505尺寸图完整URL_20260703.repair_report.json`
+- 修复副本校验：`L095060505` 两行 T4 均为完整 URL；HEAD `200 image/jpeg`；T 数仍为 `9`；无截断坏 URL 残留。
+
+三表同类问题复查：
+
+- 新增通用 Excel COM 修复脚本：
+  - `scripts\repair_truncated_oss_urls.ps1`
+- 复查并生成副本：
+  - `D:\Desktop\jit\DXXmall\outputs\store_newskill_196_writeback_197x3_t_20260703\0616-2_196_最终回传_197x3通过T首图回填_T4保留_T够6_不跨D旧图轮换_20260703_修复OSS截断URL_20260703.xlsx`
+  - `D:\Desktop\jit\DXXmall\DXXMALLminimini新核价\7月2日核价过了6条已经裂变_修复OSS截断URL_20260703.xls`
+  - `D:\Desktop\jit\DXXmall\DXXMALLminimini新核价\7月2日核价过了6条_修复OSS截断URL_20260703.xlsx`
+- 三表总验证报告：
+  - `D:\Desktop\jit\DXXmall\outputs\store_newskill_196_writeback_197x3_t_20260703\repair_three_workbooks_truncated_oss_url_validation_20260703.json`
+- 验证规则：按“整条 URL token 完全等于坏地址”统计；完整 URL 含有坏地址前缀但不算坏。
+- 验证结果：
+  - 完整 OSS URL HEAD `200 image/jpeg`，大小 `88274` 字节。
+  - 196 表副本：坏 URL token `0`，完整 URL token `2`，同 hash 可疑 URL `0`。
+  - `7月2日核价过了6条已经裂变.xls` 副本：坏 URL token `0`，完整 URL token `0`，同 hash 可疑 URL `0`。
+  - `7月2日核价过了6条.xlsx` 副本：坏 URL token `0`，完整 URL token `0`，同 hash 可疑 URL `0`。

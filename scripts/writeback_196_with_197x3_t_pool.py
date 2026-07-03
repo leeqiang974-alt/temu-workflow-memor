@@ -26,7 +26,7 @@ import generate_apply_ali_tfirst_0608 as ali_t
 TARGET_SIZE = 800
 TARGET_MAX_BYTES = 150 * 1024
 OSS_PREFIX = "temu-jit/dxxmall-0616-2/197x3-passed-t-writeback"
-URL_RE = re.compile(r"https?://[^\s,;，；]+")
+URL_RE = re.compile(r"https?://.*?(?=(?:[,;，；]?\s*https?://)|$)", re.S)
 SIZE_RE = re.compile(r"(尺寸|尺码|size|cm|inch|length|height|width|宽|长|高)", re.I)
 
 
@@ -53,10 +53,17 @@ def split_urls(value: object) -> list[str]:
     text = str(value or "").strip()
     if not text:
         return []
-    urls = URL_RE.findall(text)
-    if urls:
-        return urls
-    return [part.strip() for part in re.split(r"[\r\n]+", text) if part.strip()]
+    urls: list[str] = []
+    for line in re.split(r"[\r\n]+", text):
+        line = line.strip()
+        if not line:
+            continue
+        matches = [match.group(0).strip() for match in URL_RE.finditer(line)]
+        if matches:
+            urls.extend(matches)
+        else:
+            urls.append(line)
+    return urls
 
 
 def dedupe(values: list[str]) -> list[str]:
