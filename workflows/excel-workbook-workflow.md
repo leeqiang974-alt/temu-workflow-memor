@@ -52,7 +52,7 @@
 - 应用 T/J 复核反馈是死规则：必须先汇总所有可用反馈记录（DOM 导出、feedback lock、raw feedback、review records），去重后形成 `decision=D+type+index+url` 清单；T 删除不能只靠 URL 精确匹配，必须同时按 `精确 URL` 和 `D + T 序号(index)` 执行兜底删除。若 URL 已因重排或修复变化，仍按记录中的 `D + T序号` 删除当前 T 列对应位置，并在报告里写明 `delete-index-fallback`。`redo` 的旧 T1 必须从 T 和 U 中同时移除，并用审核通过的新 T1 回填；没有通过新 T1 时不得交付。所有用户标记删除/不要/死刑/白色/错误配色/多次删除图都要进入 delete lock，最终校验必须输出：反馈删除记录数、redo 记录数、实际移除数、残留 URL 数、按序号兜底删除数。
 - L058 特别污染锁：`l058-extra-fixed-under145k`、`L058_extra_fixed_800_under145k` 等历史补图不得回流到 L058 的 T 值；如果用户再次指出 L058 有删除项，必须先查全量 feedback/raw/review 记录，再对当前表按 URL 和 `D+T序号` 双重执行删除。
 - T 值最多 10 张，应用删除、T4 矫正、T1 替换后必须再次截断并校验。
-- 执行任何表格回填、图片删除、T/J 修复、最终表输出后，必须准备 Claude Code + NVIDIA 复核包并要求复核通过后再声称完成。复核包至少包含：执行命令/脚本摘要、输入表与输出表路径、反馈记录来源、删除/redo 清单、changed-cell diff、残留校验报告、T4/U/T≤10/J 非空校验。没有完成该复核，不得说“完成/已处理好”。
+- 执行任何表格回填、图片删除、T/J 修复、最终表输出后，必须准备 Claude Code + NVIDIA 复核包并要求复核通过后再声称完成。复核包至少包含：执行命令/脚本摘要、输入表与输出表路径、反馈记录来源、删除/redo 清单、changed-cell diff、残留校验报告、T4/U/T≤10/J 非空校验。没有完成该复核，不得说“完成/已处理好”。复核完成后还必须运行 `scripts\require_claude_nvidia_review.ps1 -ReviewPath <审查文件> -ArtifactPath <最终输出表>`；脚本未通过时，该表只能算过程产物。
 - 复核页反馈导出必须读取页面实时 DOM 中的标记和 textarea 中文；不得只依赖 localStorage 或 POST 后台接口。若后台保存失败，必须仍能导出完整 JSON。
 - T 和 J URL 可访问。
 - 店小秘/外链旧图按规则替换或保留。

@@ -22,6 +22,17 @@
 - 把候选图回填到 Excel 前。
 - 用户反馈“你又用旧逻辑”“错配”“严重失职”“为什么旧图又进库”。
 - 准备把过程表/最终表入 D 查询库前。
+- 每次准备向用户交付“已完成/已修复/最终表/可上传表/通过图/插件修复完成”等结果前。
+
+重要：这不是口头规则。Temu 自动化项目的交付定义必须包含一份 Claude+NVIDIA 审查记录，并用 `scripts\require_claude_nvidia_review.ps1` 校验：
+
+```powershell
+.\scripts\require_claude_nvidia_review.ps1 `
+  -ReviewPath "D:\...\claude_nvidia_xxx_review.md" `
+  -ArtifactPath "D:\...\最终输出.xlsx"
+```
+
+如果没有审查文件、审查结论不是 `pass`、或审查文件没有提到当前交付产物，Codex 不得说“完成/已处理好/可以用”。
 
 ## 审查输入包
 
@@ -122,4 +133,8 @@ Claude+NVIDIA 必须输出 JSON + 人类摘要：
 - Codex 执行前必须先看 GitHub 记忆。
 - Codex 改 skill/规则后必须提交 GitHub。
 - Claude+NVIDIA 审查结果若为 block，Codex 不得继续回填最终表。
+- Claude+NVIDIA 审查结果若缺失，视同 block。
+- 每个最终交付产物必须在交付目录保存审查文件，命名建议：`claude_nvidia_<task>_final_gate_<date>.md`。
+- 每个最终交付报告必须写入 `claude_nvidia_review_path` 和 `claude_nvidia_gate_ok=true`，否则只能称为过程产物。
+- 用户指出严重失误后，下一轮修复必须先做失误归因和 gate 补强，再交付新表。
 - 若用户明确要求赶时间，也只能跳过非关键图片质量审查，不能跳过 T 模型顺序、J 变体匹配、T4 尺寸图、入库隔离这些硬规则。

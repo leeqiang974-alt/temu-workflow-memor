@@ -53,6 +53,7 @@
 13. 对用户标记 redo 的 image2 结果，是否作为复检失败处理，进入 Seedream/即梦 fallback 或明确重做计划，而不是直接写回。
 14. 作图执行前是否提供每个 L0xx 的 source PNG 调配表、场景 lane、色调 lane、构图/比例差异计划。
 15. 是否同时满足 `PNG 素材差异化` 和 `场景差异化`；只有其中一项通过不能放行。
+16. 如果这是最终交付/修复完成声明，审查文件是否明确提到本次实际输出路径，并且产物报告是否能被 `scripts\require_claude_nvidia_review.ps1` 校验通过。
 
 ## 输出格式
 
@@ -81,7 +82,8 @@
     "scene_differentiation_plan": "pass|fail",
     "png_and_scene_both_differentiated": "pass|fail",
     "review_feedback_export_complete": "pass|fail",
-    "redo_items_not_written_back": "pass|fail"
+    "redo_items_not_written_back": "pass|fail",
+    "final_gate_artifact_path_covered": "pass|fail"
   },
   "notes": []
 }
@@ -96,6 +98,7 @@
 - 不单针对 L043，所有 L0xx 下一轮作图都不能继续使用过于统一的 PNG；必须轮换不同源 PNG，并同时做场景差异化。
 - 当前已发现 L042、L043 都存在 PNG 素材过于统一风险。本批已生成图不自动返工，但下一次执行必须先给出素材调配和场景差异计划。
 - 用户在复核页填写的中文反馈是决策依据；导出 JSON 不完整时，必须从页面输入框、记录 JSON 或截图中恢复，不能把空反馈当成无原因 redo。
+- 每次 Codex 准备向用户说“完成、已处理好、可以上传、这是最终表”之前，必须提供最终 gate 审查。没有审查文件或审查文件没有覆盖当前输出路径，decision 必须为 `block`。
 
 ## 作图执行前拦截规则
 

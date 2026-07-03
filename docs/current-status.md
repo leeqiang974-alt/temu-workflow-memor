@@ -1052,3 +1052,37 @@ L043060503 主池最终 3 套：
 - 6条表：修复 `1` 个截断/无后缀 OSS 图片 URL，`unresolved=0`，`bad_post_count=0`，`10` 行，`54` 列，唯一 OSS URL `61`。
 
 后续死规则：遇到 `SKC preview image URL cannot be empty`、`Product Carousel Image URL cannot be empty`、`Image link cannot be empty`、图片上传超时/404/无响应等图片 URL 类报错时，不能只按用户点名的 D 或单个 URL 修。必须用全量脚本扫整本工作簿，修复所有截断/无后缀 OSS URL，补齐 54 列，并用报告确认 `unresolved=0`、`bad_post_count=0` 后再交付。
+
+## 2026-07-03 Claude/NVIDIA 审查强制 gate 补强
+
+用户追问“到底有没有强制执行 agent Claude NVIDIA 对每次对话结果做审核”。当前证据结论：
+
+- 仓库已有 Claude/NVIDIA 审查规则和提示词，但主要是文档约束。
+- 实际执行中有多次计划/作图前审查记录，但并没有对每一次最终交付做机械拦截。
+- 这导致本次三表 OSS 修复先交付了窄范围错误副本，属于 gate 未强制执行。
+
+已补强：
+
+- 新增 NVIDIA LiteLLM 配置：`config\litellm-nvidia.yaml`
+- 新增 Claude/NVIDIA 启动脚本：`scripts\claude-code-nvidia.ps1`
+- 新增 LiteLLM 启动脚本：`scripts\start-nvidia-litellm.ps1`
+- 新增交付前必检脚本：`scripts\require_claude_nvidia_review.ps1`
+
+新硬规则：
+
+- 每次对用户交付“完成/已修复/最终表/可上传表/通过图/插件修复完成”前，必须生成 Claude/NVIDIA final gate 审查文件。
+- 审查文件必须 `decision=pass`，且必须提到当前实际输出路径或文件名。
+- 必须运行：
+  - `scripts\require_claude_nvidia_review.ps1 -ReviewPath <审查文件> -ArtifactPath <输出产物>`
+- 该脚本未通过时，不能说“完成/已处理好/可以上传”，只能说“过程产物，待审查”。
+- 用户指出严重失误后，下一轮修复必须先做失误归因、补 gate，再交付新结果。
+
+本次 196 全量 OSS 修复表已补做 Claude/NVIDIA final gate：
+
+- 审查文件：`D:\Desktop\jit\DXXmall\outputs\store_newskill_196_writeback_197x3_t_20260703\claude_nvidia_196_full_oss_repair_and_gate_fix_final_review_20260703.md`
+- 审查结论：`decision=pass`
+- 强制检查命令已通过：
+  - `scripts\require_claude_nvidia_review.ps1 -ReviewPath <上述审查文件> -ArtifactPath D:\Desktop\jit\DXXmall\outputs\store_newskill_196_writeback_197x3_t_20260703\0616-2_196_最终回传_197x3通过T首图回填_T4保留_T够6_不跨D旧图轮换_全量OSS图片URL修复验证_20260703.xlsx`
+- 196 OSS 修复报告已补写：
+  - `claude_nvidia_review_path`
+  - `claude_nvidia_gate_ok=true`

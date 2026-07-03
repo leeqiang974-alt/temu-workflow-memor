@@ -59,6 +59,9 @@
 
 - [ ] 开发计划、脚本修改、表格处理结果、图片复核结果已交给 Claude Code + NVIDIA 审查提示词。
 - [ ] 图片生成/重构/Seedream fallback/image2 redo 开跑前已交给 Claude Code + NVIDIA 过审。
+- [ ] 每次对用户交付“完成/已修复/最终表/可上传表/通过图/插件修复完成”之前，都有 Claude Code + NVIDIA 最终 gate 审查。
+- [ ] 已运行 `scripts\require_claude_nvidia_review.ps1`，确认审查文件存在、`decision=pass`、并且覆盖当前输出路径。
+- [ ] 最终报告或状态记录写入 `claude_nvidia_review_path` 与 `claude_nvidia_gate_ok=true`。
 - [ ] 审查明确检查是否先读 GitHub 记忆。
 - [ ] 审查明确拦截旧 T 链路回退：旧 Seedream/ComfyUI/阿里/all_sku_tfirst/历史通过库直接写回。
 - [ ] 审查明确检查所有 L0xx 的 source PNG 调配、场景 lane、色调 lane、构图差异。
