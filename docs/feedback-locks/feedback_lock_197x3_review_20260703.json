@@ -1,0 +1,1169 @@
+﻿{
+    "review":  "0616_2_image2_197x3_t_candidates_review",
+    "exported_at":  "2026-07-03T02:07:46.137Z",
+    "locked_at":  "2026-07-03T10:12:01+08:00",
+    "source_feedback_file":  "C:\\Users\\Administrator\\.codex\\attachments\\c7270734-360b-4967-b0a1-75303223e0e7\\pasted-text.txt",
+    "output_dir":  "D:\\Desktop\\jit\\DXXmall\\outputs\\store_newskill_image2_197x3_t_candidates_20260702",
+    "rule_overrides":  [
+                           {
+                               "prefix":  "L086",
+                               "severity":  "hard",
+                               "rule":  "去掉并锁定所有白色产品素材/白色产品图记录；L086 没有白色变体，后续 T/J/候选池/写回不得使用白色产品素材或白色产品输出。"
+                           },
+                           {
+                               "prefix":  "L091",
+                               "severity":  "hard",
+                               "rule":  "顶部结构极易出错；保持正面/少变角度，冻结顶部凹槽/方格/结构，不得臆想新增顶部部件。"
+                           },
+                           {
+                               "prefix":  "L083",
+                               "severity":  "hard",
+                               "rule":  "外观出错率高；必须冻结整体比例、侧面直杆、表面铁片、支架/连接件，优先固定 PNG 合成或严格产品参考。"
+                           },
+                           {
+                               "prefix":  "L082",
+                               "severity":  "hard",
+                               "rule":  "必须保持左右伸缩功能特征；产品侧面不允许出现滑轨或额外轨道，底部/侧面滑轨臆想一律失败。"
+                           }
+                       ],
+    "counts":  {
+                   "total_feedback":  61,
+                   "redo":  61,
+                   "reject":  0,
+                   "keep":  0,
+                   "unique_D":  47,
+                   "unique_prefix":  13
+               },
+    "records":  [
+                    {
+                        "candidate_id":  "L042060501__set2",
+                        "D":  "L042060501",
+                        "prefix":  "L042",
+                        "set":  "set2",
+                        "decision":  "redo",
+                        "feedback":  "钉子螺纹错了，卷起来的突出的部分多余了。",
+                        "ts":  "2026-07-03T01:34:55.458Z",
+                        "lock_type":  "redo_first"
+                    },
+                    {
+                        "candidate_id":  "L042060502__set3",
+                        "D":  "L042060502",
+                        "prefix":  "L042",
+                        "set":  "set3",
+                        "decision":  "redo",
+                        "feedback":  "钉子螺纹错了",
+                        "ts":  "2026-07-03T01:35:27.941Z",
+                        "lock_type":  "redo_first"
+                    },
+                    {
+                        "candidate_id":  "L042060505__set3",
+                        "D":  "L042060505",
+                        "prefix":  "L042",
+                        "set":  "set3",
+                        "decision":  "redo",
+                        "feedback":  "钉子螺纹错了",
+                        "ts":  "2026-07-03T01:35:46.972Z",
+                        "lock_type":  "redo_first"
+                    },
+                    {
+                        "candidate_id":  "L042060506__set3",
+                        "D":  "L042060506",
+                        "prefix":  "L042",
+                        "set":  "set3",
+                        "decision":  "redo",
+                        "feedback":  "围挡外观错误",
+                        "ts":  "2026-07-03T01:36:04.674Z",
+                        "lock_type":  "redo_first"
+                    },
+                    {
+                        "candidate_id":  "L043060501__set2",
+                        "D":  "L043060501",
+                        "prefix":  "L043",
+                        "set":  "set2",
+                        "decision":  "redo",
+                        "feedback":  "产品外观错误，空洞也错误",
+                        "ts":  "2026-07-03T01:36:36.971Z",
+                        "lock_type":  "redo_first"
+                    },
+                    {
+                        "candidate_id":  "L043060502__set2",
+                        "D":  "L043060502",
+                        "prefix":  "L043",
+                        "set":  "set2",
+                        "decision":  "redo",
+                        "feedback":  "产品外观错误，这一般后面的细节错误，前面的细节也错误",
+                        "ts":  "2026-07-03T01:36:59.114Z",
+                        "lock_type":  "redo_first"
+                    },
+                    {
+                        "candidate_id":  "L043060502__set3",
+                        "D":  "L043060502",
+                        "prefix":  "L043",
+                        "set":  "set3",
+                        "decision":  "redo",
+                        "feedback":  "整个外观错误",
+                        "ts":  "2026-07-03T01:37:25.291Z",
+                        "lock_type":  "redo_first"
+                    },
+                    {
+                        "candidate_id":  "L043060503__set3",
+                        "D":  "L043060503",
+                        "prefix":  "L043",
+                        "set":  "set3",
+                        "decision":  "redo",
+                        "feedback":  "前面有个向外凸起的部分丢失",
+                        "ts":  "2026-07-03T01:37:47.370Z",
+                        "lock_type":  "redo_first"
+                    },
+                    {
+                        "candidate_id":  "L043060503__set1",
+                        "D":  "L043060503",
+                        "prefix":  "L043",
+                        "set":  "set1",
+                        "decision":  "redo",
+                        "feedback":  "前面有个向外凸起的部分丢失，整个外观错误",
+                        "ts":  "2026-07-03T01:38:04.797Z",
+                        "lock_type":  "redo_first"
+                    },
+                    {
+                        "candidate_id":  "L043060504__set1",
+                        "D":  "L043060504",
+                        "prefix":  "L043",
+                        "set":  "set1",
+                        "decision":  "redo",
+                        "feedback":  "整个外观错误",
+                        "ts":  "2026-07-03T01:38:24.191Z",
+                        "lock_type":  "redo_first"
+                    },
+                    {
+                        "candidate_id":  "L043060504__set3",
+                        "D":  "L043060504",
+                        "prefix":  "L043",
+                        "set":  "set3",
+                        "decision":  "redo",
+                        "feedback":  "整个外观错误",
+                        "ts":  "2026-07-03T01:38:29.522Z",
+                        "lock_type":  "redo_first"
+                    },
+                    {
+                        "candidate_id":  "L043060505__set1",
+                        "D":  "L043060505",
+                        "prefix":  "L043",
+                        "set":  "set1",
+                        "decision":  "redo",
+                        "feedback":  "整个外观错误",
+                        "ts":  "2026-07-03T01:38:33.251Z",
+                        "lock_type":  "redo_first"
+                    },
+                    {
+                        "candidate_id":  "L043060505__set2",
+                        "D":  "L043060505",
+                        "prefix":  "L043",
+                        "set":  "set2",
+                        "decision":  "redo",
+                        "feedback":  "整个外观错误",
+                        "ts":  "2026-07-03T01:38:35.706Z",
+                        "lock_type":  "redo_first"
+                    },
+                    {
+                        "candidate_id":  "L043060505__set3",
+                        "D":  "L043060505",
+                        "prefix":  "L043",
+                        "set":  "set3",
+                        "decision":  "redo",
+                        "feedback":  "整个外观错误",
+                        "ts":  "2026-07-03T01:38:39.100Z",
+                        "lock_type":  "redo_first"
+                    },
+                    {
+                        "candidate_id":  "L043060506__set3",
+                        "D":  "L043060506",
+                        "prefix":  "L043",
+                        "set":  "set3",
+                        "decision":  "redo",
+                        "feedback":  "整个外观错误",
+                        "ts":  "2026-07-03T01:38:43.638Z",
+                        "lock_type":  "redo_first"
+                    },
+                    {
+                        "candidate_id":  "L043060506__set1",
+                        "D":  "L043060506",
+                        "prefix":  "L043",
+                        "set":  "set1",
+                        "decision":  "redo",
+                        "feedback":  "整个外观错误",
+                        "ts":  "2026-07-03T01:38:48.922Z",
+                        "lock_type":  "redo_first"
+                    },
+                    {
+                        "candidate_id":  "L043060507__set1",
+                        "D":  "L043060507",
+                        "prefix":  "L043",
+                        "set":  "set1",
+                        "decision":  "redo",
+                        "feedback":  "整个外观错误",
+                        "ts":  "2026-07-03T01:38:51.485Z",
+                        "lock_type":  "redo_first"
+                    },
+                    {
+                        "candidate_id":  "L043060507__set3",
+                        "D":  "L043060507",
+                        "prefix":  "L043",
+                        "set":  "set3",
+                        "decision":  "redo",
+                        "feedback":  "整个外观错误",
+                        "ts":  "2026-07-03T01:38:57.325Z",
+                        "lock_type":  "redo_first"
+                    },
+                    {
+                        "candidate_id":  "L043060508__set3",
+                        "D":  "L043060508",
+                        "prefix":  "L043",
+                        "set":  "set3",
+                        "decision":  "redo",
+                        "feedback":  "整个外观错误",
+                        "ts":  "2026-07-03T01:39:06.074Z",
+                        "lock_type":  "redo_first"
+                    },
+                    {
+                        "candidate_id":  "L047060501__set1",
+                        "D":  "L047060501",
+                        "prefix":  "L047",
+                        "set":  "set1",
+                        "decision":  "redo",
+                        "feedback":  "老问题，底部是世界插进去，没有底座的",
+                        "ts":  "2026-07-03T01:39:20.500Z",
+                        "lock_type":  "redo_first"
+                    },
+                    {
+                        "candidate_id":  "L047060505__set1",
+                        "D":  "L047060505",
+                        "prefix":  "L047",
+                        "set":  "set1",
+                        "decision":  "redo",
+                        "feedback":  "老问题，底部是世界插进去，没有底座的",
+                        "ts":  "2026-07-03T01:40:09.066Z",
+                        "lock_type":  "redo_first"
+                    },
+                    {
+                        "candidate_id":  "L047060505__set3",
+                        "D":  "L047060505",
+                        "prefix":  "L047",
+                        "set":  "set3",
+                        "decision":  "redo",
+                        "feedback":  "外观错误了",
+                        "ts":  "2026-07-03T01:40:13.099Z",
+                        "lock_type":  "redo_first"
+                    },
+                    {
+                        "candidate_id":  "L047060506__set2",
+                        "D":  "L047060506",
+                        "prefix":  "L047",
+                        "set":  "set2",
+                        "decision":  "redo",
+                        "feedback":  "外观错误了",
+                        "ts":  "2026-07-03T01:40:29.770Z",
+                        "lock_type":  "redo_first"
+                    },
+                    {
+                        "candidate_id":  "L047060507__set3",
+                        "D":  "L047060507",
+                        "prefix":  "L047",
+                        "set":  "set3",
+                        "decision":  "redo",
+                        "feedback":  "老问题，底部是世界插进去，没有底座的",
+                        "ts":  "2026-07-03T01:40:39.827Z",
+                        "lock_type":  "redo_first"
+                    },
+                    {
+                        "candidate_id":  "L047060507__set1",
+                        "D":  "L047060507",
+                        "prefix":  "L047",
+                        "set":  "set1",
+                        "decision":  "redo",
+                        "feedback":  "外观错误了",
+                        "ts":  "2026-07-03T01:40:52.541Z",
+                        "lock_type":  "redo_first"
+                    },
+                    {
+                        "candidate_id":  "L058060505__set2",
+                        "D":  "L058060505",
+                        "prefix":  "L058",
+                        "set":  "set2",
+                        "decision":  "redo",
+                        "feedback":  "做多了一个桶，还错了，多了两个拖把",
+                        "ts":  "2026-07-03T01:43:46.124Z",
+                        "lock_type":  "redo_first"
+                    },
+                    {
+                        "candidate_id":  "L068060502__set2",
+                        "D":  "L068060502",
+                        "prefix":  "L068",
+                        "set":  "set2",
+                        "decision":  "redo",
+                        "feedback":  "这个外观错",
+                        "ts":  "2026-07-03T01:45:31.370Z",
+                        "lock_type":  "redo_first"
+                    },
+                    {
+                        "candidate_id":  "L068060501__set3",
+                        "D":  "L068060501",
+                        "prefix":  "L068",
+                        "set":  "set3",
+                        "decision":  "redo",
+                        "feedback":  "这个外观错",
+                        "ts":  "2026-07-03T01:48:33.786Z",
+                        "lock_type":  "redo_first"
+                    },
+                    {
+                        "candidate_id":  "L068060503__set1",
+                        "D":  "L068060503",
+                        "prefix":  "L068",
+                        "set":  "set1",
+                        "decision":  "redo",
+                        "feedback":  "这个外观错",
+                        "ts":  "2026-07-03T01:48:42.411Z",
+                        "lock_type":  "redo_first"
+                    },
+                    {
+                        "candidate_id":  "L078060502__set1",
+                        "D":  "L078060502",
+                        "prefix":  "L078",
+                        "set":  "set1",
+                        "decision":  "redo",
+                        "feedback":  "盖子上面没有黑色把手",
+                        "ts":  "2026-07-03T01:53:09.088Z",
+                        "lock_type":  "redo_first"
+                    },
+                    {
+                        "candidate_id":  "L078060502__set2",
+                        "D":  "L078060502",
+                        "prefix":  "L078",
+                        "set":  "set2",
+                        "decision":  "redo",
+                        "feedback":  "盖子上面没有黑色把手",
+                        "ts":  "2026-07-03T01:53:14.182Z",
+                        "lock_type":  "redo_first"
+                    },
+                    {
+                        "candidate_id":  "L078060504__set2",
+                        "D":  "L078060504",
+                        "prefix":  "L078",
+                        "set":  "set2",
+                        "decision":  "redo",
+                        "feedback":  "把手错误",
+                        "ts":  "2026-07-03T01:53:30.023Z",
+                        "lock_type":  "redo_first"
+                    },
+                    {
+                        "candidate_id":  "L078060505__set2",
+                        "D":  "L078060505",
+                        "prefix":  "L078",
+                        "set":  "set2",
+                        "decision":  "redo",
+                        "feedback":  "盖子上面没有黑色把手",
+                        "ts":  "2026-07-03T01:53:36.972Z",
+                        "lock_type":  "redo_first"
+                    },
+                    {
+                        "candidate_id":  "L081060505__set2",
+                        "D":  "L081060505",
+                        "prefix":  "L081",
+                        "set":  "set2",
+                        "decision":  "redo",
+                        "feedback":  "产品外观错误",
+                        "ts":  "2026-07-03T01:54:09.452Z",
+                        "lock_type":  "redo_first"
+                    },
+                    {
+                        "candidate_id":  "L081060505__set3",
+                        "D":  "L081060505",
+                        "prefix":  "L081",
+                        "set":  "set3",
+                        "decision":  "redo",
+                        "feedback":  "产品外观错误",
+                        "ts":  "2026-07-03T01:54:21.243Z",
+                        "lock_type":  "redo_first"
+                    },
+                    {
+                        "candidate_id":  "L082060501__set3",
+                        "D":  "L082060501",
+                        "prefix":  "L082",
+                        "set":  "set3",
+                        "decision":  "redo",
+                        "feedback":  "产品侧面没有轨道",
+                        "ts":  "2026-07-03T01:54:26.018Z",
+                        "lock_type":  "redo_first"
+                    },
+                    {
+                        "candidate_id":  "L082060502__set2",
+                        "D":  "L082060502",
+                        "prefix":  "L082",
+                        "set":  "set2",
+                        "decision":  "redo",
+                        "feedback":  "产品的结构逻辑错误",
+                        "ts":  "2026-07-03T01:54:45.373Z",
+                        "lock_type":  "redo_first"
+                    },
+                    {
+                        "candidate_id":  "L082060506__set2",
+                        "D":  "L082060506",
+                        "prefix":  "L082",
+                        "set":  "set2",
+                        "decision":  "redo",
+                        "feedback":  "底部滑轨错误",
+                        "ts":  "2026-07-03T01:56:44.436Z",
+                        "lock_type":  "redo_first"
+                    },
+                    {
+                        "candidate_id":  "L082060507__set3",
+                        "D":  "L082060507",
+                        "prefix":  "L082",
+                        "set":  "set3",
+                        "decision":  "redo",
+                        "feedback":  "产品逻辑错误",
+                        "ts":  "2026-07-03T01:57:02.546Z",
+                        "lock_type":  "redo_first"
+                    },
+                    {
+                        "candidate_id":  "L082060507__set1",
+                        "D":  "L082060507",
+                        "prefix":  "L082",
+                        "set":  "set1",
+                        "decision":  "redo",
+                        "feedback":  "侧面没有滑轨",
+                        "ts":  "2026-07-03T01:57:16.372Z",
+                        "lock_type":  "redo_first"
+                    },
+                    {
+                        "candidate_id":  "L082060508__set1",
+                        "D":  "L082060508",
+                        "prefix":  "L082",
+                        "set":  "set1",
+                        "decision":  "redo",
+                        "feedback":  "左右伸缩的特征细节错误。",
+                        "ts":  "2026-07-03T01:59:24.894Z",
+                        "lock_type":  "redo_first"
+                    },
+                    {
+                        "candidate_id":  "L083060503__set1",
+                        "D":  "L083060503",
+                        "prefix":  "L083",
+                        "set":  "set1",
+                        "decision":  "redo",
+                        "feedback":  "产品比例错误",
+                        "ts":  "2026-07-03T02:00:01.003Z",
+                        "lock_type":  "redo_first"
+                    },
+                    {
+                        "candidate_id":  "L083060504__set2",
+                        "D":  "L083060504",
+                        "prefix":  "L083",
+                        "set":  "set2",
+                        "decision":  "redo",
+                        "feedback":  "细节错了，侧面的直杆多了一个细节出来",
+                        "ts":  "2026-07-03T02:01:30.004Z",
+                        "lock_type":  "redo_first"
+                    },
+                    {
+                        "candidate_id":  "L083060504__set3",
+                        "D":  "L083060504",
+                        "prefix":  "L083",
+                        "set":  "set3",
+                        "decision":  "redo",
+                        "feedback":  "外观错误",
+                        "ts":  "2026-07-03T02:02:01.573Z",
+                        "lock_type":  "redo_first"
+                    },
+                    {
+                        "candidate_id":  "L083060505__set3",
+                        "D":  "L083060505",
+                        "prefix":  "L083",
+                        "set":  "set3",
+                        "decision":  "redo",
+                        "feedback":  "表面的铁片错误",
+                        "ts":  "2026-07-03T02:02:34.723Z",
+                        "lock_type":  "redo_first"
+                    },
+                    {
+                        "candidate_id":  "L083060506__set1",
+                        "D":  "L083060506",
+                        "prefix":  "L083",
+                        "set":  "set1",
+                        "decision":  "redo",
+                        "feedback":  "外观错误",
+                        "ts":  "2026-07-03T02:02:43.411Z",
+                        "lock_type":  "redo_first"
+                    },
+                    {
+                        "candidate_id":  "L083060507__set1",
+                        "D":  "L083060507",
+                        "prefix":  "L083",
+                        "set":  "set1",
+                        "decision":  "redo",
+                        "feedback":  "外观错误",
+                        "ts":  "2026-07-03T02:02:53.064Z",
+                        "lock_type":  "redo_first"
+                    },
+                    {
+                        "candidate_id":  "L083060507__set3",
+                        "D":  "L083060507",
+                        "prefix":  "L083",
+                        "set":  "set3",
+                        "decision":  "redo",
+                        "feedback":  "外观错误",
+                        "ts":  "2026-07-03T02:03:00.407Z",
+                        "lock_type":  "redo_first"
+                    },
+                    {
+                        "candidate_id":  "L086060501__set1",
+                        "D":  "L086060501",
+                        "prefix":  "L086",
+                        "set":  "set1",
+                        "decision":  "redo",
+                        "feedback":  "没有白色，所有的L086,没有白色的素材",
+                        "ts":  "2026-07-03T02:04:26.420Z",
+                        "lock_type":  "redo_first"
+                    },
+                    {
+                        "candidate_id":  "L086060503__set3",
+                        "D":  "L086060503",
+                        "prefix":  "L086",
+                        "set":  "set3",
+                        "decision":  "redo",
+                        "feedback":  "没有白色，所有的L086,没有白色的素材",
+                        "ts":  "2026-07-03T02:04:30.489Z",
+                        "lock_type":  "redo_first"
+                    },
+                    {
+                        "candidate_id":  "L086060504__set2",
+                        "D":  "L086060504",
+                        "prefix":  "L086",
+                        "set":  "set2",
+                        "decision":  "redo",
+                        "feedback":  "没有白色，所有的L086,没有白色的素材",
+                        "ts":  "2026-07-03T02:04:35.260Z",
+                        "lock_type":  "redo_first"
+                    },
+                    {
+                        "candidate_id":  "L086060505__set1",
+                        "D":  "L086060505",
+                        "prefix":  "L086",
+                        "set":  "set1",
+                        "decision":  "redo",
+                        "feedback":  "没有白色，所有的L086,没有白色的素材",
+                        "ts":  "2026-07-03T02:04:38.065Z",
+                        "lock_type":  "redo_first"
+                    },
+                    {
+                        "candidate_id":  "L086060507__set3",
+                        "D":  "L086060507",
+                        "prefix":  "L086",
+                        "set":  "set3",
+                        "decision":  "redo",
+                        "feedback":  "没有白色，所有的L086,没有白色的素材",
+                        "ts":  "2026-07-03T02:04:46.506Z",
+                        "lock_type":  "redo_first"
+                    },
+                    {
+                        "candidate_id":  "L086060508__set2",
+                        "D":  "L086060508",
+                        "prefix":  "L086",
+                        "set":  "set2",
+                        "decision":  "redo",
+                        "feedback":  "没有白色，所有的L086,没有白色的素材",
+                        "ts":  "2026-07-03T02:04:48.972Z",
+                        "lock_type":  "redo_first"
+                    },
+                    {
+                        "candidate_id":  "L086060509__set1",
+                        "D":  "L086060509",
+                        "prefix":  "L086",
+                        "set":  "set1",
+                        "decision":  "redo",
+                        "feedback":  "",
+                        "ts":  "2026-07-03T02:04:51.721Z",
+                        "lock_type":  "redo_first"
+                    },
+                    {
+                        "candidate_id":  "L089060501__set2",
+                        "D":  "L089060501",
+                        "prefix":  "L089",
+                        "set":  "set2",
+                        "decision":  "redo",
+                        "feedback":  "外观错误",
+                        "ts":  "2026-07-03T02:05:32.466Z",
+                        "lock_type":  "redo_first"
+                    },
+                    {
+                        "candidate_id":  "L091060501__set1",
+                        "D":  "L091060501",
+                        "prefix":  "L091",
+                        "set":  "set1",
+                        "decision":  "redo",
+                        "feedback":  "顶部的结构错误",
+                        "ts":  "2026-07-03T02:06:08.395Z",
+                        "lock_type":  "redo_first"
+                    },
+                    {
+                        "candidate_id":  "L091060502__set1",
+                        "D":  "L091060502",
+                        "prefix":  "L091",
+                        "set":  "set1",
+                        "decision":  "redo",
+                        "feedback":  "顶部的结构错误",
+                        "ts":  "2026-07-03T02:06:18.517Z",
+                        "lock_type":  "redo_first"
+                    },
+                    {
+                        "candidate_id":  "L091060505__set1",
+                        "D":  "L091060505",
+                        "prefix":  "L091",
+                        "set":  "set1",
+                        "decision":  "redo",
+                        "feedback":  "顶部的结构错误",
+                        "ts":  "2026-07-03T02:06:26.923Z",
+                        "lock_type":  "redo_first"
+                    },
+                    {
+                        "candidate_id":  "L091060506__set2",
+                        "D":  "L091060506",
+                        "prefix":  "L091",
+                        "set":  "set2",
+                        "decision":  "redo",
+                        "feedback":  "顶部的结构错误",
+                        "ts":  "2026-07-03T02:06:32.202Z",
+                        "lock_type":  "redo_first"
+                    },
+                    {
+                        "candidate_id":  "L095060502__set3",
+                        "D":  "L095060502",
+                        "prefix":  "L095",
+                        "set":  "set3",
+                        "decision":  "redo",
+                        "feedback":  "",
+                        "ts":  "2026-07-03T02:07:16.653Z",
+                        "lock_type":  "redo_first"
+                    }
+                ],
+    "prefix_summary":  [
+                           {
+                               "prefix":  "L042",
+                               "count":  4,
+                               "D_count":  4,
+                               "feedbacks":  [
+                                                 {
+                                                     "candidate_id":  "L042060501__set2",
+                                                     "D":  "L042060501",
+                                                     "set":  "set2",
+                                                     "decision":  "redo",
+                                                     "feedback":  "钉子螺纹错了，卷起来的突出的部分多余了。"
+                                                 },
+                                                 {
+                                                     "candidate_id":  "L042060502__set3",
+                                                     "D":  "L042060502",
+                                                     "set":  "set3",
+                                                     "decision":  "redo",
+                                                     "feedback":  "钉子螺纹错了"
+                                                 },
+                                                 {
+                                                     "candidate_id":  "L042060505__set3",
+                                                     "D":  "L042060505",
+                                                     "set":  "set3",
+                                                     "decision":  "redo",
+                                                     "feedback":  "钉子螺纹错了"
+                                                 },
+                                                 {
+                                                     "candidate_id":  "L042060506__set3",
+                                                     "D":  "L042060506",
+                                                     "set":  "set3",
+                                                     "decision":  "redo",
+                                                     "feedback":  "围挡外观错误"
+                                                 }
+                                             ]
+                           },
+                           {
+                               "prefix":  "L043",
+                               "count":  15,
+                               "D_count":  8,
+                               "feedbacks":  [
+                                                 {
+                                                     "candidate_id":  "L043060501__set2",
+                                                     "D":  "L043060501",
+                                                     "set":  "set2",
+                                                     "decision":  "redo",
+                                                     "feedback":  "产品外观错误，空洞也错误"
+                                                 },
+                                                 {
+                                                     "candidate_id":  "L043060502__set2",
+                                                     "D":  "L043060502",
+                                                     "set":  "set2",
+                                                     "decision":  "redo",
+                                                     "feedback":  "产品外观错误，这一般后面的细节错误，前面的细节也错误"
+                                                 },
+                                                 {
+                                                     "candidate_id":  "L043060502__set3",
+                                                     "D":  "L043060502",
+                                                     "set":  "set3",
+                                                     "decision":  "redo",
+                                                     "feedback":  "整个外观错误"
+                                                 },
+                                                 {
+                                                     "candidate_id":  "L043060503__set3",
+                                                     "D":  "L043060503",
+                                                     "set":  "set3",
+                                                     "decision":  "redo",
+                                                     "feedback":  "前面有个向外凸起的部分丢失"
+                                                 },
+                                                 {
+                                                     "candidate_id":  "L043060503__set1",
+                                                     "D":  "L043060503",
+                                                     "set":  "set1",
+                                                     "decision":  "redo",
+                                                     "feedback":  "前面有个向外凸起的部分丢失，整个外观错误"
+                                                 },
+                                                 {
+                                                     "candidate_id":  "L043060504__set1",
+                                                     "D":  "L043060504",
+                                                     "set":  "set1",
+                                                     "decision":  "redo",
+                                                     "feedback":  "整个外观错误"
+                                                 },
+                                                 {
+                                                     "candidate_id":  "L043060504__set3",
+                                                     "D":  "L043060504",
+                                                     "set":  "set3",
+                                                     "decision":  "redo",
+                                                     "feedback":  "整个外观错误"
+                                                 },
+                                                 {
+                                                     "candidate_id":  "L043060505__set1",
+                                                     "D":  "L043060505",
+                                                     "set":  "set1",
+                                                     "decision":  "redo",
+                                                     "feedback":  "整个外观错误"
+                                                 },
+                                                 {
+                                                     "candidate_id":  "L043060505__set2",
+                                                     "D":  "L043060505",
+                                                     "set":  "set2",
+                                                     "decision":  "redo",
+                                                     "feedback":  "整个外观错误"
+                                                 },
+                                                 {
+                                                     "candidate_id":  "L043060505__set3",
+                                                     "D":  "L043060505",
+                                                     "set":  "set3",
+                                                     "decision":  "redo",
+                                                     "feedback":  "整个外观错误"
+                                                 },
+                                                 {
+                                                     "candidate_id":  "L043060506__set3",
+                                                     "D":  "L043060506",
+                                                     "set":  "set3",
+                                                     "decision":  "redo",
+                                                     "feedback":  "整个外观错误"
+                                                 },
+                                                 {
+                                                     "candidate_id":  "L043060506__set1",
+                                                     "D":  "L043060506",
+                                                     "set":  "set1",
+                                                     "decision":  "redo",
+                                                     "feedback":  "整个外观错误"
+                                                 },
+                                                 {
+                                                     "candidate_id":  "L043060507__set1",
+                                                     "D":  "L043060507",
+                                                     "set":  "set1",
+                                                     "decision":  "redo",
+                                                     "feedback":  "整个外观错误"
+                                                 },
+                                                 {
+                                                     "candidate_id":  "L043060507__set3",
+                                                     "D":  "L043060507",
+                                                     "set":  "set3",
+                                                     "decision":  "redo",
+                                                     "feedback":  "整个外观错误"
+                                                 },
+                                                 {
+                                                     "candidate_id":  "L043060508__set3",
+                                                     "D":  "L043060508",
+                                                     "set":  "set3",
+                                                     "decision":  "redo",
+                                                     "feedback":  "整个外观错误"
+                                                 }
+                                             ]
+                           },
+                           {
+                               "prefix":  "L047",
+                               "count":  6,
+                               "D_count":  4,
+                               "feedbacks":  [
+                                                 {
+                                                     "candidate_id":  "L047060501__set1",
+                                                     "D":  "L047060501",
+                                                     "set":  "set1",
+                                                     "decision":  "redo",
+                                                     "feedback":  "老问题，底部是世界插进去，没有底座的"
+                                                 },
+                                                 {
+                                                     "candidate_id":  "L047060505__set1",
+                                                     "D":  "L047060505",
+                                                     "set":  "set1",
+                                                     "decision":  "redo",
+                                                     "feedback":  "老问题，底部是世界插进去，没有底座的"
+                                                 },
+                                                 {
+                                                     "candidate_id":  "L047060505__set3",
+                                                     "D":  "L047060505",
+                                                     "set":  "set3",
+                                                     "decision":  "redo",
+                                                     "feedback":  "外观错误了"
+                                                 },
+                                                 {
+                                                     "candidate_id":  "L047060506__set2",
+                                                     "D":  "L047060506",
+                                                     "set":  "set2",
+                                                     "decision":  "redo",
+                                                     "feedback":  "外观错误了"
+                                                 },
+                                                 {
+                                                     "candidate_id":  "L047060507__set3",
+                                                     "D":  "L047060507",
+                                                     "set":  "set3",
+                                                     "decision":  "redo",
+                                                     "feedback":  "老问题，底部是世界插进去，没有底座的"
+                                                 },
+                                                 {
+                                                     "candidate_id":  "L047060507__set1",
+                                                     "D":  "L047060507",
+                                                     "set":  "set1",
+                                                     "decision":  "redo",
+                                                     "feedback":  "外观错误了"
+                                                 }
+                                             ]
+                           },
+                           {
+                               "prefix":  "L058",
+                               "count":  1,
+                               "D_count":  1,
+                               "feedbacks":  [
+                                                 {
+                                                     "candidate_id":  "L058060505__set2",
+                                                     "D":  "L058060505",
+                                                     "set":  "set2",
+                                                     "decision":  "redo",
+                                                     "feedback":  "做多了一个桶，还错了，多了两个拖把"
+                                                 }
+                                             ]
+                           },
+                           {
+                               "prefix":  "L068",
+                               "count":  3,
+                               "D_count":  3,
+                               "feedbacks":  [
+                                                 {
+                                                     "candidate_id":  "L068060502__set2",
+                                                     "D":  "L068060502",
+                                                     "set":  "set2",
+                                                     "decision":  "redo",
+                                                     "feedback":  "这个外观错"
+                                                 },
+                                                 {
+                                                     "candidate_id":  "L068060501__set3",
+                                                     "D":  "L068060501",
+                                                     "set":  "set3",
+                                                     "decision":  "redo",
+                                                     "feedback":  "这个外观错"
+                                                 },
+                                                 {
+                                                     "candidate_id":  "L068060503__set1",
+                                                     "D":  "L068060503",
+                                                     "set":  "set1",
+                                                     "decision":  "redo",
+                                                     "feedback":  "这个外观错"
+                                                 }
+                                             ]
+                           },
+                           {
+                               "prefix":  "L078",
+                               "count":  4,
+                               "D_count":  3,
+                               "feedbacks":  [
+                                                 {
+                                                     "candidate_id":  "L078060502__set1",
+                                                     "D":  "L078060502",
+                                                     "set":  "set1",
+                                                     "decision":  "redo",
+                                                     "feedback":  "盖子上面没有黑色把手"
+                                                 },
+                                                 {
+                                                     "candidate_id":  "L078060502__set2",
+                                                     "D":  "L078060502",
+                                                     "set":  "set2",
+                                                     "decision":  "redo",
+                                                     "feedback":  "盖子上面没有黑色把手"
+                                                 },
+                                                 {
+                                                     "candidate_id":  "L078060504__set2",
+                                                     "D":  "L078060504",
+                                                     "set":  "set2",
+                                                     "decision":  "redo",
+                                                     "feedback":  "把手错误"
+                                                 },
+                                                 {
+                                                     "candidate_id":  "L078060505__set2",
+                                                     "D":  "L078060505",
+                                                     "set":  "set2",
+                                                     "decision":  "redo",
+                                                     "feedback":  "盖子上面没有黑色把手"
+                                                 }
+                                             ]
+                           },
+                           {
+                               "prefix":  "L081",
+                               "count":  2,
+                               "D_count":  1,
+                               "feedbacks":  [
+                                                 {
+                                                     "candidate_id":  "L081060505__set2",
+                                                     "D":  "L081060505",
+                                                     "set":  "set2",
+                                                     "decision":  "redo",
+                                                     "feedback":  "产品外观错误"
+                                                 },
+                                                 {
+                                                     "candidate_id":  "L081060505__set3",
+                                                     "D":  "L081060505",
+                                                     "set":  "set3",
+                                                     "decision":  "redo",
+                                                     "feedback":  "产品外观错误"
+                                                 }
+                                             ]
+                           },
+                           {
+                               "prefix":  "L082",
+                               "count":  6,
+                               "D_count":  5,
+                               "feedbacks":  [
+                                                 {
+                                                     "candidate_id":  "L082060501__set3",
+                                                     "D":  "L082060501",
+                                                     "set":  "set3",
+                                                     "decision":  "redo",
+                                                     "feedback":  "产品侧面没有轨道"
+                                                 },
+                                                 {
+                                                     "candidate_id":  "L082060502__set2",
+                                                     "D":  "L082060502",
+                                                     "set":  "set2",
+                                                     "decision":  "redo",
+                                                     "feedback":  "产品的结构逻辑错误"
+                                                 },
+                                                 {
+                                                     "candidate_id":  "L082060506__set2",
+                                                     "D":  "L082060506",
+                                                     "set":  "set2",
+                                                     "decision":  "redo",
+                                                     "feedback":  "底部滑轨错误"
+                                                 },
+                                                 {
+                                                     "candidate_id":  "L082060507__set3",
+                                                     "D":  "L082060507",
+                                                     "set":  "set3",
+                                                     "decision":  "redo",
+                                                     "feedback":  "产品逻辑错误"
+                                                 },
+                                                 {
+                                                     "candidate_id":  "L082060507__set1",
+                                                     "D":  "L082060507",
+                                                     "set":  "set1",
+                                                     "decision":  "redo",
+                                                     "feedback":  "侧面没有滑轨"
+                                                 },
+                                                 {
+                                                     "candidate_id":  "L082060508__set1",
+                                                     "D":  "L082060508",
+                                                     "set":  "set1",
+                                                     "decision":  "redo",
+                                                     "feedback":  "左右伸缩的特征细节错误。"
+                                                 }
+                                             ]
+                           },
+                           {
+                               "prefix":  "L083",
+                               "count":  7,
+                               "D_count":  5,
+                               "feedbacks":  [
+                                                 {
+                                                     "candidate_id":  "L083060503__set1",
+                                                     "D":  "L083060503",
+                                                     "set":  "set1",
+                                                     "decision":  "redo",
+                                                     "feedback":  "产品比例错误"
+                                                 },
+                                                 {
+                                                     "candidate_id":  "L083060504__set2",
+                                                     "D":  "L083060504",
+                                                     "set":  "set2",
+                                                     "decision":  "redo",
+                                                     "feedback":  "细节错了，侧面的直杆多了一个细节出来"
+                                                 },
+                                                 {
+                                                     "candidate_id":  "L083060504__set3",
+                                                     "D":  "L083060504",
+                                                     "set":  "set3",
+                                                     "decision":  "redo",
+                                                     "feedback":  "外观错误"
+                                                 },
+                                                 {
+                                                     "candidate_id":  "L083060505__set3",
+                                                     "D":  "L083060505",
+                                                     "set":  "set3",
+                                                     "decision":  "redo",
+                                                     "feedback":  "表面的铁片错误"
+                                                 },
+                                                 {
+                                                     "candidate_id":  "L083060506__set1",
+                                                     "D":  "L083060506",
+                                                     "set":  "set1",
+                                                     "decision":  "redo",
+                                                     "feedback":  "外观错误"
+                                                 },
+                                                 {
+                                                     "candidate_id":  "L083060507__set1",
+                                                     "D":  "L083060507",
+                                                     "set":  "set1",
+                                                     "decision":  "redo",
+                                                     "feedback":  "外观错误"
+                                                 },
+                                                 {
+                                                     "candidate_id":  "L083060507__set3",
+                                                     "D":  "L083060507",
+                                                     "set":  "set3",
+                                                     "decision":  "redo",
+                                                     "feedback":  "外观错误"
+                                                 }
+                                             ]
+                           },
+                           {
+                               "prefix":  "L086",
+                               "count":  7,
+                               "D_count":  7,
+                               "feedbacks":  [
+                                                 {
+                                                     "candidate_id":  "L086060501__set1",
+                                                     "D":  "L086060501",
+                                                     "set":  "set1",
+                                                     "decision":  "redo",
+                                                     "feedback":  "没有白色，所有的L086,没有白色的素材"
+                                                 },
+                                                 {
+                                                     "candidate_id":  "L086060503__set3",
+                                                     "D":  "L086060503",
+                                                     "set":  "set3",
+                                                     "decision":  "redo",
+                                                     "feedback":  "没有白色，所有的L086,没有白色的素材"
+                                                 },
+                                                 {
+                                                     "candidate_id":  "L086060504__set2",
+                                                     "D":  "L086060504",
+                                                     "set":  "set2",
+                                                     "decision":  "redo",
+                                                     "feedback":  "没有白色，所有的L086,没有白色的素材"
+                                                 },
+                                                 {
+                                                     "candidate_id":  "L086060505__set1",
+                                                     "D":  "L086060505",
+                                                     "set":  "set1",
+                                                     "decision":  "redo",
+                                                     "feedback":  "没有白色，所有的L086,没有白色的素材"
+                                                 },
+                                                 {
+                                                     "candidate_id":  "L086060507__set3",
+                                                     "D":  "L086060507",
+                                                     "set":  "set3",
+                                                     "decision":  "redo",
+                                                     "feedback":  "没有白色，所有的L086,没有白色的素材"
+                                                 },
+                                                 {
+                                                     "candidate_id":  "L086060508__set2",
+                                                     "D":  "L086060508",
+                                                     "set":  "set2",
+                                                     "decision":  "redo",
+                                                     "feedback":  "没有白色，所有的L086,没有白色的素材"
+                                                 },
+                                                 {
+                                                     "candidate_id":  "L086060509__set1",
+                                                     "D":  "L086060509",
+                                                     "set":  "set1",
+                                                     "decision":  "redo",
+                                                     "feedback":  ""
+                                                 }
+                                             ]
+                           },
+                           {
+                               "prefix":  "L089",
+                               "count":  1,
+                               "D_count":  1,
+                               "feedbacks":  [
+                                                 {
+                                                     "candidate_id":  "L089060501__set2",
+                                                     "D":  "L089060501",
+                                                     "set":  "set2",
+                                                     "decision":  "redo",
+                                                     "feedback":  "外观错误"
+                                                 }
+                                             ]
+                           },
+                           {
+                               "prefix":  "L091",
+                               "count":  4,
+                               "D_count":  4,
+                               "feedbacks":  [
+                                                 {
+                                                     "candidate_id":  "L091060501__set1",
+                                                     "D":  "L091060501",
+                                                     "set":  "set1",
+                                                     "decision":  "redo",
+                                                     "feedback":  "顶部的结构错误"
+                                                 },
+                                                 {
+                                                     "candidate_id":  "L091060502__set1",
+                                                     "D":  "L091060502",
+                                                     "set":  "set1",
+                                                     "decision":  "redo",
+                                                     "feedback":  "顶部的结构错误"
+                                                 },
+                                                 {
+                                                     "candidate_id":  "L091060505__set1",
+                                                     "D":  "L091060505",
+                                                     "set":  "set1",
+                                                     "decision":  "redo",
+                                                     "feedback":  "顶部的结构错误"
+                                                 },
+                                                 {
+                                                     "candidate_id":  "L091060506__set2",
+                                                     "D":  "L091060506",
+                                                     "set":  "set2",
+                                                     "decision":  "redo",
+                                                     "feedback":  "顶部的结构错误"
+                                                 }
+                                             ]
+                           },
+                           {
+                               "prefix":  "L095",
+                               "count":  1,
+                               "D_count":  1,
+                               "feedbacks":  [
+                                                 {
+                                                     "candidate_id":  "L095060502__set3",
+                                                     "D":  "L095060502",
+                                                     "set":  "set3",
+                                                     "decision":  "redo",
+                                                     "feedback":  ""
+                                                 }
+                                             ]
+                           }
+                       ]
+}

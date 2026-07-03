@@ -120,6 +120,10 @@ Prefer local review outputs first. Upload/write back only after user approval.
 - Deleted/rejected/不要/死刑/wrong-color images must not return through existing workbook values, approved registries, or source folders.
 - Review feedback export must read live DOM/input/textarea values so Chinese comments are preserved even when localStorage or POST saving fails.
 - L042 J special rule: use first-level `黑色` and `绿色` source folders only, match by row `G` + `SKU货号`, reject visually mixed source files, and compose true five-cell grid previews from whole SKU size-chart images unless the user explicitly asks for cutouts.
+- L082 hard T rule: preserve the left-right expandable product function. The product side must not contain hallucinated slide rails, extra tracks, drawer rails, or bottom/side rail hardware; any such candidate is a redo/reject and cannot enter T/U.
+- L083 hard T rule: appearance drift is common. Preserve overall proportion, side straight rods, surface metal plate/sheet details, supports, connectors, frame geometry, and visible hardware; prefer fixed-PNG compositing or strict product-reference generation for redo.
+- L086 hard material rule: this product group has no white variant. Remove and lock out all white product sources, white product material records, and generated white-product outputs from T/J/candidate/writeback workflows. Later approved registries or workbook values cannot resurrect white L086 images.
+- L091 hard T rule: top structure/groove/grid pattern is the failure point. Avoid angle changes, keep strict front-facing or slight perspective, freeze the exact top structure and upper edge, and reject any output that adds/removes/changes top parts.
 - Do not let a previous round’s approved registry skip a D that appears in the current redo list.
 - Never write into the only source workbook. Always copy first.
 - Never expose access keys or credentials in chat or reports.

@@ -150,3 +150,27 @@ L051060505 C 列 `产品描述` 已按用户反馈只删除第 1 张图 `https:/
 - 点击 `导出筛选JSON` 后，导出框可生成包含 decision 与中文 feedback 的 JSON。
 
 注意：本次按钮冒烟测试在浏览器本地状态中点过 `L042060501__set1/set2/set3`。其中 `set2` 保留了页面已有中文反馈 `钉子螺纹错了，卷起来的突出的部分多余了。`；`set1/set3` 为空反馈测试项。后续正式复核以用户最终导出的 JSON 为准，不把本地冒烟测试当作最终筛选结论。
+
+## 2026-07-03 197x3 用户复核反馈锁
+
+用户导出 `0616_2_image2_197x3_t_candidates_review` 的正式复核 JSON 后，已落地为 feedback lock。该锁是后续候选替换、Seedream fallback、表格写回前的硬门槛；锁内 `redo` 图不得进入 T/U。
+
+- 原始导出：`D:\Desktop\jit\DXXmall\outputs\store_newskill_image2_197x3_t_candidates_20260702\feedback_raw_export_197x3_review_20260703.json`
+- 机器锁：`D:\Desktop\jit\DXXmall\outputs\store_newskill_image2_197x3_t_candidates_20260702\feedback_lock_197x3_review_20260703.json`
+- 人读摘要：`D:\Desktop\jit\DXXmall\outputs\store_newskill_image2_197x3_t_candidates_20260702\feedback_lock_197x3_review_20260703.md`
+- 统计：`61` 条反馈，全部 `redo`，涉及 `47` 个唯一 D、`13` 个 L0xx 前缀。
+
+本次新增/再次强调的硬规则已同步到 workflow 与 skill：
+
+- L086：再次强调，去掉并锁定所有白色产品素材记录；L086 没有白色变体，后续 T/J/候选池/写回不得使用白色产品素材或白色产品输出。
+- L091：顶部结构/凹槽/方格极易出错；不要变角度，保持正面或极小角度，冻结顶部结构，不得臆想新增顶部部件。
+- L083：外观出错率高；冻结整体比例、侧面直杆、表面铁片、支架/连接件，优先固定 PNG 合成或严格产品参考。
+- L082：左右伸缩的产品功能特征必须保持；产品侧面不允许出现滑轨或额外轨道，底部/侧面滑轨臆想一律失败。
+
+已同步文件：
+
+- 仓库 workflow：`workflows/t-first-image-workflow.md`
+- 仓库 skill：`skills/product-lifestyle-scene/SKILL.md`
+- 仓库 skill：`skills/temu-xuanxshop-image-workbook/SKILL.md`
+- 本机实际加载 skill：`C:\Users\Administrator\.codex\skills\product-lifestyle-scene\SKILL.md`
+- 本机实际加载 skill：`C:\Users\Administrator\.codex\skills\temu-xuanxshop-image-workbook\SKILL.md`
