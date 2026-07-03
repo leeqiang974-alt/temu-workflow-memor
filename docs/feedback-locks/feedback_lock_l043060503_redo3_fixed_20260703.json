@@ -1,0 +1,16 @@
+{
+  "review": "0616_2_image2_seedream_redo2_3_review",
+  "locked_at": "2026-07-03T12:43:54",
+  "feedback": {
+    "L043060503__set3__redo1__redo2_image2": {
+      "decision": "redo",
+      "feedback": "还是错",
+      "ts": "2026-07-03T04:39:51.927Z"
+    }
+  },
+  "locked_bad_source_ids": [
+    "L043_NEW_0008",
+    "L043_NEW_0025"
+  ],
+  "next_action": "fixed PNG composite candidates, no AI redraw"
+}

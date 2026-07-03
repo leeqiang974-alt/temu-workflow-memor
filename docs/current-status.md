@@ -278,3 +278,41 @@ C 盘空间处理：为恢复仓库记忆写入能力，已将 C 盘 outputs 中
 - `L091060506__set2__redo1__redo2_image2`，source `L091_T_0030`
 
 这 3 张仍需用户复核通过后才可用于后续替换/写回；当前未改 T/U/J/标题。
+
+## 2026-07-03 L043060503 redo3 固定 PNG 合成
+
+用户继续在 `0616_2_image2_seedream_redo2_3_review` 反馈：
+
+- `L043060503__set3__redo1__redo2_image2`：`redo`，备注 `还是错`
+
+该 D 已经历 image2、Seedream、再次 image2 后仍错，判断为 L043 高结构产品的 AI 重画漂移风险。按最新规则改为固定 PNG 合成，不再让模型重画产品：
+
+- 锁定失败源：`L043_NEW_0008`、`L043_NEW_0025`
+- 新候选 A：`L043060503__set3__redo1__redo3_fixed_a`，source `L043_NEW_0038`
+- 新候选 B：`L043060503__set3__redo1__redo3_fixed_b`，source `L043_NEW_0043`
+- 方法：Pillow deterministic composite，保留源 PNG 产品像素，只做背景/阴影合成
+- 本轮不调用 image2/Seedream，不上传最终商品图，不写回 Excel
+
+执行前已完成 Claude Code + NVIDIA 审查，结论 `PASS`：
+
+- `D:\Desktop\jit\DXXmall\outputs\store_newskill_l043060503_fixed_redo3_20260703\claude_nvidia_l043060503_redo3_fixed_plan_review_20260703.md`
+
+输出：
+
+- 脚本：`scripts\compose_l043060503_redo3_fixed.py`
+- 输出目录：`D:\Desktop\jit\DXXmall\outputs\store_newskill_l043060503_fixed_redo3_20260703`
+- 反馈锁：`D:\Desktop\jit\DXXmall\outputs\store_newskill_l043060503_fixed_redo3_20260703\feedback_lock_l043060503_redo3_fixed_20260703.json`
+- 仓库反馈锁：`docs\feedback-locks\feedback_lock_l043060503_redo3_fixed_20260703.json`
+- 仓库计划摘要：`docs\feedback-locks\l043060503_redo3_fixed_plan.md`
+- 结果：`D:\Desktop\jit\DXXmall\outputs\store_newskill_l043060503_fixed_redo3_20260703\l043060503_redo3_fixed_results.json`
+- 8765 复核页：`http://127.0.0.1:8765/outputs/store_newskill_l043060503_fixed_redo3_20260703/l043060503_redo3_fixed_review.html`
+
+生成统计：
+
+- 计划：`2`
+- 成功：`2/2`
+- 失败：`0`
+- 本地图片缺失：`0`
+- AI 成本：`$0`
+
+这 2 张仍需用户复核选择后才可用于替换；当前未改 T/U/J/标题。
