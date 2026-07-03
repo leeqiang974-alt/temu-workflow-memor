@@ -1086,3 +1086,29 @@ L043060503 主池最终 3 套：
 - 196 OSS 修复报告已补写：
   - `claude_nvidia_review_path`
   - `claude_nvidia_gate_ok=true`
+
+## 2026-07-03 196 表 T4 尺寸图显示 URL 编码修复
+
+用户追问“第四张尺寸图不显示”后重新验证发现：此前只证明 T4 位存在尺寸图线索，但没有证明带中文/空格的尺寸图 URL 能直接显示。复扫结果显示旧表按正则截取时有大量 T4 在空格前被截断为无 `.jpg` 的 404 token；直接读取 Excel 原始 T4 行后确认原始 URL 多数包含中文、空格、括号，如 `尺寸图 (8).jpg`，这类链接必须 percent-encode 后才能稳定用于平台/浏览器显示。
+
+已生成新副本：
+
+- `D:\Desktop\jit\DXXmall\outputs\store_newskill_196_writeback_197x3_t_20260703\0616-2_196_最终回传_197x3通过T首图回填_T4保留_T够6_不跨D旧图轮换_全量OSS图片URL修复验证_T4显示URL编码_20260703.xlsx`
+
+报告：
+
+- T4 显示报告：`D:\Desktop\jit\DXXmall\outputs\store_newskill_196_writeback_197x3_t_20260703\0616-2_196_最终回传_197x3通过T首图回填_T4保留_T够6_不跨D旧图轮换_全量OSS图片URL修复验证_T4显示URL编码_20260703.t4_url_encode_report.json`
+- 硬校验报告：`D:\Desktop\jit\DXXmall\outputs\store_newskill_196_writeback_197x3_t_20260703\0616-2_196_最终回传_197x3通过T首图回填_T4保留_T够6_不跨D旧图轮换_全量OSS图片URL修复验证_T4显示URL编码_20260703.hard_validation_20260703.json`
+
+验证结果：
+
+- URL 编码影响 `474` 个单元格、`1123` 个 URL 出现位置。
+- 有效行 `322`，唯一 D `196`。
+- T4 缺失 `0`，T4 非尺寸图 `0`，T4 不可访问 `0`，`all_t4_display_ok=true`。
+- J/T/U 空值 `0`，T>10 `0`，T<6 `0`，U!=T1 `0`，同 D 标题/T 不一致 `0`，`pass_hard_checks=true`。
+
+新增脚本：
+
+- `scripts\encode_workbook_image_urls.py`
+
+后续死规则：最终表不能只校验 T4 “在第 4 位”。必须按 Excel 原始 T 列换行读取第 4 张，若 URL 含中文、空格、括号等 unsafe 字符，先 percent-encode，再验证可访问；否则不能说 T4 显示问题已解决。

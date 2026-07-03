@@ -55,6 +55,7 @@
 - 执行任何表格回填、图片删除、T/J 修复、最终表输出后，必须准备 Claude Code + NVIDIA 复核包并要求复核通过后再声称完成。复核包至少包含：执行命令/脚本摘要、输入表与输出表路径、反馈记录来源、删除/redo 清单、changed-cell diff、残留校验报告、T4/U/T≤10/J 非空校验。没有完成该复核，不得说“完成/已处理好”。复核完成后还必须运行 `scripts\require_claude_nvidia_review.ps1 -ReviewPath <审查文件> -ArtifactPath <最终输出表>`；脚本未通过时，该表只能算过程产物。
 - 复核页反馈导出必须读取页面实时 DOM 中的标记和 textarea 中文；不得只依赖 localStorage 或 POST 后台接口。若后台保存失败，必须仍能导出完整 JSON。
 - T 和 J URL 可访问。
+- 含中文、空格、括号的 OSS 图片 URL 必须在最终表中做 URL percent-encode；特别是 T4 尺寸图常见 `尺寸图 (8).jpg`，不能只靠 Excel 原始字符串。最终交付前必须按 T 列原始换行行读取第 4 张，并验证编码后的 URL 可访问。
 - 店小秘/外链旧图按规则替换或保留。
 - X/AC 等辅助列按最新店铺规则校验。
 - 最终交付必须输出 changed-cell diff summary，列出每个被改单元格的 row、header、old、new；任何未授权列变化都是错误。

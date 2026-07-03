@@ -111,6 +111,7 @@ Prefer local review outputs first. Upload/write back only after user approval.
    - If Temu/Xuanxshop upload errors mention empty image links, carousel image URL, SKC preview image URL, image upload timeout, 404, or an OSS URL that does not respond, do not repair only the single D or URL named in the error.
    - Run a workbook-wide scan for every `ozonshanghai.oss-cn-shanghai.aliyuncs.com` URL in every cell.
    - Treat OSS URLs with no image extension as suspicious/truncated. Resolve them by OSS metadata and bucket prefix lookup only when the current key prefix uniquely matches one image object (`.jpg`, `.jpeg`, `.png`, `.webp`).
+   - Percent-encode final image URLs that contain Chinese characters, spaces, parentheses, or other unsafe path characters before delivery. Raw Excel strings such as `尺寸图 (8).jpg` may exist in the sheet but fail marketplace/browser display unless encoded.
    - Do not guess between multiple prefix matches. Put ambiguous or missing matches into an unresolved report and stop before delivery.
    - After replacements, rescan the output workbook. Delivery requires zero unresolved suspicious OSS URLs and zero post-scan bad URLs.
    - Old `.xls` or 50-column upload workbooks must be converted/copied to the current 54-column template shape, including tail columns `SKCID`, `SKUID`, `创建时间`, and `更新时间`.
@@ -137,6 +138,7 @@ Prefer local review outputs first. Upload/write back only after user approval.
 - Do not let a previous round’s approved registry skip a D that appears in the current redo list.
 - Never write into the only source workbook. Always copy first.
 - Image URL upload fixes must be workbook-wide. Do not deliver a sheet after only fixing one reported D, one T4 URL, or one known bad OSS prefix; full scan and post-scan report are mandatory.
+- T4 display fixes must validate the raw workbook line, not a whitespace-splitting regex token. A size-image URL with Chinese text or spaces must be percent-encoded and then HEAD/GET checked before delivery.
 - Never expose access keys or credentials in chat or reports.
 - Do not upload or write back unreviewed AI images.
 - If the page is too heavy to browse, rebuild it with lazy loading, pagination, or per-D loading.
