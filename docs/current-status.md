@@ -174,3 +174,27 @@ L051060505 C 列 `产品描述` 已按用户反馈只删除第 1 张图 `https:/
 - 仓库 skill：`skills/temu-xuanxshop-image-workbook/SKILL.md`
 - 本机实际加载 skill：`C:\Users\Administrator\.codex\skills\product-lifestyle-scene\SKILL.md`
 - 本机实际加载 skill：`C:\Users\Administrator\.codex\skills\temu-xuanxshop-image-workbook\SKILL.md`
+
+## 2026-07-03 197x3 image2 redo 61 执行结果
+
+按用户要求“把这次修改的图片提交重做，看下效果”，已基于 `feedback_lock_197x3_review_20260703.json` 执行 APIMart / GPT-Image-2 候选级 redo。该批仅生成本地图和复核页，不上传、不写回 Excel。
+
+- 执行脚本：`C:\Users\Administrator\Documents\temu自动化\scripts\run_image2_197x3_redo_from_feedback.py`
+- 输出目录：`D:\Desktop\jit\DXXmall\outputs\store_newskill_image2_197x3_redo_61_20260703`
+- 8765 复核页：`http://127.0.0.1:8765/outputs/store_newskill_image2_197x3_redo_61_20260703/0616_2_image2_197x3_redo_61_review.html`
+- 计划：`D:\Desktop\jit\DXXmall\outputs\store_newskill_image2_197x3_redo_61_20260703\redo_61_candidate_plan.json`
+- 结果：`D:\Desktop\jit\DXXmall\outputs\store_newskill_image2_197x3_redo_61_20260703\candidate_results_redo_61.json`
+- Claude/NVIDIA 审查：`D:\Desktop\jit\DXXmall\outputs\store_newskill_image2_197x3_redo_61_20260703\claude_nvidia_redo_61_plan_review_20260703.md`
+
+执行前审查结论：`PASS`。审查确认：GitHub/本地记忆已读、只跑 image2/APIMart、无上传/无写回、L086 白色素材已阻断、用户反馈进入 prompt、输出目录隔离。
+
+生成统计：
+
+- redo 计划：`61` 张。
+- 首轮成功：`57` 张，APIMart 无图 error：`4` 张。
+- 补跑后成功：`61/61`，未解决 error：`0`。
+- 结果记录总数：`65`（包含首轮 4 条 error 记录和后续 4 条成功补跑记录）。
+- 估算成本：`$0.366`。
+- L086：`7/7` 已生成，source 只使用非白 kept_cutout `L086_NEW_0002` / `L086_NEW_0003`；疑似白色 `L086_NEW_0004` 未使用。
+
+复核页说明：左列是原失败候选图，中列是本次新 source PNG，右列是本次 image2 redo 图。该页仍需用户筛选，筛选通过前不得写回 T/U。
