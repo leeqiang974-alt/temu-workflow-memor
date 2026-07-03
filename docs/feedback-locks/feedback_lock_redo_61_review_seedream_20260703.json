@@ -1,0 +1,506 @@
+{
+  "review": "0616_2_image2_197x3_redo_61_review",
+  "exported_at": "2026-07-03T04:06:11.665Z",
+  "locked_at": "2026-07-03T12:09:53+08:00",
+  "rule": "Only explicit redo with user feedback goes to Seedream; explicit keep and unclicked candidates are keep.",
+  "source_feedback_file": "D:\\Desktop\\jit\\DXXmall\\outputs\\store_newskill_seedream_from_197x3_redo_feedback_20260703\\redo_61_review_feedback_raw_20260703.json",
+  "redo_source_plan": "D:\\Desktop\\jit\\DXXmall\\outputs\\store_newskill_image2_197x3_redo_61_20260703\\redo_61_candidate_plan.json",
+  "image2_redo_results": "D:\\Desktop\\jit\\DXXmall\\outputs\\store_newskill_image2_197x3_redo_61_20260703\\candidate_results_redo_61.json",
+  "counts": {
+    "total": 61,
+    "explicit_feedback": 24,
+    "redo": 16,
+    "keep": 45,
+    "default_keep": 37
+  },
+  "feedback": {
+    "L047060507__set1__redo1": {
+      "decision": "keep",
+      "feedback": "",
+      "ts": "2026-07-03T04:06:11.665Z",
+      "source": "default_unclicked_keep",
+      "original_d": "L047060507",
+      "prefix": "L047"
+    },
+    "L083060505__set3__redo1": {
+      "decision": "keep",
+      "feedback": "",
+      "ts": "2026-07-03T04:06:11.665Z",
+      "source": "default_unclicked_keep",
+      "original_d": "L083060505",
+      "prefix": "L083"
+    },
+    "L086060505__set1__redo1": {
+      "decision": "keep",
+      "feedback": "",
+      "ts": "2026-07-03T04:06:11.665Z",
+      "source": "default_unclicked_keep",
+      "original_d": "L086060505",
+      "prefix": "L086"
+    },
+    "L042060502__set3__redo1": {
+      "decision": "keep",
+      "feedback": "",
+      "ts": "2026-07-03T04:01:23.879Z",
+      "source": "explicit",
+      "original_d": "L042060502",
+      "prefix": "L042"
+    },
+    "L083060507__set3__redo1": {
+      "decision": "keep",
+      "feedback": "",
+      "ts": "2026-07-03T04:06:11.665Z",
+      "source": "default_unclicked_keep",
+      "original_d": "L083060507",
+      "prefix": "L083"
+    },
+    "L086060509__set1__redo1": {
+      "decision": "keep",
+      "feedback": "",
+      "ts": "2026-07-03T04:06:11.665Z",
+      "source": "default_unclicked_keep",
+      "original_d": "L086060509",
+      "prefix": "L086"
+    },
+    "L043060503__set1__redo1": {
+      "decision": "redo",
+      "feedback": "还是错，提交seedream",
+      "ts": "2026-07-03T04:02:29.779Z",
+      "source": "explicit",
+      "original_d": "L043060503",
+      "prefix": "L043"
+    },
+    "L042060501__set2__redo1": {
+      "decision": "redo",
+      "feedback": "还是错，提交seedream",
+      "ts": "2026-07-03T04:01:14.903Z",
+      "source": "explicit",
+      "original_d": "L042060501",
+      "prefix": "L042"
+    },
+    "L078060502__set2__redo1": {
+      "decision": "keep",
+      "feedback": "",
+      "ts": "2026-07-03T04:06:11.665Z",
+      "source": "default_unclicked_keep",
+      "original_d": "L078060502",
+      "prefix": "L078"
+    },
+    "L068060503__set1__redo1": {
+      "decision": "keep",
+      "feedback": "",
+      "ts": "2026-07-03T04:06:11.665Z",
+      "source": "default_unclicked_keep",
+      "original_d": "L068060503",
+      "prefix": "L068"
+    },
+    "L086060508__set2__redo1": {
+      "decision": "keep",
+      "feedback": "",
+      "ts": "2026-07-03T04:06:11.665Z",
+      "source": "default_unclicked_keep",
+      "original_d": "L086060508",
+      "prefix": "L086"
+    },
+    "L083060503__set1__redo1": {
+      "decision": "keep",
+      "feedback": "",
+      "ts": "2026-07-03T04:06:11.665Z",
+      "source": "default_unclicked_keep",
+      "original_d": "L083060503",
+      "prefix": "L083"
+    },
+    "L047060501__set1__redo1": {
+      "decision": "keep",
+      "feedback": "",
+      "ts": "2026-07-03T04:06:11.665Z",
+      "source": "default_unclicked_keep",
+      "original_d": "L047060501",
+      "prefix": "L047"
+    },
+    "L082060508__set1__redo1": {
+      "decision": "keep",
+      "feedback": "",
+      "ts": "2026-07-03T04:06:11.665Z",
+      "source": "default_unclicked_keep",
+      "original_d": "L082060508",
+      "prefix": "L082"
+    },
+    "L043060503__set3__redo1": {
+      "decision": "redo",
+      "feedback": "还是错，提交seedream",
+      "ts": "2026-07-03T04:02:26.231Z",
+      "source": "explicit",
+      "original_d": "L043060503",
+      "prefix": "L043"
+    },
+    "L082060502__set2__redo1": {
+      "decision": "keep",
+      "feedback": "",
+      "ts": "2026-07-03T04:06:11.665Z",
+      "source": "default_unclicked_keep",
+      "original_d": "L082060502",
+      "prefix": "L082"
+    },
+    "L089060501__set2__redo1": {
+      "decision": "keep",
+      "feedback": "",
+      "ts": "2026-07-03T04:06:11.665Z",
+      "source": "default_unclicked_keep",
+      "original_d": "L089060501",
+      "prefix": "L089"
+    },
+    "L086060507__set3__redo1": {
+      "decision": "keep",
+      "feedback": "",
+      "ts": "2026-07-03T04:06:11.665Z",
+      "source": "default_unclicked_keep",
+      "original_d": "L086060507",
+      "prefix": "L086"
+    },
+    "L082060507__set3__redo1": {
+      "decision": "keep",
+      "feedback": "",
+      "ts": "2026-07-03T04:06:11.665Z",
+      "source": "default_unclicked_keep",
+      "original_d": "L082060507",
+      "prefix": "L082"
+    },
+    "L043060505__set3__redo1": {
+      "decision": "keep",
+      "feedback": "",
+      "ts": "2026-07-03T04:03:06.592Z",
+      "source": "explicit",
+      "original_d": "L043060505",
+      "prefix": "L043"
+    },
+    "L058060505__set2__redo1": {
+      "decision": "keep",
+      "feedback": "",
+      "ts": "2026-07-03T04:03:57.807Z",
+      "source": "explicit",
+      "original_d": "L058060505",
+      "prefix": "L058"
+    },
+    "L043060501__set2__redo1": {
+      "decision": "redo",
+      "feedback": "中间有个小孔洞丢失，提交seedream",
+      "ts": "2026-07-03T04:01:52.295Z",
+      "source": "explicit",
+      "original_d": "L043060501",
+      "prefix": "L043"
+    },
+    "L086060503__set3__redo1": {
+      "decision": "keep",
+      "feedback": "",
+      "ts": "2026-07-03T04:06:11.665Z",
+      "source": "default_unclicked_keep",
+      "original_d": "L086060503",
+      "prefix": "L086"
+    },
+    "L047060505__set1__redo1": {
+      "decision": "keep",
+      "feedback": "",
+      "ts": "2026-07-03T04:06:11.665Z",
+      "source": "default_unclicked_keep",
+      "original_d": "L047060505",
+      "prefix": "L047"
+    },
+    "L091060506__set2__redo1": {
+      "decision": "redo",
+      "feedback": "还是错，提交seedream",
+      "ts": "2026-07-03T04:06:01.952Z",
+      "source": "explicit",
+      "original_d": "L091060506",
+      "prefix": "L091"
+    },
+    "L043060502__set2__redo1": {
+      "decision": "redo",
+      "feedback": "还是错，提交seedream",
+      "ts": "2026-07-03T04:02:17.064Z",
+      "source": "explicit",
+      "original_d": "L043060502",
+      "prefix": "L043"
+    },
+    "L043060505__set2__redo1": {
+      "decision": "keep",
+      "feedback": "",
+      "ts": "2026-07-03T04:03:00.704Z",
+      "source": "explicit",
+      "original_d": "L043060505",
+      "prefix": "L043"
+    },
+    "L047060507__set3__redo1": {
+      "decision": "keep",
+      "feedback": "",
+      "ts": "2026-07-03T04:06:11.665Z",
+      "source": "default_unclicked_keep",
+      "original_d": "L047060507",
+      "prefix": "L047"
+    },
+    "L068060501__set3__redo1": {
+      "decision": "keep",
+      "feedback": "",
+      "ts": "2026-07-03T04:06:11.665Z",
+      "source": "default_unclicked_keep",
+      "original_d": "L068060501",
+      "prefix": "L068"
+    },
+    "L082060507__set1__redo1": {
+      "decision": "keep",
+      "feedback": "",
+      "ts": "2026-07-03T04:06:11.665Z",
+      "source": "default_unclicked_keep",
+      "original_d": "L082060507",
+      "prefix": "L082"
+    },
+    "L081060505__set3__redo1": {
+      "decision": "keep",
+      "feedback": "",
+      "ts": "2026-07-03T04:06:11.665Z",
+      "source": "default_unclicked_keep",
+      "original_d": "L081060505",
+      "prefix": "L081"
+    },
+    "L047060506__set2__redo1": {
+      "decision": "keep",
+      "feedback": "",
+      "ts": "2026-07-03T04:06:11.665Z",
+      "source": "default_unclicked_keep",
+      "original_d": "L047060506",
+      "prefix": "L047"
+    },
+    "L083060504__set2__redo1": {
+      "decision": "keep",
+      "feedback": "",
+      "ts": "2026-07-03T04:06:11.665Z",
+      "source": "default_unclicked_keep",
+      "original_d": "L083060504",
+      "prefix": "L083"
+    },
+    "L043060506__set3__redo1": {
+      "decision": "redo",
+      "feedback": "还是错，提交seedream",
+      "ts": "2026-07-03T04:03:11.650Z",
+      "source": "explicit",
+      "original_d": "L043060506",
+      "prefix": "L043"
+    },
+    "L047060505__set3__redo1": {
+      "decision": "keep",
+      "feedback": "",
+      "ts": "2026-07-03T04:06:11.665Z",
+      "source": "default_unclicked_keep",
+      "original_d": "L047060505",
+      "prefix": "L047"
+    },
+    "L043060504__set1__redo1": {
+      "decision": "keep",
+      "feedback": "",
+      "ts": "2026-07-03T04:02:37.264Z",
+      "source": "explicit",
+      "original_d": "L043060504",
+      "prefix": "L043"
+    },
+    "L042060505__set3__redo1": {
+      "decision": "redo",
+      "feedback": "还是错，提交seedream",
+      "ts": "2026-07-03T04:01:33.929Z",
+      "source": "explicit",
+      "original_d": "L042060505",
+      "prefix": "L042"
+    },
+    "L078060502__set1__redo1": {
+      "decision": "keep",
+      "feedback": "",
+      "ts": "2026-07-03T04:06:11.665Z",
+      "source": "default_unclicked_keep",
+      "original_d": "L078060502",
+      "prefix": "L078"
+    },
+    "L083060507__set1__redo1": {
+      "decision": "keep",
+      "feedback": "",
+      "ts": "2026-07-03T04:06:11.665Z",
+      "source": "default_unclicked_keep",
+      "original_d": "L083060507",
+      "prefix": "L083"
+    },
+    "L042060506__set3__redo1": {
+      "decision": "redo",
+      "feedback": "还是错，提交seedream",
+      "ts": "2026-07-03T04:01:45.257Z",
+      "source": "explicit",
+      "original_d": "L042060506",
+      "prefix": "L042"
+    },
+    "L086060501__set1__redo1": {
+      "decision": "keep",
+      "feedback": "",
+      "ts": "2026-07-03T04:06:11.665Z",
+      "source": "default_unclicked_keep",
+      "original_d": "L086060501",
+      "prefix": "L086"
+    },
+    "L083060506__set1__redo1": {
+      "decision": "keep",
+      "feedback": "",
+      "ts": "2026-07-03T04:06:11.665Z",
+      "source": "default_unclicked_keep",
+      "original_d": "L083060506",
+      "prefix": "L083"
+    },
+    "L095060502__set3__redo1": {
+      "decision": "keep",
+      "feedback": "",
+      "ts": "2026-07-03T04:06:11.665Z",
+      "source": "default_unclicked_keep",
+      "original_d": "L095060502",
+      "prefix": "L095"
+    },
+    "L068060502__set2__redo1": {
+      "decision": "keep",
+      "feedback": "",
+      "ts": "2026-07-03T04:06:11.665Z",
+      "source": "default_unclicked_keep",
+      "original_d": "L068060502",
+      "prefix": "L068"
+    },
+    "L043060507__set1__redo1": {
+      "decision": "redo",
+      "feedback": "还是错，提交seedream",
+      "ts": "2026-07-03T04:03:22.864Z",
+      "source": "explicit",
+      "original_d": "L043060507",
+      "prefix": "L043"
+    },
+    "L043060508__set3__redo1": {
+      "decision": "redo",
+      "feedback": "还是错，提交seedream",
+      "ts": "2026-07-03T04:03:32.439Z",
+      "source": "explicit",
+      "original_d": "L043060508",
+      "prefix": "L043"
+    },
+    "L083060504__set3__redo1": {
+      "decision": "keep",
+      "feedback": "",
+      "ts": "2026-07-03T04:06:11.665Z",
+      "source": "default_unclicked_keep",
+      "original_d": "L083060504",
+      "prefix": "L083"
+    },
+    "L043060506__set1__redo1": {
+      "decision": "keep",
+      "feedback": "",
+      "ts": "2026-07-03T04:03:18.967Z",
+      "source": "explicit",
+      "original_d": "L043060506",
+      "prefix": "L043"
+    },
+    "L043060502__set3__redo1": {
+      "decision": "keep",
+      "feedback": "",
+      "ts": "2026-07-03T04:02:22.815Z",
+      "source": "explicit",
+      "original_d": "L043060502",
+      "prefix": "L043"
+    },
+    "L078060504__set2__redo1": {
+      "decision": "keep",
+      "feedback": "",
+      "ts": "2026-07-03T04:06:11.665Z",
+      "source": "default_unclicked_keep",
+      "original_d": "L078060504",
+      "prefix": "L078"
+    },
+    "L043060504__set3__redo1": {
+      "decision": "redo",
+      "feedback": "还是错，提交seedream",
+      "ts": "2026-07-03T04:02:42.831Z",
+      "source": "explicit",
+      "original_d": "L043060504",
+      "prefix": "L043"
+    },
+    "L091060502__set1__redo1": {
+      "decision": "redo",
+      "feedback": "还是错，提交seedream",
+      "ts": "2026-07-03T04:05:56.120Z",
+      "source": "explicit",
+      "original_d": "L091060502",
+      "prefix": "L091"
+    },
+    "L081060505__set2__redo1": {
+      "decision": "keep",
+      "feedback": "",
+      "ts": "2026-07-03T04:06:11.665Z",
+      "source": "default_unclicked_keep",
+      "original_d": "L081060505",
+      "prefix": "L081"
+    },
+    "L043060507__set3__redo1": {
+      "decision": "redo",
+      "feedback": "还是错，提交seedream",
+      "ts": "2026-07-03T04:03:27.871Z",
+      "source": "explicit",
+      "original_d": "L043060507",
+      "prefix": "L043"
+    },
+    "L082060506__set2__redo1": {
+      "decision": "keep",
+      "feedback": "",
+      "ts": "2026-07-03T04:06:11.665Z",
+      "source": "default_unclicked_keep",
+      "original_d": "L082060506",
+      "prefix": "L082"
+    },
+    "L091060505__set1__redo1": {
+      "decision": "redo",
+      "feedback": "还是错，提交seedream",
+      "ts": "2026-07-03T04:05:59.047Z",
+      "source": "explicit",
+      "original_d": "L091060505",
+      "prefix": "L091"
+    },
+    "L078060505__set2__redo1": {
+      "decision": "keep",
+      "feedback": "",
+      "ts": "2026-07-03T04:06:11.665Z",
+      "source": "default_unclicked_keep",
+      "original_d": "L078060505",
+      "prefix": "L078"
+    },
+    "L043060505__set1__redo1": {
+      "decision": "keep",
+      "feedback": "",
+      "ts": "2026-07-03T04:02:49.983Z",
+      "source": "explicit",
+      "original_d": "L043060505",
+      "prefix": "L043"
+    },
+    "L082060501__set3__redo1": {
+      "decision": "keep",
+      "feedback": "",
+      "ts": "2026-07-03T04:06:11.665Z",
+      "source": "default_unclicked_keep",
+      "original_d": "L082060501",
+      "prefix": "L082"
+    },
+    "L091060501__set1__redo1": {
+      "decision": "redo",
+      "feedback": "还是错，提交seedream",
+      "ts": "2026-07-03T04:05:51.344Z",
+      "source": "explicit",
+      "original_d": "L091060501",
+      "prefix": "L091"
+    },
+    "L086060504__set2__redo1": {
+      "decision": "keep",
+      "feedback": "",
+      "ts": "2026-07-03T04:06:11.665Z",
+      "source": "default_unclicked_keep",
+      "original_d": "L086060504",
+      "prefix": "L086"
+    }
+  }
+}

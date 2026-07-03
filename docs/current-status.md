@@ -198,3 +198,36 @@ L051060505 C 列 `产品描述` 已按用户反馈只删除第 1 张图 `https:/
 - L086：`7/7` 已生成，source 只使用非白 kept_cutout `L086_NEW_0002` / `L086_NEW_0003`；疑似白色 `L086_NEW_0004` 未使用。
 
 复核页说明：左列是原失败候选图，中列是本次新 source PNG，右列是本次 image2 redo 图。该页仍需用户筛选，筛选通过前不得写回 T/U。
+
+## 2026-07-03 redo 61 复核反馈转 Seedream fallback
+
+用户在 `0616_2_image2_197x3_redo_61_review` 导出反馈后明确规则：只要点击了 `重做` 且备注为错的项目提交 Seedream；没有错的全部保留，包括未点击的候选。
+
+本轮已按该规则建立 feedback lock，并在执行前完成 Claude Code + NVIDIA 审查，审查结论 `PASS`：
+
+- 原始反馈：`D:\Desktop\jit\DXXmall\outputs\store_newskill_seedream_from_197x3_redo_feedback_20260703\redo_61_review_feedback_raw_20260703.json`
+- 反馈锁：`D:\Desktop\jit\DXXmall\outputs\store_newskill_seedream_from_197x3_redo_feedback_20260703\feedback_lock_redo_61_review_seedream_20260703.json`
+- 仓库记忆：`docs\feedback-locks\feedback_lock_redo_61_review_seedream_20260703.json`
+- Seedream source plan：`D:\Desktop\jit\DXXmall\outputs\store_newskill_seedream_from_197x3_redo_feedback_20260703\source_plan_seedream_from_redo_61_feedback_20260703.json`
+- 仓库摘要：`docs\feedback-locks\source_plan_seedream_from_redo_61_feedback_20260703.md`
+- Claude/NVIDIA 审查：`D:\Desktop\jit\DXXmall\outputs\store_newskill_seedream_from_197x3_redo_feedback_20260703\claude_nvidia_seedream_from_redo_61_review_20260703.md`
+
+计数：
+
+- redo 61 总候选：`61`
+- 用户显式反馈：`24`
+- 提交 Seedream fallback：`16`
+- 保留：`45`，其中未点击默认保留 `37`
+
+Seedream fallback 已完成：
+
+- 结果：`D:\Desktop\jit\DXXmall\outputs\store_newskill_seedream_from_197x3_redo_feedback_20260703\seedream_fallback_results.json`
+- 成功：`16/16`
+- 失败：`0`
+- 本地图片缺失：`0`
+- 涉及前缀：`L042`、`L043`、`L091`
+- 8765 复核页：`http://127.0.0.1:8765/outputs/store_newskill_seedream_from_197x3_redo_feedback_20260703/0616_2_seedream_from_redo_61_feedback_16_review.html`
+
+本轮只生成 Seedream 本地复核图和必要的模型参考图上传；未上传最终商品图、未写回 Excel、未改 T/U/J/标题。用户复核通过前，这 16 张仍不得进入最终表。
+
+C 盘空间处理：为恢复仓库记忆写入能力，已将 C 盘 outputs 中的真实目录 `selected_280_xiangji_cutout` 迁移到 `D:\Desktop\jit\DXXmall\outputs_c_migrated\selected_280_xiangji_cutout`，并在原路径创建 junction。原路径继续可用。
