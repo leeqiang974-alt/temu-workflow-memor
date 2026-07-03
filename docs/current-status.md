@@ -710,3 +710,40 @@ L043060503 主池最终 3 套：
 - 首页不包含 `应急版`。
 - `/api/status` 与 `/api/ping` 返回 mode：`restored-tabs`。
 - `/api/d-groups?d=E9A&store=DXXmall` 仍返回：`items=6`、`html=True`、`htmlRows=True`、`column_count=54`、首个命中 `row_count=3`。
+
+## 2026-07-03 7月1日新核价表 SKC 变体属性修复
+
+用户反馈：
+
+- Temu 页面报错：`变种属性取值不能为空`。
+- 相关表格：
+  - `D:\Desktop\jit\DXXmall\DXXMALLminimini新核价\7月1日.xlsx`
+
+排查结论：
+
+- 可见列 `变种属性值一`、`变种属性值二` 没有空值。
+- 真正问题在隐藏 JSON 列 `SKC属性`：
+  - 9 行 `SKC属性` JSON 的 `parentSpecName` 和 `specName` 都为空字符串。
+  - 平台解析后会把它识别为变种属性取值为空。
+
+修复：
+
+- 未覆盖原表，生成修复副本：
+  - `D:\Desktop\jit\DXXmall\DXXMALLminimini新核价\7月1日_修复SKC变种属性_20260703_143725.xlsx`
+- 报告：
+  - `D:\Desktop\jit\DXXmall\DXXMALLminimini新核价\7月1日_修复SKC变种属性_20260703_143725_report.json`
+- 修复逻辑：
+  - 用同一行 `变种属性名称一/变种属性值一` 和 `SKU属性` 第一项的 `parentSpecId/specId` 回填 `SKC属性` 第一项。
+  - 保留原 `previewImgUrls`、`extCode`、`productSkcId`。
+
+验证：
+
+- 改动范围：只改 `SKC属性` 列，共 9 个单元格。
+- `blank_issues_after`：空。
+- `skc_json_issues_after`：空。
+- 原表不变。
+
+新增规则：
+
+- 平台提交前必须校验隐藏 JSON 字段里的变体取值，不得只看可见列。
+- `SKC属性` JSON 的 `parentSpecName/specName` 必须非空；为空时按同一行可见变体列与 `SKU属性` 回填。
