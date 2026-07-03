@@ -76,6 +76,7 @@ L051060505 C 列 `产品描述` 已按用户反馈只删除第 1 张图 `https:/
 - 输入表：`D:\Desktop\jit\DXXmall\outputs\store_newskill_final_199_writeback_20260702_fix_feedback_20260702\0616-2_197_最终回传_硬校验修复_L051060505_C列删第1图_20260702.xlsx`
 - 输出目录：`D:\Desktop\jit\DXXmall\outputs\store_newskill_image2_197x3_t_candidates_20260702`
 - 最终复核页：`D:\Desktop\jit\DXXmall\outputs\store_newskill_image2_197x3_t_candidates_20260702\0616_2_image2_197x3_t_candidates_review.html`
+- 8765 访问页：`http://127.0.0.1:8765/outputs/store_newskill_image2_197x3_t_candidates_20260702/0616_2_image2_197x3_t_candidates_review.html`
 - 干净结果：`candidate_results_197x3.json`
 - 补跑历史：`candidate_results_197x3_with_retry_history.json`
 - 清理摘要：`candidate_results_197x3_clean_summary.json`
@@ -87,3 +88,10 @@ L051060505 C 列 `产品描述` 已按用户反馈只删除第 1 张图 `https:/
 - `D:\Desktop\jit\DXXmall\outputs\store_newskill_image2_197x3_t_candidates_20260702\claude_nvidia_197x3_t_plan_review_20260702.md`
 
 本候选池是未来替换用素材池，不代表用户已复核通过，也不得直接写回 T/U。后续如要用于表格，仍需打开复核页筛选，并继续执行：删除/不要/死刑图锁定、T4 尺寸图、T<=10、U=T1、J 行级 SKU 变体匹配、标题指纹按当前入库表 D 精确恢复、Claude Code + NVIDIA 写回前审查。
+
+2026-07-03 已修正 8765 访问映射：应急后台 `/outputs/*` 固定读取 `C:\Users\Administrator\Documents\Codex\2026-06-08\comfyui\outputs`，而 197x3 实际输出在 D 盘。已创建 junction：
+
+- `C:\Users\Administrator\Documents\Codex\2026-06-08\comfyui\outputs\store_newskill_image2_197x3_t_candidates_20260702`
+- 指向 `D:\Desktop\jit\DXXmall\outputs\store_newskill_image2_197x3_t_candidates_20260702`
+
+修复后 8765 URL 返回 `200`，不再报 `文件不存在`。
