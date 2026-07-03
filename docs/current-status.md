@@ -95,3 +95,21 @@ L051060505 C 列 `产品描述` 已按用户反馈只删除第 1 张图 `https:/
 - 指向 `D:\Desktop\jit\DXXmall\outputs\store_newskill_image2_197x3_t_candidates_20260702`
 
 修复后 8765 URL 返回 `200`，不再报 `文件不存在`。
+
+## 2026-07-03 Temu 筛选插件批量复制按钮修复
+
+用户反馈筛选弹窗中 `一键复制全页`、`一键复制未复制` 点击后没响应。排查结论：按钮来自 `plugins/temu-filter-extension/content.js`，不是 197x3 复核 HTML；8765 junction 映射修复与该按钮失效无直接关系。截图中的 `E9A`、`K6L`、`H5Z`、`N7J`、`J4S` 通过 `/api/d-groups` 均可返回数据，后台查行链路可用。
+
+已修复：
+
+- `copyText()`：`navigator.clipboard.writeText()` 失败后回退到 `textarea + document.execCommand("copy")`，两者都失败时抛出可见错误，避免静默失败。
+- `copyRecordsBatch()`：点击后立即禁用批量按钮并显示进度；先查行聚合文本，成功写入剪贴板后才调用 `recordCopiedEvent()`，避免未实际复制却标记为已复制；完成或失败后恢复按钮。
+- `manifest.json` 版本升为 `1.4`，提醒浏览器加载新版插件。
+
+已验证：
+
+- `node --check plugins/temu-filter-extension/content.js` 通过。
+- 8765 查行 API 对截图中的 5 个指纹返回数据。
+- Claude Code + NVIDIA 复核结论：`Approved — Minimal, Safe, and Verified Fix`；认为修复局部、低风险，不影响翻页、滚动条、生成剔除 D 底表、预检完整流程等其它按钮。
+
+使用新版插件时，需要在浏览器扩展管理页重新加载 Temu 价差筛选插件，然后刷新 Temu 页面；旧页面里的 content script 不会自动替换。

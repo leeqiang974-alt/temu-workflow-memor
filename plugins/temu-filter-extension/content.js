@@ -1834,17 +1834,42 @@
   }
 
   function copyText(text) {
+    var value = String(text || "");
+    function legacyCopy() {
+      var ta = document.createElement("textarea");
+      ta.value = value;
+      ta.setAttribute("readonly", "readonly");
+      ta.style.position = "fixed";
+      ta.style.top = "0";
+      ta.style.left = "-9999px";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+      ta.setSelectionRange(0, ta.value.length);
+      var ok = false;
+      try {
+        ok = document.execCommand("copy");
+      } finally {
+        ta.remove();
+      }
+      if (!ok) return Promise.reject(new Error("浏览器拒绝写入剪贴板"));
+      return Promise.resolve();
+    }
     if (navigator.clipboard && navigator.clipboard.writeText) {
-      return navigator.clipboard.writeText(text);
+      return navigator.clipboard.writeText(value).catch(function () {
+        return legacyCopy();
+      });
     }
     var ta = document.createElement("textarea");
-    ta.value = text;
+    ta.value = value;
     ta.style.position = "fixed";
     ta.style.left = "-9999px";
     document.body.appendChild(ta);
     ta.select();
-    document.execCommand("copy");
+    var copied = document.execCommand("copy");
     ta.remove();
+    if (!copied) return Promise.reject(new Error("浏览器拒绝写入剪贴板"));
     return Promise.resolve();
   }
 
@@ -2323,33 +2348,74 @@
     }
 
     async function copyRecordsBatch(onlyUncopied) {
+      var copyAllBtn = document.getElementById("temu-copy-all-visible");
+      var copyUncopiedBtn = document.getElementById("temu-copy-uncopied");
+      var originalAllText = copyAllBtn ? copyAllBtn.textContent : "";
+      var originalUncopiedText = copyUncopiedBtn ? copyUncopiedBtn.textContent : "";
+      function setBatchBusy(message) {
+        if (copyAllBtn) {
+          copyAllBtn.disabled = true;
+          copyAllBtn.style.opacity = "0.65";
+          copyAllBtn.textContent = onlyUncopied ? originalAllText : message;
+        }
+        if (copyUncopiedBtn) {
+          copyUncopiedBtn.disabled = true;
+          copyUncopiedBtn.style.opacity = "0.65";
+          copyUncopiedBtn.textContent = onlyUncopied ? message : originalUncopiedText;
+        }
+        setNewWorkbookStatus(message, false);
+      }
+      function clearBatchBusy() {
+        if (copyAllBtn) {
+          copyAllBtn.disabled = false;
+          copyAllBtn.style.opacity = "1";
+          copyAllBtn.textContent = originalAllText || "一键复制全页";
+        }
+        if (copyUncopiedBtn) {
+          copyUncopiedBtn.disabled = false;
+          copyUncopiedBtn.style.opacity = "1";
+          copyUncopiedBtn.textContent = originalUncopiedText || "一键复制未复制";
+        }
+      }
       var targets = simpleRecords.filter(function (record) {
         return !removedKeys[record.key] && record.lookupKey;
       });
       var seenLookup = {};
       var chunks = [];
-      var copiedCount = 0;
-      for (var i = 0; i < targets.length; i++) {
-        var record = targets[i];
-        if (seenLookup[record.lookupKey]) continue;
-        seenLookup[record.lookupKey] = true;
-        if (onlyUncopied) {
-          var status = await getCopiedStatus(record);
-          if (status && status.copied) continue;
+      var matchedRecords = [];
+      try {
+        setBatchBusy(onlyUncopied ? "正在检查未复制..." : "正在查行...");
+        for (var i = 0; i < targets.length; i++) {
+          var record = targets[i];
+          if (seenLookup[record.lookupKey]) continue;
+          seenLookup[record.lookupKey] = true;
+          setBatchBusy("处理中 " + (matchedRecords.length + 1) + " / " + targets.length + "：" + record.lookupKey);
+          if (onlyUncopied) {
+            var status = await getCopiedStatus(record);
+            if (status && status.copied) continue;
+          }
+          var rowsData = await fetchFingerprintRowsData(record.lookupKey);
+          if (!rowsData || !rowsData.text) continue;
+          chunks.push(rowsData.text);
+          matchedRecords.push({ record: record, item: rowsData.item });
         }
-        var rowsData = await fetchFingerprintRowsData(record.lookupKey);
-        if (!rowsData || !rowsData.text) continue;
-        chunks.push(rowsData.text);
-        await recordCopiedEvent(record, rowsData.item);
-        copiedCount++;
+        if (!chunks.length) {
+          showToast(onlyUncopied ? "没有未复制的可复制记录" : "没有可复制记录");
+          setNewWorkbookStatus(onlyUncopied ? "没有未复制的可复制记录" : "没有可复制记录", true);
+          return;
+        }
+        setBatchBusy("正在写入剪贴板：" + matchedRecords.length + " 组D行");
+        await copyText(chunks.join("\r\n"));
+        setBatchBusy("剪贴板已写入，正在记录复制状态...");
+        for (var j = 0; j < matchedRecords.length; j++) {
+          await recordCopiedEvent(matchedRecords[j].record, matchedRecords[j].item);
+        }
+        showToast("已复制并记录 " + matchedRecords.length + " 组D行");
+        setNewWorkbookStatus("已复制并记录 " + matchedRecords.length + " 组D行", false);
+        refreshCopiedBadges();
+      } finally {
+        clearBatchBusy();
       }
-      if (!chunks.length) {
-        showToast(onlyUncopied ? "没有未复制的可复制记录" : "没有可复制记录");
-        return;
-      }
-      await copyText(chunks.join("\r\n"));
-      showToast("已复制并记录 " + copiedCount + " 组D行");
-      refreshCopiedBadges();
     }
 
     function setNewWorkbookStatus(message, isError) {
