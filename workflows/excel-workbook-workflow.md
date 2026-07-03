@@ -56,6 +56,7 @@
 - 复核页反馈导出必须读取页面实时 DOM 中的标记和 textarea 中文；不得只依赖 localStorage 或 POST 后台接口。若后台保存失败，必须仍能导出完整 JSON。
 - T 和 J URL 可访问。
 - 含中文、空格、括号的 OSS 图片 URL 必须在最终表中做 URL percent-encode；特别是 T4 尺寸图常见 `尺寸图 (8).jpg`，不能只靠 Excel 原始字符串。最终交付前必须按 T 列原始换行行读取第 4 张，并验证编码后的 URL 可访问。
+- 上传/入库表不能只靠 `产品货号(D)` 有效行校验。若 D 列为空，也必须全工作簿扫描所有 URL，最终报告必须确认 `unsafe_url_occurrences_after=0`、`unsafe_url_cells_after=0`；否则不能说图片链接/T4 显示问题已解决。
 - 店小秘/外链旧图按规则替换或保留。
 - X/AC 等辅助列按最新店铺规则校验。
 - 最终交付必须输出 changed-cell diff summary，列出每个被改单元格的 row、header、old、new；任何未授权列变化都是错误。

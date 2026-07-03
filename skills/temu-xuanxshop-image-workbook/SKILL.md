@@ -114,6 +114,7 @@ Prefer local review outputs first. Upload/write back only after user approval.
    - Percent-encode final image URLs that contain Chinese characters, spaces, parentheses, or other unsafe path characters before delivery. Raw Excel strings such as `尺寸图 (8).jpg` may exist in the sheet but fail marketplace/browser display unless encoded.
    - Do not guess between multiple prefix matches. Put ambiguous or missing matches into an unresolved report and stop before delivery.
    - After replacements, rescan the output workbook. Delivery requires zero unresolved suspicious OSS URLs and zero post-scan bad URLs.
+   - Do not rely only on D/effective-row validation for upload-ready sheets. Some shop upload/export tables can have blank `产品货号`; still scan every cell in the workbook and report total URL occurrences, unsafe URL occurrences, and unsafe cells.
    - Old `.xls` or 50-column upload workbooks must be converted/copied to the current 54-column template shape, including tail columns `SKCID`, `SKUID`, `创建时间`, and `更新时间`.
    - Delete or clearly retire earlier narrow repair outputs when a full repair supersedes them, so users do not accidentally upload stale bad copies.
 
@@ -139,6 +140,7 @@ Prefer local review outputs first. Upload/write back only after user approval.
 - Never write into the only source workbook. Always copy first.
 - Image URL upload fixes must be workbook-wide. Do not deliver a sheet after only fixing one reported D, one T4 URL, or one known bad OSS prefix; full scan and post-scan report are mandatory.
 - T4 display fixes must validate the raw workbook line, not a whitespace-splitting regex token. A size-image URL with Chinese text or spaces must be percent-encoded and then HEAD/GET checked before delivery.
+- URL display fixes must include a whole-workbook unsafe URL scan after writing the output. `unsafe_url_occurrences_after` must be `0`; a D-based validator returning zero effective rows is not proof that an upload sheet is safe.
 - Never expose access keys or credentials in chat or reports.
 - Do not upload or write back unreviewed AI images.
 - If the page is too heavy to browse, rebuild it with lazy loading, pagination, or per-D loading.

@@ -16,7 +16,7 @@ $ErrorActionPreference = "Stop"
 
 $OssHost = "ozonshanghai.oss-cn-shanghai.aliyuncs.com"
 $ImageExtPattern = '\.(jpg|jpeg|png|webp)(\?.*)?$'
-$UrlPattern = 'https?://[^\s"''<>\]\}]+'
+$UrlPattern = 'https?://[^\r\n"''<>\]\}]+'
 
 function Get-ImageUrls {
     param([string]$Text)

@@ -24,7 +24,7 @@ from typing import Any
 
 from openpyxl import load_workbook
 
-URL_RE = re.compile(r"https?://[^\r\n\"'<>\\]\}]+")
+URL_RE = re.compile(r"https?://[^\r\n\"'<>]+")
 SIZE_RE = re.compile(r"(尺寸|尺码|size|%E5%B0%BA%E5%AF%B8|%E5%B0%BA%E7%A0%81)", re.I)
 
 
@@ -141,6 +141,49 @@ def validate_t4(workbook_path: Path) -> dict[str, Any]:
     }
 
 
+def scan_url_safety(workbook_path: Path) -> dict[str, Any]:
+    workbook = load_workbook(workbook_path, read_only=True, data_only=False)
+    unsafe_examples: list[dict[str, Any]] = []
+    total_url_occurrences = 0
+    unsafe_url_occurrences = 0
+    unsafe_cells = 0
+
+    for worksheet in workbook.worksheets:
+        for row in worksheet.iter_rows():
+            for cell in row:
+                if not isinstance(cell.value, str) or "http" not in cell.value:
+                    continue
+                cell_unsafe = False
+                for match in URL_RE.finditer(cell.value):
+                    original = match.group(0).strip()
+                    if not original:
+                        continue
+                    total_url_occurrences += 1
+                    encoded = encode_url(original)
+                    if encoded != original:
+                        unsafe_url_occurrences += 1
+                        cell_unsafe = True
+                        if len(unsafe_examples) < 30:
+                            unsafe_examples.append(
+                                {
+                                    "sheet": worksheet.title,
+                                    "cell": cell.coordinate,
+                                    "url": original,
+                                    "encoded": encoded,
+                                }
+                            )
+                if cell_unsafe:
+                    unsafe_cells += 1
+
+    return {
+        "total_url_occurrences_after": total_url_occurrences,
+        "unsafe_url_occurrences_after": unsafe_url_occurrences,
+        "unsafe_url_cells_after": unsafe_cells,
+        "unsafe_url_examples_after": unsafe_examples,
+        "all_urls_encoded_ok": unsafe_url_occurrences == 0,
+    }
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Copy a workbook and percent-encode image URLs.")
     parser.add_argument("--input", required=True, type=Path)
@@ -170,6 +213,7 @@ def main() -> int:
     workbook.save(args.output)
 
     validation = validate_t4(args.output)
+    url_safety = scan_url_safety(args.output)
     report = {
         "source": str(args.input),
         "output": str(args.output),
@@ -177,11 +221,12 @@ def main() -> int:
         "changed_url_occurrence_count": sum(item["change_count"] for item in changed_cells),
         "changed_cells_sample": changed_cells[:30],
         **validation,
+        **url_safety,
     }
     report_path = args.report or args.output.with_suffix(".image_url_encode_report.json")
     report_path.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
     print(json.dumps(report, ensure_ascii=False, indent=2))
-    return 0 if validation["all_t4_display_ok"] else 2
+    return 0 if validation["all_t4_display_ok"] and url_safety["all_urls_encoded_ok"] else 2
 
 
 if __name__ == "__main__":

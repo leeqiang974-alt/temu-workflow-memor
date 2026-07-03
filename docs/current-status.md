@@ -1112,3 +1112,37 @@ L043060503 主池最终 3 套：
 - `scripts\encode_workbook_image_urls.py`
 
 后续死规则：最终表不能只校验 T4 “在第 4 位”。必须按 Excel 原始 T 列换行读取第 4 张，若 URL 含中文、空格、括号等 unsafe 字符，先 percent-encode，再验证可访问；否则不能说 T4 显示问题已解决。
+
+## 2026-07-03 三表 URL 修复失败复盘与编码版收口
+
+用户追问为什么此前“三个表相同问题去修复”运行了两次但最后仍没有真正改动到位。复盘结论：
+
+- 第一次修复是窄补丁，只针对已知的 `L095`/单个坏 URL 做 exact-token 替换和验证，没有全工作簿扫描所有图片 URL。
+- 第二次全量 OSS 修复虽然扫了更多 URL，但旧正则按空白切 URL，遇到 `尺寸图 (8).jpg` 这类带空格/中文/括号的尺寸图时，只证明“截断/无后缀 URL 不存在”，没有证明最终 Excel 原始 URL 能被浏览器/平台显示。
+- `scripts\encode_workbook_image_urls.py` 早期版本也有 URL 正则缺陷，可能导致应编码的中文 URL 没被匹配到，出现“脚本知道要编码但结果 changed=0”的假修复风险。
+- 两张 `7月2日` 上传表的 `产品货号(D)` 数据行为空，单靠 D/effective-row/T4 校验会得到 `effective_rows=0` 的假通过；这类表必须全工作簿扫描 URL。
+
+已修正：
+
+- `scripts\encode_workbook_image_urls.py` 改为按原始换行/引号边界识别完整 URL，并在输出后新增全工作簿 URL 安全扫描。
+- `scripts\full_repair_workbook_oss_image_urls.ps1` 的 URL 正则同步改为不按空白截断。
+- Skill 与 Excel workflow 新增硬规则：上传/入库表即使 D 为空，也必须输出 `total_url_occurrences_after`、`unsafe_url_occurrences_after`、`unsafe_url_cells_after`，且 unsafe 必须为 0。
+
+当前三张编码版输出：
+
+- 196 表：`D:\Desktop\jit\DXXmall\outputs\store_newskill_196_writeback_197x3_t_20260703\0616-2_196_最终回传_197x3通过T首图回填_T4保留_T够6_不跨D旧图轮换_全量OSS图片URL修复验证_T4显示URL编码_20260703.xlsx`
+- 7月2日核价过了6条已经裂变：`D:\Desktop\jit\DXXmall\DXXMALLminimini新核价\7月2日核价过了6条已经裂变_全量OSS图片URL修复_补齐54列_URL编码_20260703.xlsx`
+- 7月2日核价过了6条：`D:\Desktop\jit\DXXmall\DXXMALLminimini新核价\7月2日核价过了6条_全量OSS图片URL修复验证_URL编码_20260703.xlsx`
+
+复扫结果：
+
+- 196 表：`changed_cell_count=474`，`changed_url_occurrence_count=1123`，`effective_rows=322`，`unique_D=196`，`unique_t4_count=181`，`t4_unreachable_count=0`，`all_t4_display_ok=true`，`total_url_occurrences_after=7013`，`unsafe_url_occurrences_after=0`，`unsafe_url_cells_after=0`。
+- 裂变表：`changed_cell_count=120`，`changed_url_occurrence_count=210`，`effective_rows=0`，`total_url_occurrences_after=1740`，`unsafe_url_occurrences_after=0`，`unsafe_url_cells_after=0`。
+- 6条表：`changed_cell_count=12`，`changed_url_occurrence_count=21`，`effective_rows=0`，`total_url_occurrences_after=174`，`unsafe_url_occurrences_after=0`，`unsafe_url_cells_after=0`。
+
+Claude/NVIDIA final gate：
+
+- 审查文件：`D:\Desktop\jit\DXXmall\outputs\store_newskill_196_writeback_197x3_t_20260703\claude_nvidia_three_table_t4_url_encode_final_gate_20260703.md`
+- 审查结论：`decision=pass`
+- 强制检查脚本结果：`ok=true`，`artifact_count=3`
+- 以上四份 JSON 报告已写入 `claude_nvidia_review_path` 与 `claude_nvidia_gate_ok=true`。
