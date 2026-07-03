@@ -31,7 +31,18 @@ STORE_ROOTS = {
 }
 PRICE_COPY_LOG_PATH = WORK_DIR / "temu_price_copy_events.json"
 STORE_PRUNED_STATE_PATH = WORK_DIR / "temu_store_pruned_state.json"
-EXCEL_SKIP_WORDS = ("过程", "不入库", "复检前", "候选", "candidate", "review")
+EXCEL_SKIP_WORDS = (
+    "过程",
+    "不入库",
+    "复检前",
+    "候选",
+    "candidate",
+    "review",
+    "新核价",
+    "修复skc变种属性",
+    "隔离",
+    "不参与d搜索",
+)
 EXCEL_PREFERRED_WORDS = ("最终", "回传", "true_final", "提交", "已应用")
 GROUP_INDEX_CACHE = {}
 GROUP_INDEX_CACHE_LOCK = Lock()

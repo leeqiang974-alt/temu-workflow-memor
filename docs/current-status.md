@@ -1,6 +1,6 @@
 ﻿# 当前执行状态
 
-更新时间：2026-07-02
+更新时间：2026-07-03
 
 ## 正在跑的 0616-2 / 202 D
 
@@ -788,3 +788,40 @@ L043060503 主池最终 3 套：
 
 - 这次主要修 8765 后台复制出口；插件页面不重载也会调用新后台接口。
 - 已经粘贴生成的旧表仍需用此前的修复副本或重新从插件复制。
+
+## 2026-07-03 新核价复制结果与模板对比、D 搜索污染修复
+
+用户要求检查插件复制出来的 `7月1日.xlsx` 与当前模板表格是否一致：
+
+- 复制结果表：
+  - `D:\Desktop\jit\DXXmall\DXXMALLminimini新核价\7月1日.xlsx`
+- 对比模板：
+  - `D:\Desktop\jit\DXXmall\outputs\store_newskill_final_199_writeback_20260702_fix_feedback_20260702\0616-2_197_最终回传_硬校验修复_L051060505_C列删第1图_20260702.xlsx`
+- 对比报告：
+  - `D:\Desktop\jit\DXXmall\DXXMALLminimini新核价\7月1日_vs_197模板_复制结果对比_report.json`
+
+对比结论：
+
+- 表头完全一致：`headers_equal=true`，无缺列、无多列、无顺序错位。
+- `7月1日.xlsx` 共 `81` 行；模板共 `325` 行。
+- 按 `产品货号 + SKU货号 + 变种属性值一 + 变种属性值二` 匹配到 `73` 行。
+- 匹配行内容差异只发现 `1` 处，字段为 `SKC属性`；其余匹配字段未发现内容漂移。
+- 有 `8` 行在该 197 模板里找不到同键记录：`L063060503` 3 行、`L086060510` 2 行、`L091060503` 1 行、`L091060507` 1 行、`L076060503` 1 行。这些是插件从其它源最终表复制出的 D，不能用该 197 模板直接判定内容。
+- 格式差异明显：复制结果表大量列被写成文本格式 `@`、启用自动换行，并且列宽与模板不同。这解释了用户看到的“复制结果与原表格格式不一致”。平台报错的核心阻塞已由 SKC JSON 清洗解决；视觉/Excel 格式一致性仍需以后通过模板化生成或粘贴后格式继承解决。
+
+进一步排查发现 8765 后台 D 搜索曾扫描到 `DXXMALLminimini新核价`、`修复SKC变种属性`、`_隔离_不参与D搜索` 等结果/隔离表，存在复制结果反向污染源库的风险。
+
+已修复：
+
+- `tools\temu_control_panel.py`
+  - `EXCEL_SKIP_WORDS` 增加：`新核价`、`修复skc变种属性`、`隔离`、`不参与d搜索`。
+- 已同步 live 后台：
+  - `C:\Users\Administrator\Documents\Codex\2026-06-08\comfyui\work\temu_control_panel.py`
+- 已重启 8765，当前监听进程：`37316`。
+
+验证：
+
+- `python -m py_compile tools\temu_control_panel.py` 通过。
+- `python -m py_compile C:\Users\Administrator\Documents\Codex\2026-06-08\comfyui\work\temu_control_panel.py` 通过。
+- 单个接口 `/api/d-groups?store=DXXmall&d=E9A` 返回 `bad_count=0`，只命中 `D:\Desktop\jit\DXXmall\0616-2_TRUE_FINAL_202提交前_尺寸T4最终校验.xlsx`。
+- 批量接口验证 `E9A/K6L/H5Z/N7J/J4S`：每个 query 均 `bad_count=0`，不再返回 `新核价`、`修复SKC`、`隔离`、`不参与D搜索` 路径。
