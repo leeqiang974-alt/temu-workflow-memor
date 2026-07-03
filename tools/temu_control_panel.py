@@ -503,65 +503,136 @@ def _index_html():
   <meta charset="utf-8" />
   <title>Temu 自动化控制面板</title>
   <style>
-    body {{ font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; margin: 0; background: #f6f7fb; color: #1f2937; }}
-    header {{ background: #111827; color: #fff; padding: 18px 24px; }}
-    header h1 {{ margin: 0 0 6px; font-size: 22px; }}
+    body {{ font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; margin: 0; background: #eef2f7; color: #1f2937; }}
+    header {{ background: #111827; color: #fff; padding: 16px 24px; }}
+    header h1 {{ margin: 0 0 5px; font-size: 22px; }}
     header p {{ margin: 0; color: #cbd5e1; }}
-    main {{ max-width: 1280px; margin: 0 auto; padding: 18px; }}
+    main {{ max-width: 1360px; margin: 0 auto; padding: 14px 18px 24px; }}
+    .tabs {{ display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 12px; }}
+    .tab {{ border: 1px solid #c7d2fe; background: #fff; color: #1e40af; padding: 8px 12px; border-radius: 7px; font-weight: 700; cursor: pointer; }}
+    .tab.active {{ background: #2563eb; color: #fff; border-color: #2563eb; }}
+    .panel {{ display: none; background: #fff; border: 1px solid #d9e1ec; border-radius: 8px; padding: 16px; box-shadow: 0 4px 18px rgba(15, 23, 42, .06); }}
+    .panel.active {{ display: block; }}
     .grid {{ display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }}
-    .card {{ background: #fff; border: 1px solid #d9e1ec; border-radius: 10px; padding: 16px; box-shadow: 0 4px 18px rgba(15, 23, 42, .06); }}
-    .card h2 {{ margin: 0 0 10px; font-size: 17px; }}
+    .card {{ background: #fff; border: 1px solid #d9e1ec; border-radius: 8px; padding: 14px; }}
+    h2 {{ margin: 0 0 10px; font-size: 18px; }}
+    h3 {{ margin: 0 0 8px; font-size: 15px; }}
     a.button, button {{ display: inline-block; padding: 8px 12px; border-radius: 7px; border: 1px solid #2563eb; background: #2563eb; color: #fff; text-decoration: none; font-weight: 700; margin: 4px 6px 4px 0; cursor: pointer; }}
     button.secondary, a.secondary {{ background: #fff; color: #2563eb; }}
+    button.warn {{ background: #b45309; border-color: #b45309; }}
     input, select {{ padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 7px; margin: 4px 6px 4px 0; }}
-    textarea {{ width: 100%; min-height: 180px; border: 1px solid #cbd5e1; border-radius: 7px; padding: 8px; white-space: pre; overflow: auto; }}
-    table {{ border-collapse: collapse; width: 100%; margin-top: 10px; }}
+    textarea {{ width: 100%; min-height: 170px; border: 1px solid #cbd5e1; border-radius: 7px; padding: 8px; white-space: pre; overflow: auto; box-sizing: border-box; }}
+    table {{ border-collapse: collapse; width: 100%; margin-top: 10px; background: #fff; }}
     th, td {{ border: 1px solid #d9e1ec; padding: 7px; text-align: left; vertical-align: top; }}
     code {{ background: #eef2ff; padding: 2px 5px; border-radius: 5px; }}
     .ok {{ color: #15803d; font-weight: 700; }}
     .warn {{ color: #b45309; font-weight: 700; }}
     .muted {{ color: #64748b; font-size: 12px; }}
-    #queryResult, #storeResult, #statusBox {{ white-space: pre-wrap; background: #f8fafc; border: 1px solid #d9e1ec; border-radius: 8px; padding: 10px; min-height: 70px; overflow: auto; }}
+    .box {{ white-space: pre-wrap; background: #f8fafc; border: 1px solid #d9e1ec; border-radius: 8px; padding: 10px; min-height: 70px; overflow: auto; }}
+    #urlPreview img {{ max-width: 220px; max-height: 220px; object-fit: contain; border: 1px solid #d9e1ec; margin: 6px; background: #fff; }}
     @media (max-width: 900px) {{ .grid {{ grid-template-columns: 1fr; }} }}
   </style>
 </head>
 <body>
   <header>
     <h1>Temu 自动化控制面板</h1>
-    <p>核心接口已恢复：D 查行、插件复制记录、店铺剔除底表、完整流程预检、outputs 浏览、T 资产库。</p>
+    <p>多 tab 工作台已恢复：旧完整源码未找回，本页按历史功能重建；危险旧全流程入口仍受保护。</p>
   </header>
   <main>
-    <div class="grid">
-      <section class="card">
-        <h2>D 查行 / 指纹复制测试</h2>
+    <div class="tabs" id="tabs">
+      <button class="tab active" data-tab="overview">总览</button>
+      <button class="tab" data-tab="dlookup">D首图查行</button>
+      <button class="tab" data-tab="store">店铺新表</button>
+      <button class="tab" data-tab="tassets">T首图资产</button>
+      <button class="tab" data-tab="sku">出单SKU替换</button>
+      <button class="tab" data-tab="imgpreview">图片链接预览</button>
+      <button class="tab" data-tab="price">核价追踪</button>
+      <button class="tab" data-tab="logs">任务日志</button>
+      <button class="tab" data-tab="files">文件与工作流</button>
+    </div>
+
+    <section id="overview" class="panel active">
+      <h2>总览</h2>
+      <div class="grid">
+        <div class="card">
+          <h3>后台状态</h3>
+          <button onclick="loadStatus()">刷新状态</button>
+          <a class="button secondary" href="/outputs/">浏览 outputs</a>
+          <div id="statusBox" class="box">outputs：<code>{OUTPUTS_DIR}</code><br>work：<code>{WORK_DIR}</code></div>
+        </div>
+        <div class="card">
+          <h3>当前硬规则</h3>
+          <div class="box">T 首图首轮 image2/APIMart；失败或复检不合格再 Seedream。
+J 图按行 SKU PNG 严格匹配。
+T4 固定保留尺寸图；T 最多 10 张。
+删除、不要、死刑、错色、白色 L086 等记录不得回流。
+技术、workflow、skill 更新必须同步 GitHub。</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="dlookup" class="panel">
+      <h2>D首图查行 / 指纹复制测试</h2>
+      <div class="card">
         <select id="store"><option>DXXmall</option><option>CXXmall</option><option>FXXmall</option></select>
         <input id="lookup" placeholder="D值 / 标题指纹 / SKU" />
         <button onclick="queryD()">查询</button>
         <button class="secondary" onclick="copyFirst()">复制首个命中D行</button>
-        <div id="queryResult" class="muted">输入 D 值、标题指纹或 SKU 后查询。复制会同时写入 text/html 表格和 TSV。</div>
-      </section>
-      <section class="card">
-        <h2>店铺新表</h2>
+        <div id="queryResult" class="box muted">输入 D 值、标题指纹或 SKU 后查询。复制会同时写入 text/html 表格和 TSV，尽量保持 Excel/WPS 单元格格式。</div>
+      </div>
+    </section>
+
+    <section id="store" class="panel">
+      <h2>店铺新表</h2>
+      <div class="card">
         <button onclick="previewPassed()">预览已复制D</button>
         <button onclick="generatePruned()">生成剔除D底表</button>
         <button class="secondary" onclick="preflightFull()">预检完整流程</button>
-        <button class="secondary" onclick="runFull()">生成完整新表（受保护）</button>
-        <div id="storeResult" class="muted">先复制通过 D，再生成剔除D底表。完整新表入口当前受最新规则保护。</div>
-      </section>
-      <section class="card">
-        <h2>T 主图资产库</h2>
+        <button class="warn" onclick="runFull()">生成完整新表（受保护）</button>
+        <div id="storeResult" class="box muted">先复制通过 D，再生成剔除D底表。完整新表入口当前受最新规则保护，只允许预检确认。</div>
+      </div>
+    </section>
+
+    <section id="tassets" class="panel">
+      <h2>T首图资产</h2>
+      <div class="card">
         <a class="button" href="/outputs/t_image_asset_registry/t_image_asset_registry.html">打开资产库</a>
         <a class="button secondary" href="/api/t-image-assets">查看资产库 API</a>
         <button class="secondary" onclick="rebuildAssets()">重建资产库</button>
         <table>{summary_rows}</table>
-      </section>
-      <section class="card">
-        <h2>状态与路径</h2>
-        <button onclick="loadStatus()">刷新状态</button>
-        <a class="button secondary" href="/outputs/">浏览 outputs</a>
-        <div id="statusBox">outputs：<code>{OUTPUTS_DIR}</code><br>work：<code>{WORK_DIR}</code></div>
-      </section>
-    </div>
+      </div>
+    </section>
+
+    <section id="sku" class="panel">
+      <h2>出单SKU替换</h2>
+      <div class="box">旧完整实现源码未恢复；当前先保留入口，避免误以为可以安全自动替换。需要跑出单 SKU 替换时，先按最新表格规则走预检，再单独执行脚本/审核页。</div>
+    </section>
+
+    <section id="imgpreview" class="panel">
+      <h2>图片链接预览</h2>
+      <textarea id="urlInput" placeholder="每行一个图片 URL，或粘贴含逗号/空格分隔的链接"></textarea>
+      <button onclick="previewUrls()">预览</button>
+      <div id="urlPreview" class="box"></div>
+    </section>
+
+    <section id="price" class="panel">
+      <h2>核价追踪</h2>
+      <div class="box">插件依赖 8765 后台接口；D 行复制已改为富剪贴板 HTML + TSV。翻页、全局筛选和报价记录仍在浏览器扩展侧执行。</div>
+    </section>
+
+    <section id="logs" class="panel">
+      <h2>任务日志</h2>
+      <button onclick="loadJobs()">刷新任务</button>
+      <div id="jobsBox" class="box">点击刷新查看后台任务状态。</div>
+    </section>
+
+    <section id="files" class="panel">
+      <h2>文件与工作流</h2>
+      <div class="grid">
+        <div class="card"><h3>运行目录</h3><div class="box">work：<code>{WORK_DIR}</code><br>outputs：<code>{OUTPUTS_DIR}</code></div></div>
+        <div class="card"><h3>GitHub/本地记忆</h3><div class="box">本次恢复基于 README、docs/current-status.md、workflow 与 skill 规则。旧多 tab 源码未在本地备份中找回。</div></div>
+      </div>
+    </section>
   </main>
   <script>
     let lastQuery = null;
@@ -645,6 +716,20 @@ def _index_html():
       const data = await api("/api/status");
       $("statusBox").textContent = JSON.stringify(data, null, 2);
     }}
+    async function loadJobs() {{
+      const data = await api("/api/jobs");
+      $("jobsBox").textContent = JSON.stringify(data, null, 2);
+    }}
+    function previewUrls() {{
+      const urls = ($("urlInput").value || "").split(/[\\s,]+/).map(x => x.trim()).filter(Boolean);
+      $("urlPreview").innerHTML = urls.map(u => '<a href="' + u.replace(/"/g, "&quot;") + '" target="_blank"><img loading="lazy" src="' + u.replace(/"/g, "&quot;") + '"></a>').join("");
+    }}
+    document.querySelectorAll(".tab").forEach(btn => btn.addEventListener("click", () => {{
+      document.querySelectorAll(".tab").forEach(x => x.classList.remove("active"));
+      document.querySelectorAll(".panel").forEach(x => x.classList.remove("active"));
+      btn.classList.add("active");
+      document.getElementById(btn.dataset.tab).classList.add("active");
+    }}));
     loadStatus().catch(()=>{{}});
   </script>
 </body>
@@ -652,7 +737,7 @@ def _index_html():
 
 
 class ControlPanelHandler(BaseHTTPRequestHandler):
-    server_version = "TemuControlPanelEmergency/1.0"
+    server_version = "TemuControlPanelRestoredTabs/1.0"
 
     def log_message(self, fmt, *args):
         print(f"[8765] {self.address_string()} - {fmt % args}")
@@ -676,7 +761,7 @@ class ControlPanelHandler(BaseHTTPRequestHandler):
                 return _html_response(self, _index_html())
 
             if path == "/api/ping":
-                return _json_response(self, {"ok": True, "mode": "restored-lite", "port": PORT})
+                return _json_response(self, {"ok": True, "mode": "restored-tabs", "port": PORT})
 
             if path == "/api/d-groups":
                 lookup = (params.get("d") or params.get("fingerprint") or [""])[0]
@@ -731,20 +816,20 @@ class ControlPanelHandler(BaseHTTPRequestHandler):
                 return _json_response(self, _preflight_store_full_workflow(store))
 
             if path == "/api/jobs":
-                return _json_response(self, {"ok": True, "jobs": [], "note": "应急修复版未恢复完整后台任务队列。"})
+                return _json_response(self, {"ok": True, "jobs": [], "note": "旧完整后台任务队列源码未恢复；当前仅保留安全状态入口。"})
 
             if path.startswith("/api/jobs/"):
-                return _json_response(self, {"ok": False, "error": "应急修复版未恢复完整后台任务队列。"}, 404)
+                return _json_response(self, {"ok": False, "error": "旧完整后台任务队列源码未恢复。"}, 404)
 
             if path == "/api/status":
                 return _json_response(
                     self,
                     {
                         "ok": True,
-                        "mode": "restored-lite",
+                        "mode": "restored-tabs",
                         "outputs_dir": str(OUTPUTS_DIR),
                         "work_dir": str(WORK_DIR),
-                        "note": "轻量控制台已恢复核心插件接口；完整新表入口仍按最新规则保护。",
+                        "note": "多 Tab 工作台已重建核心插件接口；完整新表入口仍按最新规则保护。",
                     },
                 )
 

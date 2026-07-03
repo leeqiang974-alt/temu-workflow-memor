@@ -547,3 +547,44 @@ L043060503 主池最终 3 套：
 - 首页包含 `D 查行 / 指纹复制测试`
 - `/api/status` 返回 mode：`restored-lite`
 - `/api/d-groups?d=E9A&store=DXXmall` 仍返回：`items=6`、`html=True`、`htmlRows=True`、`column_count=54`、首个命中 `row_count=3`
+
+## 2026-07-03 8765 控制台恢复为多 Tab 重建版
+
+用户纠正：
+
+- 当前 8765 前端不是原先那个多个 Tab 的前端，而是轻量重修版。
+
+排查结论：
+
+- 本地仓库与 live work 副本里仍未找到原先完整多 Tab 源码。
+- README、状态记忆和历史对话只保留了旧功能结构：总览、T 首图分支、J 预览图、出单 SKU 替换、任务日志、文件与工作流，以及后续新增的 D 首图查行、图片链接预览、核价追踪、店铺新表重做等入口。
+- 因此本次不是“原源码还原”，而是按旧结构重建多 Tab 工作台外壳，并接入当前已验证安全接口。
+
+修复：
+
+- `tools\temu_control_panel.py` 首页改为多 Tab：
+  - 总览
+  - D首图查行
+  - 店铺新表
+  - T首图资产
+  - 出单SKU替换
+  - 图片链接预览
+  - 核价追踪
+  - 任务日志
+  - 文件与工作流
+- 同步到运行文件：
+  - `C:\Users\Administrator\Documents\Codex\2026-06-08\comfyui\work\temu_control_panel.py`
+- `/api/ping`、`/api/status` 的 mode 改为 `restored-tabs`。
+- HTTP server 标识改为 `TemuControlPanelRestoredTabs/1.0`。
+- `POST /api/run` 仍按最新规则保护，不恢复旧危险一键全流程。
+- 出单 SKU 替换等旧完整实现源码未恢复的 Tab 明确显示“入口保留、不可误自动执行”。
+
+验证：
+
+- `python -m py_compile tools\temu_control_panel.py` 通过。
+- `python -m py_compile C:\Users\Administrator\Documents\Codex\2026-06-08\comfyui\work\temu_control_panel.py` 通过。
+- 8765 后台已重启，当前监听进程：`24648`。
+- 首页包含 `D首图查行`、`出单SKU替换`、`文件与工作流`。
+- 首页不包含 `应急版`。
+- `/api/status` 与 `/api/ping` 返回 mode：`restored-tabs`。
+- `/api/d-groups?d=E9A&store=DXXmall` 仍返回：`items=6`、`html=True`、`htmlRows=True`、`column_count=54`、首个命中 `row_count=3`。
