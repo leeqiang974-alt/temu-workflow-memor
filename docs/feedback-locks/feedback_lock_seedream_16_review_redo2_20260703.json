@@ -1,0 +1,31 @@
+{
+  "review": "0616_2_seedream_from_redo_61_feedback_16_review",
+  "locked_at": "2026-07-03T12:33:06",
+  "rule": "Only these three Seedream fallback failures are reworked. L043_NEW_0008 is locked out for L043060503 redo2.",
+  "counts": {
+    "total": 3,
+    "redo": 3
+  },
+  "feedback": {
+    "L043060503__set1__redo1": {
+      "decision": "redo",
+      "feedback": "这个png废掉，用其他png用image2，换进来。",
+      "ts": "2026-07-03T04:27:51.903Z"
+    },
+    "L043060503__set3__redo1": {
+      "decision": "redo",
+      "feedback": "这个png废掉，用其他png用image2，换进来",
+      "ts": "2026-07-03T04:27:54.305Z"
+    },
+    "L091060506__set2__redo1": {
+      "decision": "redo",
+      "feedback": "不要做这种带顶部的图片，image2",
+      "ts": "2026-07-03T04:28:04.320Z"
+    }
+  },
+  "locked_bad_sources": {
+    "L043": [
+      "L043_NEW_0008"
+    ]
+  }
+}

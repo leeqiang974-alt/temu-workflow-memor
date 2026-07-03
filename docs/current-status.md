@@ -231,3 +231,50 @@ Seedream fallback 已完成：
 本轮只生成 Seedream 本地复核图和必要的模型参考图上传；未上传最终商品图、未写回 Excel、未改 T/U/J/标题。用户复核通过前，这 16 张仍不得进入最终表。
 
 C 盘空间处理：为恢复仓库记忆写入能力，已将 C 盘 outputs 中的真实目录 `selected_280_xiangji_cutout` 迁移到 `D:\Desktop\jit\DXXmall\outputs_c_migrated\selected_280_xiangji_cutout`，并在原路径创建 junction。原路径继续可用。
+
+## 2026-07-03 Seedream 16 复核后 image2 redo2 3 张
+
+用户在 `0616_2_seedream_from_redo_61_feedback_16_review` 中继续反馈 3 张失败：
+
+- `L043060503__set1__redo1`：`这个png废掉，用其他png用image2，换进来。`
+- `L043060503__set3__redo1`：`这个png废掉，用其他png用image2，换进来`
+- `L091060506__set2__redo1`：`不要做这种带顶部的图片，image2`
+
+执行规则：
+
+- 只处理这 3 张；其它 Seedream/image2 复核项不动。
+- L043 当前失败源 `L043_NEW_0008` 判为废 PNG，后续 `L043060503` redo2 不得再用该源。
+- L043 两张改回 image2/APIMart，并分别换为 `L043_NEW_0001`、`L043_NEW_0025`。
+- L091 改回 image2/APIMart，使用更正面的 `L091_T_0030`，prompt 强制 front-facing，避免顶视/顶部突出构图。
+- 本轮只生成本地复核图，不上传最终商品图、不写回 Excel。
+
+执行前已完成 Claude Code + NVIDIA 审查，结论 `PASS`：
+
+- `D:\Desktop\jit\DXXmall\outputs\store_newskill_image2_seedream_redo2_3_20260703\claude_nvidia_image2_seedream_redo2_3_plan_review_20260703.md`
+
+输出：
+
+- 脚本：`scripts\run_image2_seedream_redo2_from_feedback.py`
+- 输出目录：`D:\Desktop\jit\DXXmall\outputs\store_newskill_image2_seedream_redo2_3_20260703`
+- 原始反馈：`D:\Desktop\jit\DXXmall\outputs\store_newskill_image2_seedream_redo2_3_20260703\seedream_16_review_feedback_redo2_raw_20260703.json`
+- 反馈锁：`D:\Desktop\jit\DXXmall\outputs\store_newskill_image2_seedream_redo2_3_20260703\feedback_lock_seedream_16_review_redo2_20260703.json`
+- 仓库反馈锁：`docs\feedback-locks\feedback_lock_seedream_16_review_redo2_20260703.json`
+- 仓库计划摘要：`docs\feedback-locks\image2_seedream_redo2_3_plan.md`
+- 结果：`D:\Desktop\jit\DXXmall\outputs\store_newskill_image2_seedream_redo2_3_20260703\image2_seedream_redo2_3_results.json`
+- 8765 复核页：`http://127.0.0.1:8765/outputs/store_newskill_image2_seedream_redo2_3_20260703/0616_2_image2_seedream_redo2_3_review.html`
+
+生成统计：
+
+- 计划：`3`
+- 成功：`3/3`
+- 失败：`0`
+- 本地图片缺失：`0`
+- 估算成本：`$0.018`
+
+新生成候选：
+
+- `L043060503__set1__redo1__redo2_image2`，source `L043_NEW_0001`
+- `L043060503__set3__redo1__redo2_image2`，source `L043_NEW_0025`
+- `L091060506__set2__redo1__redo2_image2`，source `L091_T_0030`
+
+这 3 张仍需用户复核通过后才可用于后续替换/写回；当前未改 T/U/J/标题。
