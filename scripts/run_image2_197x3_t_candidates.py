@@ -285,6 +285,7 @@ def build_review(module=None) -> Path:
                     <button onclick="mark('{_escape(candidate_id)}','redo')">重做</button>
                     <button onclick="mark('{_escape(candidate_id)}','reject')">不要</button>
                     <input id="fb-{_escape(candidate_id)}" placeholder="反馈：错误点/可保留原因">
+                    <span class="status" id="st-{_escape(candidate_id)}">未筛选</span>
                   </div>
                   <details><summary>prompt</summary><pre>{_escape(prompt)}</pre></details>
                 </section>
@@ -327,10 +328,15 @@ figure img{{max-width:100%;height:240px;object-fit:contain;background:#fff;borde
 .source img{{height:260px}}
 figcaption{{font-size:12px;color:#4b5563;margin-top:6px;word-break:break-all}}
 .candidate{{border:1px solid #e5e7eb;border-radius:6px;padding:8px;background:#fcfcfd}}
+.candidate.keep{{border-color:#16a34a;background:#f0fdf4}}
+.candidate.redo{{border-color:#f59e0b;background:#fffbeb}}
+.candidate.reject{{border-color:#ef4444;background:#fef2f2}}
 .actions{{display:flex;gap:6px;margin-top:8px;align-items:center;flex-wrap:wrap}}
 button{{border:0;border-radius:6px;padding:6px 10px;background:#7c3aed;color:white;cursor:pointer}}
 button:nth-child(2){{background:#f59e0b}} button:nth-child(3){{background:#ef4444}}
+button.active{{outline:3px solid rgba(37,99,235,.35);box-shadow:0 0 0 2px #fff inset}}
 input{{flex:1;min-width:160px;padding:6px;border:1px solid #ddd;border-radius:6px}}
+.status{{font-size:12px;font-weight:700;color:#6b7280;min-width:52px}}
 details{{margin-top:8px}} pre{{white-space:pre-wrap;font-size:11px;max-height:160px;overflow:auto;background:#111827;color:#f9fafb;padding:8px;border-radius:6px}}
 table{{border-collapse:collapse}} th,td{{border:1px solid #ddd;padding:4px 8px;font-size:12px}}
 #exportBox{{width:100%;height:180px;margin-top:10px}}
@@ -354,29 +360,72 @@ table{{border-collapse:collapse}} th,td{{border:1px solid #ddd;padding:4px 8px;f
 <div id="modal" onclick="this.style.display='none'"><img id="modalImg"></div>
 <script>
 const REVIEW='0616_2_image2_197x3_t_candidates_review';
-let feedback = JSON.parse(localStorage.getItem(REVIEW + ':feedback') || '{{}}');
-function liveFeedbackValue(id) {{
+let feedback = safeLoadFeedback();
+function storageGet(key) {{
+  try {{
+    if (window.localStorage) return window.localStorage.getItem(key);
+  }} catch (err) {{}}
+  return null;
+}}
+function storageSet(key, value) {{
+  try {{
+    if (window.localStorage) window.localStorage.setItem(key, value);
+  }} catch (err) {{}}
+}}
+function storageRemove(key) {{
+  try {{
+    if (window.localStorage) window.localStorage.removeItem(key);
+  }} catch (err) {{}}
+}}
+function safeLoadFeedback() {{
+  try {{
+    return JSON.parse(storageGet(REVIEW + ':feedback') || '{{}}');
+  }} catch (err) {{
+    return {{}};
+  }}
+}}
+window.liveFeedbackValue = function liveFeedbackValue(id) {{
   const el = document.getElementById('fb-' + id);
   return el ? el.value : '';
-}}
-function mark(id, decision) {{
-  feedback[id] = {{decision, feedback: liveFeedbackValue(id), ts: new Date().toISOString()}};
-  localStorage.setItem(REVIEW + ':feedback', JSON.stringify(feedback));
+}};
+function paintDecision(id, decision) {{
   const input = document.getElementById('fb-' + id);
+  const section = document.querySelector('[data-candidate="' + CSS.escape(id) + '"]');
+  const status = document.getElementById('st-' + id);
   if (input) input.style.borderColor = decision === 'keep' ? '#16a34a' : (decision === 'redo' ? '#f59e0b' : '#ef4444');
+  if (section) {{
+    section.classList.remove('keep', 'redo', 'reject');
+    section.classList.add(decision);
+    section.querySelectorAll('button').forEach(btn => btn.classList.remove('active'));
+    const index = decision === 'keep' ? 0 : (decision === 'redo' ? 1 : 2);
+    const btn = section.querySelectorAll('button')[index];
+    if (btn) btn.classList.add('active');
+  }}
+  if (status) {{
+    status.textContent = decision === 'keep' ? '已保留' : (decision === 'redo' ? '已重做' : '已不要');
+    status.style.color = decision === 'keep' ? '#16a34a' : (decision === 'redo' ? '#d97706' : '#dc2626');
+  }}
 }}
-function exportFeedback() {{
-  Object.keys(feedback).forEach(id => feedback[id].feedback = liveFeedbackValue(id) || feedback[id].feedback || '');
+window.mark = function mark(id, decision) {{
+  feedback[id] = {{decision, feedback: window.liveFeedbackValue(id), ts: new Date().toISOString()}};
+  storageSet(REVIEW + ':feedback', JSON.stringify(feedback));
+  paintDecision(id, decision);
+}};
+window.exportFeedback = function exportFeedback() {{
+  Object.keys(feedback).forEach(id => feedback[id].feedback = window.liveFeedbackValue(id) || feedback[id].feedback || '');
   const data = {{review: REVIEW, exported_at: new Date().toISOString(), feedback}};
   document.getElementById('exportBox').value = JSON.stringify(data, null, 2);
   navigator.clipboard && navigator.clipboard.writeText(document.getElementById('exportBox').value).catch(()=>{{}});
-}}
-function clearFeedback() {{
+}};
+window.clearFeedback = function clearFeedback() {{
   if (!confirm('清空本页筛选反馈？')) return;
   feedback = {{}};
-  localStorage.removeItem(REVIEW + ':feedback');
+  storageRemove(REVIEW + ':feedback');
+  document.querySelectorAll('.candidate').forEach(el => el.classList.remove('keep', 'redo', 'reject'));
+  document.querySelectorAll('button.active').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.status').forEach(el => {{el.textContent='未筛选'; el.style.color='#6b7280';}});
   document.querySelectorAll('input[id^="fb-"]').forEach(el => {{el.value=''; el.style.borderColor='#ddd';}});
-}}
+}};
 document.querySelectorAll('.zoomable').forEach(img => img.addEventListener('click', () => {{
   document.getElementById('modalImg').src = img.src;
   document.getElementById('modal').style.display = 'flex';
@@ -385,7 +434,7 @@ Object.entries(feedback).forEach(([id, item]) => {{
   const input = document.getElementById('fb-' + id);
   if (input) {{
     input.value = item.feedback || '';
-    input.style.borderColor = item.decision === 'keep' ? '#16a34a' : (item.decision === 'redo' ? '#f59e0b' : '#ef4444');
+    paintDecision(id, item.decision);
   }}
 }});
 </script>

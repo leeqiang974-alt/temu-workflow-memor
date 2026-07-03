@@ -133,3 +133,20 @@ L051060505 C 列 `产品描述` 已按用户反馈只删除第 1 张图 `https:/
 - HTML 统计：`article_count=197`、`generated_imgs=591`、`empty_src=0`、`outputs_src=788`。
 
 如果浏览器仍显示旧页面，需要对 `http://127.0.0.1:8765/outputs/store_newskill_image2_197x3_t_candidates_20260702/0616_2_image2_197x3_t_candidates_review.html` 执行强制刷新 `Ctrl+F5`。
+
+## 2026-07-03 197x3 复核页筛选按钮修复
+
+用户反馈 `保留`、`重做`、`不要` 按钮点击没响应。已修复 `scripts/run_image2_197x3_t_candidates.py` 生成的复核页交互：
+
+- 每个候选图点击后会立即给卡片加状态样式，并显示 `已保留`、`已重做`、`已不要`，不再只靠输入框边框颜色提示。
+- `mark()`、`exportFeedback()`、`clearFeedback()` 显式挂到 `window`，避免 inline onclick 找不到函数。
+- `localStorage` 读写加入安全封装；即使浏览器限制本地存储，按钮视觉状态和导出框仍可工作。
+- 导出继续从实时 DOM/input 读取反馈，中文意见不会因为 localStorage 或剪贴板失败而丢失。
+
+实测当前 8765 页面：
+
+- 候选卡片数 `591`。
+- 对 `L042060501__set1/set2/set3` 分别点击 `保留/重做/不要` 后，页面状态变为 `candidate keep`、`candidate redo`、`candidate reject`。
+- 点击 `导出筛选JSON` 后，导出框可生成包含 decision 与中文 feedback 的 JSON。
+
+注意：本次按钮冒烟测试在浏览器本地状态中点过 `L042060501__set1/set2/set3`。其中 `set2` 保留了页面已有中文反馈 `钉子螺纹错了，卷起来的突出的部分多余了。`；`set1/set3` 为空反馈测试项。后续正式复核以用户最终导出的 JSON 为准，不把本地冒烟测试当作最终筛选结论。
