@@ -825,3 +825,43 @@ L043060503 主池最终 3 套：
 - `python -m py_compile C:\Users\Administrator\Documents\Codex\2026-06-08\comfyui\work\temu_control_panel.py` 通过。
 - 单个接口 `/api/d-groups?store=DXXmall&d=E9A` 返回 `bad_count=0`，只命中 `D:\Desktop\jit\DXXmall\0616-2_TRUE_FINAL_202提交前_尺寸T4最终校验.xlsx`。
 - 批量接口验证 `E9A/K6L/H5Z/N7J/J4S`：每个 query 均 `bad_count=0`，不再返回 `新核价`、`修复SKC`、`隔离`、`不参与D搜索` 路径。
+
+## 2026-07-03 插件复制格式回退为 TSV 模板安全模式
+
+用户指出：旧后台按 D/指纹搜索后复制 D 行一直很顺，插件理论上应复用同一复制逻辑，但粘贴结果变乱。
+
+根因：
+
+- 之前为了解决剪贴板可靠性，将插件复制改成优先写入 `text/html` 表格 + TSV。
+- Excel/WPS 粘贴 HTML 表格时会把 HTML 样式一并带入目标工作簿，例如文本格式 `@`、自动换行、列宽等，导致新核价模板原格式被覆盖。
+- 这解释了 `7月1日.xlsx` 对比报告中的格式差异：大量列变成文本格式、自动换行和异常列宽。
+- SKC 空值报错与复制格式是两个问题：SKC 仍由 8765 后台输出前清洗解决；表格格式则应回退 TSV 复制来保留目标模板格式。
+
+修复：
+
+- `plugins\temu-filter-extension\content.js`
+  - 新增 `copyRowsPayloadAsTsv()`。
+  - 单条复制与一键批量复制均改为复制 TSV，不再优先 `ClipboardItem text/html`。
+  - “立即复制已准备数据”重试按钮也改为 TSV，不再写富格式 HTML。
+- `plugins\temu-filter-extension\manifest.json`
+  - 版本升为 `1.7`。
+- 已同步实际加载目录：
+  - `D:\Desktop\jit\temu-filter-extension`
+- `tools\temu_control_panel.py`
+  - 8765 页面“复制首个命中D行”同步改为 TSV 文本复制，并更新页面说明。
+- 已同步 live 后台：
+  - `C:\Users\Administrator\Documents\Codex\2026-06-08\comfyui\work\temu_control_panel.py`
+- 当前 8765 监听进程：`25864`。
+
+验证：
+
+- `node --check plugins\temu-filter-extension\content.js` 通过。
+- `node --check D:\Desktop\jit\temu-filter-extension\content.js` 通过。
+- 仓库插件与实际加载目录 `content.js`、`manifest.json` SHA256 一致。
+- 8765 首页不再包含 `text/html`/`富剪贴板 HTML + TSV` 旧文案，也不再包含 `ClipboardItem` 旧复制函数；页面显示 TSV 模板安全复制。
+- `/api/d-groups?d=E9A&store=DXXmall` 返回 `3` 行、每行 `54` 列，`bad_tsv_row_count=0`，`sanitized_skc_count=3`。
+
+使用注意：
+
+- 需要在浏览器扩展管理页重新加载 `D:\Desktop\jit\temu-filter-extension`，再刷新 Temu 页面，才能让 content script 1.7 生效。
+- 已经用 1.6 富 HTML 粘贴出来的旧表可能保留异常格式；应使用 1.7 重新复制粘贴，或用修复副本继续。

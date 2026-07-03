@@ -1944,6 +1944,12 @@
     return copyText(text).then(function () { return "plain-text"; });
   }
 
+  function copyRowsPayloadAsTsv(payload) {
+    var text = String((payload && payload.text) || "");
+    if (!text.trim()) return Promise.reject(new Error("没有可复制的 D 行文本"));
+    return copyText(text).then(function () { return "tsv-template-safe"; });
+  }
+
   function combineRowsPayloads(payloads) {
     var texts = [];
     var htmlRows = [];
@@ -2131,7 +2137,7 @@
     }
     var rowsData = await fetchFingerprintRowsData(lookupKey);
     if (rowsData && rowsData.text) {
-      await copyTablePayload(rowsDataToClipboardPayload(rowsData));
+      await copyRowsPayloadAsTsv(rowsDataToClipboardPayload(rowsData));
       await recordCopiedEvent(record, rowsData.item);
       showToast("已复制并记录：" + getCurrentStoreName() + " / " + lookupKey + (rowsData.item && rowsData.item.D ? " / " + rowsData.item.D : ""));
       return;
@@ -2564,15 +2570,10 @@
         var combinedPayload = combineRowsPayloads(payloads);
         var copyMethod = "";
         try {
-          copyMethod = await copyTablePayload(combinedPayload);
+          copyMethod = await copyRowsPayloadAsTsv(combinedPayload);
         } catch (copyErr) {
           showPreparedBatchCopyRetry(combinedPayload, matchedRecords, copyErr);
           showToast("批量数据已准备好，请点击状态栏里的“立即复制已准备数据”");
-          return;
-        }
-        if (copyMethod === "plain-text" && combinedPayload.html) {
-          showPreparedBatchCopyRetry(combinedPayload, matchedRecords, new Error("浏览器本次只允许纯文本复制，未记录已复制状态"));
-          showToast("已准备富格式表格，请点击状态栏里的“立即复制已准备数据”");
           return;
         }
         await markBatchCopied(matchedRecords, copyMethod);
@@ -2609,23 +2610,17 @@
       box.style.background = "#fffbe6";
       box.style.color = "#ad6800";
       box.innerHTML =
-        "<div style=\"font-weight:700;margin-bottom:6px;\">批量 D 行已经查好，但浏览器没有完成富格式剪贴板写入。</div>" +
+        "<div style=\"font-weight:700;margin-bottom:6px;\">批量 D 行已经查好，但浏览器没有完成剪贴板写入。</div>" +
         "<div style=\"white-space:pre-wrap;margin-bottom:8px;\">" + escapeHTML(err && err.message ? err.message : String(err || "")) + "</div>" +
         "<button id=\"temu-copy-prepared-batch\" style=\"padding:6px 12px;background:#fa8c16;color:#fff;border:none;border-radius:6px;cursor:pointer;margin-right:8px;\">立即复制已准备数据</button>" +
-        "<span style=\"font-size:12px;color:#8c6d1f;\">不再重新查行，点击后直接写入 Excel/WPS 富格式表格。</span>";
+        "<span style=\"font-size:12px;color:#8c6d1f;\">不再重新查行，点击后按 TSV 写入，保留目标 Excel/WPS 模板格式。</span>";
       var retryBtn = document.getElementById("temu-copy-prepared-batch");
       if (!retryBtn) return;
       retryBtn.addEventListener("click", function () {
         retryBtn.disabled = true;
         retryBtn.style.opacity = "0.65";
         retryBtn.textContent = "复制中...";
-        copyTablePayload(payload).then(function (method) {
-          if (method === "plain-text" && payload.html) {
-            retryBtn.disabled = false;
-            retryBtn.style.opacity = "1";
-            retryBtn.textContent = "再次尝试富格式复制";
-            throw new Error("浏览器仍只允许纯文本复制，请保持当前页焦点后再点一次");
-          }
+        copyRowsPayloadAsTsv(payload).then(function (method) {
           return markBatchCopied(matchedRecords, method);
         }).catch(function (retryErr) {
           console.error("[TemuFilter v9] prepared batch copy retry failed:", retryErr);

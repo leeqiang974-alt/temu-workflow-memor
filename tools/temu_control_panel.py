@@ -739,7 +739,7 @@ T4 固定保留尺寸图；T 最多 10 张。
         <input id="lookup" placeholder="D值 / 标题指纹 / SKU" />
         <button onclick="queryD()">查询</button>
         <button class="secondary" onclick="copyFirst()">复制首个命中D行</button>
-        <div id="queryResult" class="box muted">输入 D 值、标题指纹或 SKU 后查询。复制会同时写入 text/html 表格和 TSV，尽量保持 Excel/WPS 单元格格式。</div>
+        <div id="queryResult" class="box muted">输入 D 值、标题指纹或 SKU 后查询。复制默认写入 TSV，保留目标 Excel/WPS 模板格式；后台仍返回已清洗 SKC 的完整 D 行。</div>
       </div>
     </section>
 
@@ -778,7 +778,7 @@ T4 固定保留尺寸图；T 最多 10 张。
 
     <section id="price" class="panel">
       <h2>核价追踪</h2>
-      <div class="box">插件依赖 8765 后台接口；D 行复制已改为富剪贴板 HTML + TSV。翻页、全局筛选和报价记录仍在浏览器扩展侧执行。</div>
+      <div class="box">插件依赖 8765 后台接口；D 行复制已改回 TSV 模板安全模式，避免 HTML 样式覆盖原表格式。翻页、全局筛选和报价记录仍在浏览器扩展侧执行。</div>
     </section>
 
     <section id="logs" class="panel">
@@ -827,14 +827,31 @@ T4 固定保留尺寸图；T 最多 10 张。
       $("queryResult").textContent = "命中: " + ((data.items || []).length) + "\\n\\n" + summarizeItem((data.items || [])[0]);
     }}
     async function copyPayload(text, html) {{
-      if (html && navigator.clipboard && navigator.clipboard.write && window.ClipboardItem) {{
-        await navigator.clipboard.write([new ClipboardItem({{
-          "text/html": new Blob([html], {{type:"text/html;charset=utf-8"}}),
-          "text/plain": new Blob([text || ""], {{type:"text/plain;charset=utf-8"}})
-        }})]);
-      }} else {{
-        await navigator.clipboard.writeText(text || "");
+      const value = String(text || "");
+      if (!value.trim()) throw new Error("没有可复制的 D 行文本");
+      async function legacyCopy() {{
+        const ta = document.createElement("textarea");
+        ta.value = value;
+        ta.setAttribute("readonly", "readonly");
+        ta.style.position = "fixed";
+        ta.style.left = "-9999px";
+        ta.style.top = "0";
+        ta.style.opacity = "0";
+        document.body.appendChild(ta);
+        ta.focus();
+        ta.select();
+        ta.setSelectionRange(0, ta.value.length);
+        let ok = false;
+        try {{ ok = document.execCommand("copy"); }} finally {{ ta.remove(); }}
+        if (!ok) throw new Error("浏览器拒绝写入剪贴板");
       }}
+      if (navigator.clipboard && navigator.clipboard.writeText) {{
+        try {{
+          await navigator.clipboard.writeText(value);
+          return;
+        }} catch (err) {{}}
+      }}
+      await legacyCopy();
     }}
     async function copyFirst() {{
       const item = lastQuery && lastQuery.items && lastQuery.items[0];
@@ -842,7 +859,7 @@ T4 固定保留尺寸图；T 最多 10 张。
       const fresh = lastQuery && lastQuery.items && lastQuery.items[0];
       if (!fresh) {{ $("queryResult").textContent += "\\n无可复制行"; return; }}
       await copyPayload(fresh.tsv || "", fresh.html || "");
-      $("queryResult").textContent += "\\n\\n已复制首个命中 D 行（HTML表格+TSV）。";
+      $("queryResult").textContent += "\\n\\n已复制首个命中 D 行（TSV，保留目标表格式）。";
     }}
     async function previewPassed() {{
       $("storeResult").textContent = "读取中……";
