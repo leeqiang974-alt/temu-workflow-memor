@@ -747,3 +747,44 @@ L043060503 主池最终 3 套：
 
 - 平台提交前必须校验隐藏 JSON 字段里的变体取值，不得只看可见列。
 - `SKC属性` JSON 的 `parentSpecName/specName` 必须非空；为空时按同一行可见变体列与 `SKU属性` 回填。
+
+## 2026-07-03 插件复制出口自动清洗 SKC 属性
+
+用户进一步确认：
+
+- `7月1日.xlsx` 是从插件复制出来的数据填入表格产生的，因此需要修正插件复制链路，而不是只修单张表。
+
+根因：
+
+- 插件通过 8765 的 `/api/d-groups`、`/api/d-groups-batch` 复制完整 D 行。
+- 旧接口把源最终表中 `SKC属性` JSON 里的空 `parentSpecName/specName` 原样输出。
+- 新核价表粘贴这些行后，平台提交时报 `变种属性取值不能为空`。
+
+修复：
+
+- `tools\temu_control_panel.py`
+  - 新增 `_sanitize_skc_variant_rows()`。
+  - `/api/d-groups` 与 `/api/d-groups-batch` 输出 TSV/HTML/htmlRows 前统一清洗复制 payload。
+  - 清洗逻辑：若 `SKC属性` JSON 对象的 `parentSpecName/specName` 为空，用同一行 `变种属性名称一/变种属性值一` 和 `SKU属性` 第一项的 `parentSpecId/specId` 回填。
+  - 返回 item 新增 `sanitized_skc_count`，便于审计复制出口是否做过清洗。
+- 已同步 live 后台：
+  - `C:\Users\Administrator\Documents\Codex\2026-06-08\comfyui\work\temu_control_panel.py`
+- 已重启 8765，当前监听进程：`24324`。
+- `workflows\pricing-plugin-workflow.md` 已写入插件复制出口 SKC 清洗规则。
+
+验证：
+
+- `python -m py_compile tools\temu_control_panel.py` 通过。
+- `python -m py_compile C:\Users\Administrator\Documents\Codex\2026-06-08\comfyui\work\temu_control_panel.py` 通过。
+- 批量接口验证 `E9A/K6L/H5Z/N7J/J4S`：
+  - `E9A -> L063060503`：3 行，`sanitized_skc_count=3`，`bad_count=0`
+  - `K6L -> L086060510`：2 行，`sanitized_skc_count=2`，`bad_count=0`
+  - `H5Z -> L091060503`：1 行，`sanitized_skc_count=1`，`bad_count=0`
+  - `N7J -> L091060507`：1 行，`sanitized_skc_count=1`，`bad_count=0`
+  - `J4S -> L076060503`：1 行，`sanitized_skc_count=1`，`bad_count=0`
+- 单个接口 `/api/d-groups?d=E9A&store=DXXmall` 缓存后约 `482 ms`，首个命中 `sanitized_skc_count=3`。
+
+使用注意：
+
+- 这次主要修 8765 后台复制出口；插件页面不重载也会调用新后台接口。
+- 已经粘贴生成的旧表仍需用此前的修复副本或重新从插件复制。

@@ -179,6 +179,73 @@ def _latest_store_workbook(store: str):
     return files[0] if files else None
 
 
+def _header_index(headers, names):
+    normalized = [str(header or "").strip() for header in headers or []]
+    for name in names:
+        for idx, header in enumerate(normalized):
+            if header == name or name in header:
+                return idx
+    return None
+
+
+def _sanitize_skc_variant_rows(rows, headers):
+    if not headers:
+        return rows, 0
+    col_skc = _header_index(headers, ["SKC属性"])
+    col_sku_attr = _header_index(headers, ["SKU属性"])
+    col_variant_name = _header_index(headers, ["变种属性名称一"])
+    col_variant_value = _header_index(headers, ["变种属性值一"])
+    if col_skc is None or col_sku_attr is None or col_variant_name is None or col_variant_value is None:
+        return rows, 0
+
+    sanitized_rows = []
+    changed_count = 0
+    for row in rows:
+        values = list(row)
+        max_col = max(col_skc, col_sku_attr, col_variant_name, col_variant_value)
+        if len(values) <= max_col:
+            sanitized_rows.append(values)
+            continue
+        skc_raw = str(values[col_skc] or "").strip()
+        sku_attr_raw = str(values[col_sku_attr] or "").strip()
+        variant_name = _tsv_cell(values[col_variant_name])
+        variant_value = _tsv_cell(values[col_variant_value])
+        if not skc_raw or not sku_attr_raw or not variant_name or not variant_value:
+            sanitized_rows.append(values)
+            continue
+        try:
+            skc_attrs = json.loads(skc_raw)
+            sku_attrs = json.loads(sku_attr_raw)
+        except Exception:
+            sanitized_rows.append(values)
+            continue
+        if not isinstance(skc_attrs, list) or not skc_attrs or not isinstance(sku_attrs, list) or not sku_attrs:
+            sanitized_rows.append(values)
+            continue
+        first_sku = sku_attrs[0] if isinstance(sku_attrs[0], dict) else {}
+        row_changed = False
+        for item in skc_attrs:
+            if not isinstance(item, dict):
+                continue
+            if not str(item.get("parentSpecName") or "").strip():
+                item["parentSpecName"] = first_sku.get("parentSpecName") or variant_name
+                row_changed = True
+            if not str(item.get("specName") or "").strip():
+                item["specName"] = first_sku.get("specName") or variant_value
+                row_changed = True
+            if str(item.get("parentSpecId") or "") in {"", "0"}:
+                item["parentSpecId"] = first_sku.get("parentSpecId") or 0
+                row_changed = True
+            if str(item.get("specId") or "") in {"", "0"}:
+                item["specId"] = first_sku.get("specId") or "0"
+                row_changed = True
+        if row_changed:
+            values[col_skc] = json.dumps(skc_attrs, ensure_ascii=False, separators=(",", ":"))
+            changed_count += 1
+        sanitized_rows.append(values)
+    return sanitized_rows, changed_count
+
+
 def _read_workbook_groups(path: Path):
     wb = load_workbook(path, data_only=False, read_only=True)
     try:
@@ -212,6 +279,7 @@ def _read_workbook_groups(path: Path):
                 d_value,
                 {
                     "D": d_value,
+                    "headers": header_row,
                     "title": "",
                     "fingerprint": "",
                     "sku_values": set(),
@@ -296,7 +364,7 @@ def _query_d_groups_from_index(query: str, store: str, index):
             sku_hit = any(query_upper and query_upper in sku for sku in group["sku_values"])
             if query_upper not in {d_value.upper(), group["fingerprint"].upper()} and not sku_hit and query_upper not in group["title"].upper():
                 continue
-            rows = group["rows"]
+            rows, sanitized_skc_count = _sanitize_skc_variant_rows(group["rows"], group.get("headers"))
             row_numbers = group["row_numbers"]
             items.append(
                 {
@@ -314,6 +382,7 @@ def _query_d_groups_from_index(query: str, store: str, index):
                     "html": _rows_to_excel_html(rows),
                     "htmlRows": _rows_to_html_rows(rows),
                     "column_count": max((len(row) for row in rows), default=0),
+                    "sanitized_skc_count": sanitized_skc_count,
                 }
             )
     items.sort(key=lambda item: _excel_score(Path(item["file"])), reverse=True)
