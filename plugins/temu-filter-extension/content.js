@@ -1873,6 +1873,57 @@
     return Promise.resolve();
   }
 
+  function rowsDataToClipboardPayload(rowsData) {
+    var text = String((rowsData && (rowsData.text || rowsData.tsv)) || "");
+    var html = rowsData && rowsData.html ? String(rowsData.html) : "";
+    if (!html && rowsData && rowsData.htmlRows) {
+      html = '<html><head><meta charset="utf-8"></head><body><table style="border-collapse:collapse;">' +
+        String(rowsData.htmlRows) + "</table></body></html>";
+    }
+    return { text: text, html: html };
+  }
+
+  function copyTablePayload(payload) {
+    var text = String((payload && payload.text) || "");
+    var html = String((payload && payload.html) || "");
+    if (html && navigator.clipboard && navigator.clipboard.write && window.ClipboardItem) {
+      try {
+        var item = new ClipboardItem({
+          "text/html": new Blob([html], { type: "text/html;charset=utf-8" }),
+          "text/plain": new Blob([text], { type: "text/plain;charset=utf-8" }),
+        });
+        return navigator.clipboard.write([item]).catch(function () {
+          return copyText(text);
+        });
+      } catch (err) {
+        return copyText(text);
+      }
+    }
+    return copyText(text);
+  }
+
+  function combineRowsPayloads(payloads) {
+    var texts = [];
+    var htmlRows = [];
+    payloads.forEach(function (payload) {
+      if (!payload) return;
+      if (payload.text) texts.push(String(payload.text));
+      var html = String(payload.html || "");
+      if (!html) return;
+      var matches = html.match(/<tr[\s\S]*?<\/tr>/gi);
+      if (matches && matches.length) {
+        htmlRows = htmlRows.concat(matches);
+      } else {
+        htmlRows.push("<tr><td>" + escapeHTML(payload.text || "") + "</td></tr>");
+      }
+    });
+    return {
+      text: texts.join("\r\n"),
+      html: '<html><head><meta charset="utf-8"></head><body><table style="border-collapse:collapse;font-family:Arial,Microsoft YaHei,sans-serif;font-size:11pt;">' +
+        htmlRows.join("\n") + "</table></body></html>",
+    };
+  }
+
   function extractTitleFingerprint(title) {
     var text = String(title || "").replace(/\s+/g, " ").trim();
     var match = text.match(/(?:^|[\s，,、。])([A-Z0-9]{3})$/i);
@@ -1929,10 +1980,16 @@
         if (contentType.indexOf("application/json") >= 0) {
           var data = await res.json();
           if (Array.isArray(data.items) && data.items.length && data.items[0].tsv) {
-            return { text: data.items[0].tsv, item: data.items[0], source: "d-groups" };
+            return {
+              text: data.items[0].tsv,
+              html: data.items[0].html || data.html || "",
+              htmlRows: data.items[0].htmlRows || data.htmlRows || "",
+              item: data.items[0],
+              source: "d-groups"
+            };
           }
           var text = data.clipboardText || data.tsv || data.text || recordsToTsv(data.rows || data.records || data.data);
-          if (text && String(text).trim()) return { text: String(text), item: data, source: "generic-json" };
+          if (text && String(text).trim()) return { text: String(text), html: data.html || "", htmlRows: data.htmlRows || "", item: data, source: "generic-json" };
         } else {
           var raw = await res.text();
           if (raw && raw.trim()) return { text: raw, item: null, source: "text" };
@@ -1991,7 +2048,7 @@
     }
     var rowsData = await fetchFingerprintRowsData(lookupKey);
     if (rowsData && rowsData.text) {
-      await copyText(rowsData.text);
+      await copyTablePayload(rowsDataToClipboardPayload(rowsData));
       await recordCopiedEvent(record, rowsData.item);
       showToast("已复制并记录：" + getCurrentStoreName() + " / " + lookupKey + (rowsData.item && rowsData.item.D ? " / " + rowsData.item.D : ""));
       return;
@@ -2381,7 +2438,7 @@
         return !removedKeys[record.key] && record.lookupKey;
       });
       var seenLookup = {};
-      var chunks = [];
+      var payloads = [];
       var matchedRecords = [];
       try {
         setBatchBusy(onlyUncopied ? "正在检查未复制..." : "正在查行...");
@@ -2396,16 +2453,16 @@
           }
           var rowsData = await fetchFingerprintRowsData(record.lookupKey);
           if (!rowsData || !rowsData.text) continue;
-          chunks.push(rowsData.text);
+          payloads.push(rowsDataToClipboardPayload(rowsData));
           matchedRecords.push({ record: record, item: rowsData.item });
         }
-        if (!chunks.length) {
+        if (!payloads.length) {
           showToast(onlyUncopied ? "没有未复制的可复制记录" : "没有可复制记录");
           setNewWorkbookStatus(onlyUncopied ? "没有未复制的可复制记录" : "没有可复制记录", true);
           return;
         }
         setBatchBusy("正在写入剪贴板：" + matchedRecords.length + " 组D行");
-        await copyText(chunks.join("\r\n"));
+        await copyTablePayload(combineRowsPayloads(payloads));
         setBatchBusy("剪贴板已写入，正在记录复制状态...");
         for (var j = 0; j < matchedRecords.length; j++) {
           await recordCopiedEvent(matchedRecords[j].record, matchedRecords[j].item);

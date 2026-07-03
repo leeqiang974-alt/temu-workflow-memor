@@ -471,3 +471,43 @@ L043060503 主池最终 3 套：
 - 主池校验：`groups 197 rows 591 min 3 max 3 bad [] missing 0`
 
 当前仍未写回 Excel，未上传最终商品图，未改 T/U/J/标题。
+
+## 2026-07-03 Temu 筛选插件 D 行复制格式修复
+
+用户反馈：
+
+- 插件复制出的 D 值行与原表格内的格子格式不一致，导致无法使用。
+
+排查结论：
+
+- 插件前端只调用 `navigator.clipboard.writeText()` 写入纯文本 TSV。
+- 8765 后台 `/api/d-groups` 只返回 `tsv/clipboardText`，没有返回 Excel/WPS 可识别的 `text/html` 表格。
+- 纯文本 TSV 在长 URL、多 URL、富文本描述和单元格换行场景下，粘贴到 Excel/WPS 时容易丢失表格剪贴板结构，表现为格子格式与原表不一致。
+
+修复：
+
+- `tools\temu_control_panel.py`
+  - `/api/d-groups` 每个 item 新增 `html`、`htmlRows`、`column_count`。
+  - `/api/fingerprint-copy`、`/api/copy-rows-by-fingerprint` 等兼容接口也透出首个命中的 `html/htmlRows`。
+  - `tsv` 继续保留，作为旧浏览器兜底。
+- `C:\Users\Administrator\Documents\Codex\2026-06-08\comfyui\work\temu_control_panel.py`
+  - 已同步同样修复并重启 8765 后台。
+- `plugins\temu-filter-extension\content.js`
+  - 新增富剪贴板写入：优先 `ClipboardItem` 同时写 `text/html` 和 `text/plain`。
+  - 单个 `复制` 和 `一键复制全页/未复制` 都走同一套富剪贴板逻辑。
+  - 不支持 `ClipboardItem` 时自动回退纯 TSV。
+- `workflows\pricing-plugin-workflow.md`
+  - 写入死规则：D 行复制必须同时写 `text/html` 表格和 `text/plain` TSV，不能只复制纯文本。
+
+验证：
+
+- `node --check plugins\temu-filter-extension\content.js` 通过。
+- `python -m py_compile tools\temu_control_panel.py` 通过。
+- `python -m py_compile C:\Users\Administrator\Documents\Codex\2026-06-08\comfyui\work\temu_control_panel.py` 通过。
+- 8765 后台已重启，当前监听进程：`11684`。
+- `/api/d-groups?d=E9A&store=DXXmall` 返回：`items=6`、`html=True`、`htmlRows=True`、`column_count=54`、首个命中 `row_count=3`。
+
+使用注意：
+
+- 浏览器扩展需要在扩展管理页点击重新加载，且 Temu 页面刷新后新 content script 才会生效。
+- 当前修复只改变复制格式，不改查行逻辑、不写回 Excel、不上传。

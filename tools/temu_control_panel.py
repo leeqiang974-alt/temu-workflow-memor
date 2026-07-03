@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import html as html_lib
 import mimetypes
 import os
 import subprocess
@@ -100,6 +101,35 @@ def _tsv_cell(value):
 
 def _rows_to_tsv(rows):
     return "\n".join("\t".join(_tsv_cell(value) for value in row) for row in rows)
+
+
+def _html_cell(value):
+    text = "" if value is None else str(value)
+    text = text.replace("\r\n", "\n").replace("\r", "\n")
+    return "<br>".join(html_lib.escape(part) for part in text.split("\n"))
+
+
+def _rows_to_html_rows(rows):
+    html_rows = []
+    for row in rows:
+        cells = []
+        for value in row:
+            cells.append(
+                '<td style="mso-number-format:\'\\@\';white-space:normal;border:1px solid #d9d9d9;padding:2px 4px;vertical-align:top;">'
+                + _html_cell(value)
+                + "</td>"
+            )
+        html_rows.append("<tr>" + "".join(cells) + "</tr>")
+    return "\n".join(html_rows)
+
+
+def _rows_to_excel_html(rows):
+    return (
+        '<html><head><meta charset="utf-8"></head><body>'
+        '<table style="border-collapse:collapse;font-family:Arial,Microsoft YaHei,sans-serif;font-size:11pt;">'
+        + _rows_to_html_rows(rows)
+        + "</table></body></html>"
+    )
 
 
 def _find_header_col(headers, names):
@@ -236,6 +266,9 @@ def _query_d_groups(query: str, store: str):
                     "row_range": f"{min(row_numbers)}-{max(row_numbers)}" if row_numbers else "",
                     "row_numbers": row_numbers,
                     "tsv": _rows_to_tsv(rows),
+                    "html": _rows_to_excel_html(rows),
+                    "htmlRows": _rows_to_html_rows(rows),
+                    "column_count": max((len(row) for row in rows), default=0),
                 }
             )
     items.sort(key=lambda item: _excel_score(Path(item["file"])), reverse=True)
@@ -543,6 +576,8 @@ class ControlPanelHandler(BaseHTTPRequestHandler):
                 data = _query_d_groups(lookup, store)
                 if data.get("items"):
                     data["tsv"] = data["items"][0].get("tsv", "")
+                    data["html"] = data["items"][0].get("html", "")
+                    data["htmlRows"] = data["items"][0].get("htmlRows", "")
                     data["clipboardText"] = data["tsv"]
                 return _json_response(self, data)
 
