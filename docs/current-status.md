@@ -1146,3 +1146,25 @@ Claude/NVIDIA final gate：
 - 审查结论：`decision=pass`
 - 强制检查脚本结果：`ok=true`，`artifact_count=3`
 - 以上四份 JSON 报告已写入 `claude_nvidia_review_path` 与 `claude_nvidia_gate_ok=true`。
+
+## 2026-07-03 7月2日裂变表删除 L063060503 后保留 5D
+
+用户要求对 `D:\Desktop\jit\DXXmall\DXXMALLminimini新核价\7月2日核价过了6条已经裂变_全量OSS图片URL修复_补齐54列_20260703.xlsx` 删除 `L063060503` 的 D 行，只保留 5 个 D，并检查表格。
+
+输出：
+
+- 过程表：`D:\Desktop\jit\DXXmall\DXXMALLminimini新核价\7月2日核价过了6条已经裂变_全量OSS图片URL修复_补齐54列_删除L063060503_5D_过程_不入库_20260703.xlsx`
+- 最终表：`D:\Desktop\jit\DXXmall\DXXMALLminimini新核价\7月2日核价过了6条已经裂变_删除L063060503_5D_补齐54列_URL编码校验_20260703.xlsx`
+- 删除报告：`D:\Desktop\jit\DXXmall\DXXMALLminimini新核价\7月2日核价过了6条已经裂变_全量OSS图片URL修复_补齐54列_删除L063060503_5D_过程_不入库_20260703.delete_l063060503_report.json`
+- 最终校验报告：`D:\Desktop\jit\DXXmall\DXXMALLminimini新核价\7月2日核价过了6条已经裂变_删除L063060503_5D_补齐54列_URL编码校验_20260703.validation_20260703.json`
+- URL 编码报告：`D:\Desktop\jit\DXXmall\DXXMALLminimini新核价\7月2日核价过了6条已经裂变_删除L063060503_5D_补齐54列_URL编码校验_20260703.image_url_encode_report.json`
+
+检查结果：
+
+- 源表 `91` 行、`54` 列、`90` 条数据；`产品货号(D)` 列为空，因此按全行文本精确匹配 `L063060503` 删除。
+- 删除原始 Excel 行 `52-81`，共 `30` 行；最终 `61` 行、`60` 条数据、`54` 列。
+- 剩余 D 组：`L076060503=10`、`L091060507=10`、`L091060503=10`、`L086060510=20`、`L076060505=10`，共 `5` 个 D。
+- `L063060503` 残留 `0`。
+- J/T/U 空值 `0`，T>10 `0`，U!=T1 `0`，变体属性值空 `0`，SKC/SKU JSON bad `0`，多 D 行 `0`。
+- URL 编码校验：`changed_cell_count=90`，`changed_url_occurrence_count=150`，`total_url_occurrences_after=1260`，`unsafe_url_occurrences_after=0`，`unsafe_url_cells_after=0`。
+- Claude/NVIDIA final gate：`D:\Desktop\jit\DXXmall\DXXMALLminimini新核价\claude_nvidia_delete_l063060503_5d_final_gate_20260703.md`，`decision=pass`，强制脚本 `ok=true`、`artifact_count=1`。三份 JSON 报告已写入 `claude_nvidia_review_path` 与 `claude_nvidia_gate_ok=true`。
