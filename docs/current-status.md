@@ -1008,3 +1008,47 @@ L043060503 主池最终 3 套：
 - `SKC属性` JSON 可解析，且 `previewImgUrls` 无空值。
 - T 数分布：`7` 张 `20` 行、`8` 张 `10` 行、`9` 张 `10` 行、`10` 张 `50` 行。
 - 抽样图片 URL HEAD 均为 `200 image/jpeg`。
+
+## 2026-07-03 三表 OSS 图片 URL 全量返工修复
+
+用户指出此前交付的三张修复表仍有图片链接问题，且旧修复只围绕单个坏 URL/L095/L076 做补丁，范围过窄。已按用户要求删除旧错误产物并重新从干净源表全量处理。
+
+已删除的旧错误/中间副本包括：
+
+- `*_修复OSS截断URL_20260703*`
+- `*_修复L076060505尺寸图完整URL_20260703*`
+- `*_修复L095060505尺寸图完整URL_20260703*`
+- `repair_three_workbooks_truncated_oss_url_validation_20260703.json`
+
+新增全量修复脚本：
+
+- `scripts\full_repair_workbook_oss_image_urls.ps1`
+
+脚本规则：
+
+- 复制源表后处理，绝不覆盖源表。
+- 扫描工作簿所有单元格内的 `ozonshanghai.oss-cn-shanghai.aliyuncs.com` 图片 URL。
+- 带标准图片后缀的 OSS URL 以静态图片后缀通过；没有图片后缀/疑似截断的 OSS URL 走 OSS 元数据和 bucket prefix 查找。
+- 只有当“当前截断 key 前缀”在 OSS 中唯一匹配到一个图片对象时才自动替换；多匹配或无匹配必须进入 unresolved，不得猜。
+- 修复后必须重新扫描输出表，`bad_post_count` 必须为 `0` 才能交付。
+- 对裂变 `.xls` 旧格式表，必须补齐到 54 列并转为 `.xlsx`，尾部为 `SKCID`、`SKUID`、`创建时间`、`更新时间`。
+
+最终可用输出：
+
+- 196 表：
+  - `D:\Desktop\jit\DXXmall\outputs\store_newskill_196_writeback_197x3_t_20260703\0616-2_196_最终回传_197x3通过T首图回填_T4保留_T够6_不跨D旧图轮换_全量OSS图片URL修复验证_20260703.xlsx`
+  - 报告：`D:\Desktop\jit\DXXmall\outputs\store_newskill_196_writeback_197x3_t_20260703\0616-2_196_最终回传_197x3通过T首图回填_T4保留_T够6_不跨D旧图轮换_全量OSS图片URL修复验证_20260703.oss_url_repair_report.json`
+- 7月2日核价过了6条已经裂变：
+  - `D:\Desktop\jit\DXXmall\DXXMALLminimini新核价\7月2日核价过了6条已经裂变_全量OSS图片URL修复_补齐54列_20260703.xlsx`
+  - 报告：`D:\Desktop\jit\DXXmall\DXXMALLminimini新核价\7月2日核价过了6条已经裂变_全量OSS图片URL修复_补齐54列_20260703.oss_url_repair_report.json`
+- 7月2日核价过了6条：
+  - `D:\Desktop\jit\DXXmall\DXXMALLminimini新核价\7月2日核价过了6条_全量OSS图片URL修复验证_20260703.xlsx`
+  - 报告：`D:\Desktop\jit\DXXmall\DXXMALLminimini新核价\7月2日核价过了6条_全量OSS图片URL修复验证_20260703.oss_url_repair_report.json`
+
+最终复扫结果：
+
+- 196 表：修复 `93` 个截断/无后缀 OSS 图片 URL，`unresolved=0`，`bad_post_count=0`，`332` 行，`54` 列，唯一 OSS URL `2189`。
+- 裂变表：修复 `1` 个截断/无后缀 OSS 图片 URL，`unresolved=0`，`bad_post_count=0`，`91` 行，`54` 列，唯一 OSS URL `61`。
+- 6条表：修复 `1` 个截断/无后缀 OSS 图片 URL，`unresolved=0`，`bad_post_count=0`，`10` 行，`54` 列，唯一 OSS URL `61`。
+
+后续死规则：遇到 `SKC preview image URL cannot be empty`、`Product Carousel Image URL cannot be empty`、`Image link cannot be empty`、图片上传超时/404/无响应等图片 URL 类报错时，不能只按用户点名的 D 或单个 URL 修。必须用全量脚本扫整本工作簿，修复所有截断/无后缀 OSS URL，补齐 54 列，并用报告确认 `unresolved=0`、`bad_post_count=0` 后再交付。

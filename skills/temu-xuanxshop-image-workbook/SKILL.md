@@ -107,6 +107,15 @@ Prefer local review outputs first. Upload/write back only after user approval.
    - Run the checklist in `references/workbook-contract.md`.
    - Produce a machine-readable JSON report and a human-readable summary.
 
+9. **Repair workbook image URLs when upload errors mention images**
+   - If Temu/Xuanxshop upload errors mention empty image links, carousel image URL, SKC preview image URL, image upload timeout, 404, or an OSS URL that does not respond, do not repair only the single D or URL named in the error.
+   - Run a workbook-wide scan for every `ozonshanghai.oss-cn-shanghai.aliyuncs.com` URL in every cell.
+   - Treat OSS URLs with no image extension as suspicious/truncated. Resolve them by OSS metadata and bucket prefix lookup only when the current key prefix uniquely matches one image object (`.jpg`, `.jpeg`, `.png`, `.webp`).
+   - Do not guess between multiple prefix matches. Put ambiguous or missing matches into an unresolved report and stop before delivery.
+   - After replacements, rescan the output workbook. Delivery requires zero unresolved suspicious OSS URLs and zero post-scan bad URLs.
+   - Old `.xls` or 50-column upload workbooks must be converted/copied to the current 54-column template shape, including tail columns `SKCID`, `SKUID`, `创建时间`, and `更新时间`.
+   - Delete or clearly retire earlier narrow repair outputs when a full repair supersedes them, so users do not accidentally upload stale bad copies.
+
 ## Non-Negotiable Rules
 
 - User feedback beats historical approved state. If the user says a D/image/PNG is wrong, similar, hallucinated, or “不要”, lock it out before rerunning.
@@ -126,6 +135,7 @@ Prefer local review outputs first. Upload/write back only after user approval.
 - L091 hard T rule: top structure/groove/grid pattern is the failure point. Avoid angle changes, keep strict front-facing or slight perspective, freeze the exact top structure and upper edge, and reject any output that adds/removes/changes top parts.
 - Do not let a previous round’s approved registry skip a D that appears in the current redo list.
 - Never write into the only source workbook. Always copy first.
+- Image URL upload fixes must be workbook-wide. Do not deliver a sheet after only fixing one reported D, one T4 URL, or one known bad OSS prefix; full scan and post-scan report are mandatory.
 - Never expose access keys or credentials in chat or reports.
 - Do not upload or write back unreviewed AI images.
 - If the page is too heavy to browse, rebuild it with lazy loading, pagination, or per-D loading.
