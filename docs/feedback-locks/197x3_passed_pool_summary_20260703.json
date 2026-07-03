@@ -1,0 +1,31 @@
+{
+  "generated_at": "2026-07-03T13:28:24",
+  "rule": "197 exact D groups, exactly 3 selected candidates per D. Latest user-approved redo5 is selected for L043060503 set3; redo4_b kept as overflow approved backup.",
+  "counts": {
+    "selected": 591,
+    "unique_d": 197,
+    "bad_group_count": 0,
+    "overflow_approved": 1,
+    "rejected_chain": 82,
+    "missing_images": 0,
+    "rejected_collision": 0
+  },
+  "source_stage_counts": {
+    "original_image2_197x3": 530,
+    "seedream_fallback": 13,
+    "image2_redo61": 45,
+    "image2_redo2": 2,
+    "image2_redo5_latest_pass": 1
+  },
+  "bad_groups": {},
+  "missing_images": [],
+  "rejected_collision": [],
+  "latest_user_pass": {
+    "L043060503__set3__redo1__redo5_ai_single": {
+      "decision": "keep",
+      "feedback": "可以了，通过了，归集起来，197一共3套",
+      "ts": "2026-07-03"
+    }
+  },
+  "status": "ok"
+}

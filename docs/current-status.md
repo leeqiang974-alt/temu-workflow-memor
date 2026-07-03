@@ -417,4 +417,57 @@ C 盘空间处理：为恢复仓库记忆写入能力，已将 C 盘 outputs 中
 
 - `L043060503__set3__redo1__redo5_ai_single`，source `L043_NEW_0034`
 
-这 1 张仍需用户复核通过后才可用于替换；当前未改 T/U/J/标题，未写回 Excel，未上传最终商品图。
+用户随后确认该图通过：
+
+- `可以了，通过了，归集起来，197一共3套`
+
+## 2026-07-03 197x3 通过池归集
+
+已将 197x3 全流程候选按用户反馈归集为严格主池：
+
+- 每个 exact D 保留 `3` 张候选
+- 总 D 数：`197`
+- 主池总候选：`591`
+- 缺图：`0`
+- 每组数量异常：`0`
+- 剔除链碰撞：`0`
+- 额外通过备份：`1`
+
+主池来源：
+
+- 原始 image2 197x3 未点错候选：`530`
+- redo61 image2 通过/默认通过候选：`45`
+- Seedream fallback 默认通过候选：`13`
+- Seedream 后 image2 redo2 通过候选：`2`
+- 本轮 L043060503 redo5 最新通过候选：`1`
+
+L043060503 主池最终 3 套：
+
+- set1：`L043060503__set1__redo1__redo2_image2`，source `L043_NEW_0001`
+- set2：`L043060503__set2`，source `L043_NEW_0006`
+- set3：`L043060503__set3__redo1__redo5_ai_single`，source `L043_NEW_0034`
+
+额外通过备份：
+
+- `L043060503__set3__redo1__redo4_ai_b`，source `L043_NEW_0043`，放入 overflow approved，不进入 197x3 主池。
+
+输出：
+
+- 归集脚本：`scripts\aggregate_197x3_passed_candidate_pool.py`
+- 输出目录：`D:\Desktop\jit\DXXmall\outputs\store_newskill_197x3_passed_pool_20260703`
+- 主池 JSON：`D:\Desktop\jit\DXXmall\outputs\store_newskill_197x3_passed_pool_20260703\197x3_passed_pool_selected_591.json`
+- 溢出备份 JSON：`D:\Desktop\jit\DXXmall\outputs\store_newskill_197x3_passed_pool_20260703\197x3_passed_pool_overflow_approved.json`
+- 剔除链 JSON：`D:\Desktop\jit\DXXmall\outputs\store_newskill_197x3_passed_pool_20260703\197x3_passed_pool_rejected_chain.json`
+- 摘要 JSON：`D:\Desktop\jit\DXXmall\outputs\store_newskill_197x3_passed_pool_20260703\197x3_passed_pool_summary.json`
+- 仓库摘要：`docs\feedback-locks\197x3_passed_pool_summary_20260703.json`
+- 仓库摘要 Markdown：`docs\feedback-locks\197x3_passed_pool_summary_20260703.md`
+- 8765 审核页：`http://127.0.0.1:8765/outputs/store_newskill_197x3_passed_pool_20260703/197x3_passed_pool_review.html`
+
+验证：
+
+- `python -m py_compile scripts\aggregate_197x3_passed_candidate_pool.py` 通过
+- 复核页 HTTP 状态：`200`
+- L043060503 redo5 图片 HTTP 状态：`200`
+- 主池校验：`groups 197 rows 591 min 3 max 3 bad [] missing 0`
+
+当前仍未写回 Excel，未上传最终商品图，未改 T/U/J/标题。
