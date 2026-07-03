@@ -1,0 +1,35 @@
+/* Temu 价差筛选插件样式 */
+
+#temu-filter-panel {
+  animation: slideDown 0.3s ease;
+}
+
+#temu-filter-panel button:hover {
+  opacity: 0.85;
+  transform: translateY(-1px);
+  transition: all 0.2s;
+}
+
+#temu-filter-panel input:focus {
+  outline: none;
+  border-color: #722ed1 !important;
+  box-shadow: 0 0 0 2px rgba(114, 46, 209, 0.2);
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+#temu-filter-toast {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.temu-reference-declare-highlight {
+  display: inline-block;
+  padding: 1px 4px;
+  border-radius: 3px;
+  background: #ffec3d;
+  color: #7a4b00;
+  font-weight: 800;
+}

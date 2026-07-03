@@ -145,6 +145,45 @@ L051060505 C 列 `产品描述` 已按用户反馈只删除第 1 张图 `https:/
 
 - 必须在浏览器扩展管理页重新加载插件，并刷新 Temu 页面；旧页面中的 content script 仍是旧版本。
 
+## 2026-07-03 Temu 筛选插件实际加载目录与图标
+
+用户反馈：
+
+- 扩展页仍显示插件版本 `1.3`，找不到新版插件。
+- 希望插件有一个更好看的图标。
+
+排查结论：
+
+- 仓库源插件目录是：
+  - `C:\Users\Administrator\Documents\temu自动化\plugins\temu-filter-extension`
+  - 当前版本：`1.5`
+- 浏览器实际加载的旧插件目录是：
+  - `D:\Desktop\jit\temu-filter-extension`
+  - 原版本：`1.3`
+- 因此扩展页显示 `1.3` 是因为加载了 D 盘旧包，不是 8765 后台问题。
+
+修复：
+
+- 为仓库插件生成图标：
+  - `plugins\temu-filter-extension\icons\icon16.png`
+  - `plugins\temu-filter-extension\icons\icon32.png`
+  - `plugins\temu-filter-extension\icons\icon48.png`
+  - `plugins\temu-filter-extension\icons\icon128.png`
+- `manifest.json` 新增 `icons` 和 `action.default_icon`，toolbar/扩展列表会显示新图标。
+- 仓库缺失的 `styles.css` 已补回，保证插件包完整。
+- 已把新版 `content.js`、`manifest.json`、`styles.css`、`icons` 同步到实际加载目录：
+  - `D:\Desktop\jit\temu-filter-extension`
+- D 盘实际加载目录当前验证：
+  - `manifest.json` 版本：`1.5`
+  - `icons`：存在
+  - `action.default_icon`：存在
+  - `node --check D:\Desktop\jit\temu-filter-extension\content.js` 通过
+
+使用注意：
+
+- 在浏览器扩展管理页重新加载 `D:\Desktop\jit\temu-filter-extension` 这个插件，然后刷新 Temu 页面。
+- 如果扩展页仍显示 `1.3`，说明浏览器加载的不是上面这个 D 盘目录，需要在扩展详情里看“来源/路径”，再按实际路径同步。
+
 ## 2026-07-03 197x3 复核页图片显示修复
 
 用户反馈 `197x3` 复核页右侧网页没有图片显示。排查结论：旧复核页 HTML 虽统计了 `591/591` 候选，但页面仍按原 `197` 个 D 渲染，生成图栏为 `src=""` 且显示 `pending`；源 PNG 使用 `C:/...` 绝对路径，HTTP 页面无法直接加载。
