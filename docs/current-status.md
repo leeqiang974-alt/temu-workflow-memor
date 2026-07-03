@@ -113,3 +113,23 @@ L051060505 C 列 `产品描述` 已按用户反馈只删除第 1 张图 `https:/
 - Claude Code + NVIDIA 复核结论：`Approved — Minimal, Safe, and Verified Fix`；认为修复局部、低风险，不影响翻页、滚动条、生成剔除 D 底表、预检完整流程等其它按钮。
 
 使用新版插件时，需要在浏览器扩展管理页重新加载 Temu 价差筛选插件，然后刷新 Temu 页面；旧页面里的 content script 不会自动替换。
+
+## 2026-07-03 197x3 复核页图片显示修复
+
+用户反馈 `197x3` 复核页右侧网页没有图片显示。排查结论：旧复核页 HTML 虽统计了 `591/591` 候选，但页面仍按原 `197` 个 D 渲染，生成图栏为 `src=""` 且显示 `pending`；源 PNG 使用 `C:/...` 绝对路径，HTTP 页面无法直接加载。
+
+已修复 `scripts/run_image2_197x3_t_candidates.py` 的 `build_review()`：
+
+- 复核页按 `197` 个原始 D 分组显示。
+- 每个 D 显示 source PNG 以及 `set1/set2/set3` 三张候选图。
+- 所有源图和生成图路径均转换为 8765 可访问的 `/outputs/...` URL。
+- 每个候选 set 保留独立的 `保留/重做/不要` 和反馈输入框。
+
+验证结果：
+
+- 页面返回 `200`。
+- 抽样生成图 `/outputs/store_newskill_image2_197x3_t_candidates_20260702/generated/L042/L042060501__set1_apimart.png` 返回 `200`。
+- 抽样源 PNG `/outputs/selected_280_xiangji_cutout/.../L042_NEW_0003_kept.png` 返回 `200`。
+- HTML 统计：`article_count=197`、`generated_imgs=591`、`empty_src=0`、`outputs_src=788`。
+
+如果浏览器仍显示旧页面，需要对 `http://127.0.0.1:8765/outputs/store_newskill_image2_197x3_t_candidates_20260702/0616_2_image2_197x3_t_candidates_review.html` 执行强制刷新 `Ctrl+F5`。
