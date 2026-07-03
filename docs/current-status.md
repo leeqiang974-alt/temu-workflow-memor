@@ -184,6 +184,58 @@ L051060505 C 列 `产品描述` 已按用户反馈只删除第 1 张图 `https:/
 - 在浏览器扩展管理页重新加载 `D:\Desktop\jit\temu-filter-extension` 这个插件，然后刷新 Temu 页面。
 - 如果扩展页仍显示 `1.3`，说明浏览器加载的不是上面这个 D 盘目录，需要在扩展详情里看“来源/路径”，再按实际路径同步。
 
+## 2026-07-03 Temu 筛选插件一键复制性能修复
+
+用户反馈：
+
+- 点击 `一键复制全页` 后等待约一分半仍未完成。
+
+实测根因：
+
+- 旧后台 `/api/d-groups` 每查一个指纹都会重新遍历店铺 Excel，并读取所有可扫描工作簿。
+- 对截图中的 5 个指纹实测单次查行：
+  - `E9A`：约 `10297 ms`
+  - `K6L`：约 `9441 ms`
+  - `H5Z`：约 `9023 ms`
+  - `N7J`：约 `9382 ms`
+  - `J4S`：约 `9418 ms`
+- 插件一键复制又是顺序逐个查，所以 5 条就约 47 秒；更多条时一分半是正常结果。
+
+修复：
+
+- `tools\temu_control_panel.py`
+  - 新增店铺 Excel D 组索引缓存，按文件路径、mtime、size 自动失效。
+  - `/api/d-groups` 改为复用缓存，不再每次重新读取全部 Excel。
+  - 新增 `GET/POST /api/d-groups-batch`，一次查询多个指纹/D。
+- `plugins\temu-filter-extension\content.js`
+  - 新增 `fetchFingerprintRowsBatch()`。
+  - `copyRecordsBatch()` 改为先收集需要复制的唯一 D/指纹，再一次请求 `/api/d-groups-batch`。
+  - 批量接口失败时才退回逐条查行。
+- `plugins\temu-filter-extension\manifest.json` 版本升为 `1.6`。
+- 已同步到实际加载目录：
+  - `D:\Desktop\jit\temu-filter-extension`
+- 已同步到 live 8765 后台：
+  - `C:\Users\Administrator\Documents\Codex\2026-06-08\comfyui\work\temu_control_panel.py`
+
+验证：
+
+- `python -m py_compile tools\temu_control_panel.py` 通过。
+- `python -m py_compile C:\Users\Administrator\Documents\Codex\2026-06-08\comfyui\work\temu_control_panel.py` 通过。
+- `node --check plugins\temu-filter-extension/content.js` 通过。
+- `node --check D:\Desktop\jit\temu-filter-extension\content.js` 通过。
+- 8765 已重启，监听进程：`5000`。
+- 批量接口 5 个指纹压测：
+  - 首轮命中已有缓存：`741 ms`
+  - 第二轮：`230 ms`
+  - 缓存建索引用时记录：`8707 ms`
+  - 索引文件数：`46`
+- 单个 `/api/d-groups?d=E9A&store=DXXmall` 命中缓存后：`244 ms`。
+
+使用注意：
+
+- 必须重新加载扩展 `D:\Desktop\jit\temu-filter-extension` 并刷新 Temu 页面，旧页面正在跑的一键复制仍是旧 content script，不会自动变快。
+- 8765 重启后的第一次批量查行可能需要约 8-10 秒建立索引；之后同店铺查询应接近秒级。
+
 ## 2026-07-03 197x3 复核页图片显示修复
 
 用户反馈 `197x3` 复核页右侧网页没有图片显示。排查结论：旧复核页 HTML 虽统计了 `591/591` 候选，但页面仍按原 `197` 个 D 渲染，生成图栏为 `src=""` 且显示 `pending`；源 PNG 使用 `C:/...` 绝对路径，HTTP 页面无法直接加载。

@@ -2043,6 +2043,47 @@
     return null;
   }
 
+  async function fetchFingerprintRowsBatch(lookupKeys) {
+    var keys = [];
+    var seen = {};
+    (lookupKeys || []).forEach(function (key) {
+      key = String(key || "").trim();
+      if (!key || seen[key]) return;
+      seen[key] = true;
+      keys.push(key);
+    });
+    if (!keys.length) return {};
+    try {
+      var res = await fetch("http://127.0.0.1:8765/api/d-groups-batch", {
+        method: "POST",
+        cache: "no-store",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ store: getCurrentStoreName(), queries: keys }),
+      });
+      if (!res.ok) throw new Error(await res.text());
+      var data = await res.json();
+      var results = data.results || {};
+      var mapped = {};
+      keys.forEach(function (key) {
+        var itemData = results[key] || results[key.toUpperCase()] || null;
+        if (!itemData || !Array.isArray(itemData.items) || !itemData.items.length || !itemData.items[0].tsv) return;
+        mapped[key] = {
+          text: itemData.items[0].tsv,
+          html: itemData.items[0].html || itemData.html || "",
+          htmlRows: itemData.items[0].htmlRows || itemData.htmlRows || "",
+          item: itemData.items[0],
+          source: "d-groups-batch",
+          cache_hit: !!data.cache_hit,
+          cache_build_ms: data.cache_build_ms || 0,
+        };
+      });
+      return mapped;
+    } catch (err) {
+      console.warn("[TemuFilter v9] batch d-groups failed, fallback to per-key:", err);
+      return null;
+    }
+  }
+
   async function recordCopiedEvent(record, matchedItem) {
     var payload = {
       store: getCurrentStoreName(),
@@ -2482,21 +2523,37 @@
       var seenLookup = {};
       var payloads = [];
       var matchedRecords = [];
+      var lookupRecords = [];
       try {
         setBatchBusy(onlyUncopied ? "正在检查未复制..." : "正在查行...");
         for (var i = 0; i < targets.length; i++) {
           var record = targets[i];
           if (seenLookup[record.lookupKey]) continue;
           seenLookup[record.lookupKey] = true;
-          setBatchBusy("处理中 " + (matchedRecords.length + 1) + " / " + targets.length + "：" + record.lookupKey);
+          setBatchBusy("准备查行 " + (lookupRecords.length + 1) + " / " + targets.length + "：" + record.lookupKey);
           if (onlyUncopied) {
             var status = await getCopiedStatus(record);
             if (status && status.copied) continue;
           }
-          var rowsData = await fetchFingerprintRowsData(record.lookupKey);
+          lookupRecords.push(record);
+        }
+        if (!lookupRecords.length) {
+          showToast(onlyUncopied ? "没有未复制的可复制记录" : "没有可复制记录");
+          setNewWorkbookStatus(onlyUncopied ? "没有未复制的可复制记录" : "没有可复制记录", true);
+          return;
+        }
+        setBatchBusy("正在批量查行：" + lookupRecords.length + " 个D/指纹");
+        var batchRows = await fetchFingerprintRowsBatch(lookupRecords.map(function (record) { return record.lookupKey; }));
+        for (var b = 0; b < lookupRecords.length; b++) {
+          var batchRecord = lookupRecords[b];
+          setBatchBusy("整理结果 " + (b + 1) + " / " + lookupRecords.length + "：" + batchRecord.lookupKey);
+          var rowsData = batchRows && batchRows[batchRecord.lookupKey] ? batchRows[batchRecord.lookupKey] : null;
+          if (!rowsData) {
+            rowsData = await fetchFingerprintRowsData(batchRecord.lookupKey);
+          }
           if (!rowsData || !rowsData.text) continue;
           payloads.push(rowsDataToClipboardPayload(rowsData));
-          matchedRecords.push({ record: record, item: rowsData.item });
+          matchedRecords.push({ record: batchRecord, item: rowsData.item });
         }
         if (!payloads.length) {
           showToast(onlyUncopied ? "没有未复制的可复制记录" : "没有可复制记录");

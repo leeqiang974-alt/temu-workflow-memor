@@ -34,10 +34,12 @@
 - 复制到 Excel/WPS 时必须同时写入 `text/html` 表格和 `text/plain` TSV。不能只写纯文本，否则长链接、多 URL、富文本描述和单元格换行容易导致粘贴后格子格式与原表不一致。
 - `/api/d-groups` 返回的 `tsv` 用于兜底，`html/htmlRows/column_count` 用于表格剪贴板。单个复制和批量复制都必须走同一套富剪贴板逻辑。
 - 批量复制不能只在长时间异步查行后直接写剪贴板。必须显示进度；写入时优先 `ClipboardItem text/html`，失败后用选中 HTML 表格的 `execCommand("copy")`，最后才允许纯文本兜底。若浏览器因用户激活过期拒绝富格式写入，必须在弹窗状态栏保留“立即复制已准备数据”按钮，让第二次点击直接复制已缓存 payload，不重新查行，也不能静默标记为已复制。
+- 一键复制不得逐个 D 触发 Excel 全量扫描。后台必须缓存店铺 Excel D 组索引，并提供批量查行接口；插件批量复制应一次请求 `/api/d-groups-batch` 获取多个指纹/D 的完整行，批量接口失败时才逐条兜底。
 - 已复制记录按店铺保存，后续显示“已复制”。
 - 插件前端依赖本地 `8765` 后台接口；后台不能停留在只支持 outputs 浏览的应急版。
 - 当前必须可用接口：
   - `GET /api/d-groups?d=<指纹或D或SKU>&store=<店铺>`：返回最新店铺最终表中完整 D 组 TSV。
+  - `POST /api/d-groups-batch`：传入 `{store, queries:[...]}`，一次返回多个指纹/D 的完整 D 组 TSV/HTML，并复用后台 Excel 索引缓存。
   - `POST /api/price-copy-event`：记录店铺、D、指纹、标题、来源表、行数和价格信息。
   - `GET /api/price-copy-status?store=<店铺>&fingerprint=<指纹>` 或 `&d=<D>`：返回已复制提醒。
   - `GET /api/store-passed-d?store=<店铺>`：预览该店铺已复制/通过 D。

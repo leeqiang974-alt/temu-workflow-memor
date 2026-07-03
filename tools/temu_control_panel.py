@@ -6,10 +6,12 @@ import mimetypes
 import os
 import subprocess
 import sys
+import time
 import traceback
 from datetime import datetime
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
+from threading import Lock
 from urllib.parse import parse_qs, unquote, urlparse
 
 from openpyxl import load_workbook
@@ -31,6 +33,8 @@ PRICE_COPY_LOG_PATH = WORK_DIR / "temu_price_copy_events.json"
 STORE_PRUNED_STATE_PATH = WORK_DIR / "temu_store_pruned_state.json"
 EXCEL_SKIP_WORDS = ("过程", "不入库", "复检前", "候选", "candidate", "review")
 EXCEL_PREFERRED_WORDS = ("最终", "回传", "true_final", "提交", "已应用")
+GROUP_INDEX_CACHE = {}
+GROUP_INDEX_CACHE_LOCK = Lock()
 
 
 def _read_json(path: Path, default=None):
@@ -234,19 +238,60 @@ def _read_workbook_groups(path: Path):
         wb.close()
 
 
-def _query_d_groups(query: str, store: str):
+def _workbook_signature(files):
+    signature = []
+    for path in files:
+        try:
+            stat = path.stat()
+            signature.append((str(path), stat.st_mtime_ns, stat.st_size))
+        except Exception:
+            signature.append((str(path), 0, 0))
+    return tuple(signature)
+
+
+def _store_group_index(store: str):
+    store_norm = _normalize_store(store)
+    cache_key = store_norm.lower()
+    files = _excel_files_for_store(store_norm)
+    signature = _workbook_signature(files)
+    with GROUP_INDEX_CACHE_LOCK:
+        cached = GROUP_INDEX_CACHE.get(cache_key)
+        if cached and cached.get("signature") == signature:
+            cached["cache_hit"] = True
+            return cached
+
+    started = time.perf_counter()
+    entries = []
+    errors = []
+    for path in files:
+        try:
+            entries.append({"path": path, "groups": _read_workbook_groups(path)})
+        except Exception as exc:
+            errors.append({"file": str(path), "error": str(exc)})
+    index = {
+        "store": store_norm,
+        "signature": signature,
+        "entries": entries,
+        "errors": errors,
+        "built_at": _now_text(),
+        "build_ms": int((time.perf_counter() - started) * 1000),
+        "file_count": len(files),
+        "cache_hit": False,
+    }
+    with GROUP_INDEX_CACHE_LOCK:
+        GROUP_INDEX_CACHE[cache_key] = index
+    return index
+
+
+def _query_d_groups_from_index(query: str, store: str, index):
     query_norm = str(query or "").strip()
     query_upper = query_norm.upper()
     if not query_norm:
-        return {"items": [], "error_count": 0}
+        return {"items": [], "error_count": 0, "query": query_norm, "store": _normalize_store(store)}
     items = []
-    errors = []
-    for path in _excel_files_for_store(store):
-        try:
-            groups = _read_workbook_groups(path)
-        except Exception as exc:
-            errors.append({"file": str(path), "error": str(exc)})
-            continue
+    for entry in index.get("entries") or []:
+        path = entry["path"]
+        groups = entry["groups"]
         for d_value, group in groups.items():
             sku_hit = any(query_upper and query_upper in sku for sku in group["sku_values"])
             if query_upper not in {d_value.upper(), group["fingerprint"].upper()} and not sku_hit and query_upper not in group["title"].upper():
@@ -276,9 +321,45 @@ def _query_d_groups(query: str, store: str):
         "items": items,
         "query": query_norm,
         "store": _normalize_store(store),
-        "error_count": len(errors),
-        "errors": errors[:10],
-        "built_at": _now_text(),
+        "error_count": len(index.get("errors") or []),
+        "errors": (index.get("errors") or [])[:10],
+        "built_at": index.get("built_at") or _now_text(),
+        "cache_hit": bool(index.get("cache_hit")),
+        "cache_build_ms": int(index.get("build_ms") or 0),
+        "indexed_file_count": int(index.get("file_count") or 0),
+    }
+
+
+def _query_d_groups(query: str, store: str):
+    index = _store_group_index(store)
+    return _query_d_groups_from_index(query, store, index)
+
+
+def _query_d_groups_batch(queries, store: str):
+    seen = set()
+    normalized_queries = []
+    for query in queries or []:
+        value = str(query or "").strip()
+        if not value:
+            continue
+        key = value.upper()
+        if key in seen:
+            continue
+        seen.add(key)
+        normalized_queries.append(value)
+    index = _store_group_index(store)
+    results = {}
+    for query in normalized_queries:
+        results[query] = _query_d_groups_from_index(query, store, index)
+    return {
+        "ok": True,
+        "store": _normalize_store(store),
+        "queries": normalized_queries,
+        "results": results,
+        "cache_hit": bool(index.get("cache_hit")),
+        "cache_build_ms": int(index.get("build_ms") or 0),
+        "indexed_file_count": int(index.get("file_count") or 0),
+        "built_at": index.get("built_at") or _now_text(),
     }
 
 
@@ -768,6 +849,16 @@ class ControlPanelHandler(BaseHTTPRequestHandler):
                 store = (params.get("store") or ["DXXmall"])[0]
                 return _json_response(self, _query_d_groups(lookup, store))
 
+            if path == "/api/d-groups-batch":
+                store = (params.get("store") or ["DXXmall"])[0]
+                raw_keys = []
+                for name in ("keys", "queries", "d", "fingerprint"):
+                    raw_keys.extend(params.get(name) or [])
+                queries = []
+                for raw_key in raw_keys:
+                    queries.extend([part.strip() for part in str(raw_key).replace("\n", ",").split(",") if part.strip()])
+                return _json_response(self, _query_d_groups_batch(queries, store))
+
             if path == "/api/fingerprint-copy":
                 lookup = (params.get("fingerprint") or params.get("d") or [""])[0]
                 store = (params.get("store") or ["DXXmall"])[0]
@@ -872,6 +963,16 @@ class ControlPanelHandler(BaseHTTPRequestHandler):
             path = unquote(parsed.path)
             length = int(self.headers.get("Content-Length") or 0)
             raw = self.rfile.read(length).decode("utf-8", errors="replace") if length else ""
+            if path == "/api/d-groups-batch":
+                payload = json.loads(raw or "{}")
+                if not isinstance(payload, dict):
+                    return _json_response(self, {"ok": False, "error": "body must be json object"}, 400)
+                queries = payload.get("queries") or payload.get("keys") or payload.get("d") or []
+                if isinstance(queries, str):
+                    queries = [part.strip() for part in queries.replace("\n", ",").split(",") if part.strip()]
+                store = payload.get("store") or "DXXmall"
+                return _json_response(self, _query_d_groups_batch(queries, store))
+
             if path == "/api/price-copy-event":
                 payload = json.loads(raw or "{}")
                 if not isinstance(payload, dict):
