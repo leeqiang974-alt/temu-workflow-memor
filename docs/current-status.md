@@ -978,3 +978,33 @@ L043060503 主池最终 3 套：
   - 196 表副本：坏 URL token `0`，完整 URL token `2`，同 hash 可疑 URL `0`。
   - `7月2日核价过了6条已经裂变.xls` 副本：坏 URL token `0`，完整 URL token `0`，同 hash 可疑 URL `0`。
   - `7月2日核价过了6条.xlsx` 副本：坏 URL token `0`，完整 URL token `0`，同 hash 可疑 URL `0`。
+
+## 2026-07-03 7月2日裂变表图片空值报错修复
+
+用户上传 `7月2日核价过了6条已经裂变_修复OSS截断URL_20260703.xls` 后出现：
+
+- `SKC preview image URL cannot be empty`
+- `Product Carousel Image URL cannot be empty`
+- `Image link cannot be empty`
+
+排查结论：
+
+- 表内 `预览图`、`轮播图`、`产品素材图`、`SKC属性.previewImgUrls` 均有值，并非真实图片字段为空。
+- 报错表是真老式 `.xls`，只有 `50` 列。
+- 正常核价 `.xlsx` 模板为 `54` 列，末尾包含 `SKCID`、`SKUID`、`创建时间`、`更新时间`。
+- 上传器对该裂变 `.xls`/50 列结构解析异常，表现为图片字段空值报错。
+
+修复输出：
+
+- `D:\Desktop\jit\DXXmall\DXXMALLminimini新核价\7月2日核价过了6条已经裂变_修复OSS截断URL_补齐54列_转xlsx_20260703.xlsx`
+- 验证报告：
+  - `D:\Desktop\jit\DXXmall\DXXMALLminimini新核价\7月2日核价过了6条已经裂变_修复OSS截断URL_补齐54列_转xlsx_20260703.validation.json`
+
+验证结果：
+
+- Sheet `Worksheet`，`91` 行、`54` 列，数据行 `90`。
+- 尾部表头为 `所属店铺`、`SPUID`、`SKCID`、`SKUID`、`创建时间`、`更新时间`。
+- `预览图`、`轮播图`、`产品素材图` 无空值。
+- `SKC属性` JSON 可解析，且 `previewImgUrls` 无空值。
+- T 数分布：`7` 张 `20` 行、`8` 张 `10` 行、`9` 张 `10` 行、`10` 张 `50` 行。
+- 抽样图片 URL HEAD 均为 `200 image/jpeg`。
