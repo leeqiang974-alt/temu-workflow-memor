@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import json
 import html as html_lib
+import csv
+import io
 import mimetypes
 import os
 import subprocess
@@ -115,7 +117,11 @@ def _tsv_cell(value):
 
 
 def _rows_to_tsv(rows):
-    return "\n".join("\t".join(_tsv_cell(value) for value in row) for row in rows)
+    output = io.StringIO(newline="")
+    writer = csv.writer(output, delimiter="\t", lineterminator="\r\n")
+    for row in rows:
+        writer.writerow(["" if value is None else str(value).replace("\r\n", "\n").replace("\r", "\n") for value in row])
+    return output.getvalue().rstrip("\r\n")
 
 
 def _html_cell(value):

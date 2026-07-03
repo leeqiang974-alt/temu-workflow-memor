@@ -865,3 +865,47 @@ L043060503 主池最终 3 套：
 
 - 需要在浏览器扩展管理页重新加载 `D:\Desktop\jit\temu-filter-extension`，再刷新 Temu 页面，才能让 content script 1.7 生效。
 - 已经用 1.6 富 HTML 粘贴出来的旧表可能保留异常格式；应使用 1.7 重新复制粘贴，或用修复副本继续。
+
+## 2026-07-03 7月2日新核价上传报错排查
+
+用户提供：
+
+- 报错表：
+  - `D:\Desktop\jit\DXXmall\DXXMALLminimini新核价\7月2日.xlsx`
+- 正常参考表：
+  - `D:\Desktop\jit\新店铺\已过核价\已过核价.xlsx`
+
+对比结论：
+
+- 两表 Sheet1 表头完全一致，均为 `54` 列。
+- `7月2日.xlsx` 有 `9` 行有效数据；`已过核价.xlsx` Sheet1 有 `105` 行有效数据，另有空白 Sheet2/Sheet3。
+- `7月2日.xlsx` 的 `SKC属性`、`SKU属性`、`产品属性`、`SPU属性` JSON 均可解析，本轮没有复现 7月1日的 SKC 空值问题。
+- 主要差异在 `轮播图`：`7月2日.xlsx` 每行多 URL 被空格拼成一整串，换行数为 `0`；正常表每个 URL 是单元格内换行分隔。
+- 上传器通常按换行/逗号/分号拆图片 URL，空格拼接会被当成一个超长非法 URL，因此这是本轮最可能的上传阻塞原因。
+
+已生成两个修复副本，均未覆盖原表：
+
+- 最小修复版，只修 T 列换行：
+  - `D:\Desktop\jit\DXXmall\DXXMALLminimini新核价\7月2日_修复轮播图换行_按已过核价格式_20260703_160005.xlsx`
+  - 报告：`D:\Desktop\jit\DXXmall\DXXMALLminimini新核价\7月2日_修复轮播图换行_按已过核价格式_20260703_160005_report.json`
+- 推荐使用版，按正常参考表壳重建，保留 Sheet1/Sheet2/Sheet3 和模板样式，同时修 T 列换行：
+  - `D:\Desktop\jit\DXXmall\DXXMALLminimini新核价\7月2日_按已过核价模板重建_T换行修复_20260703_160222.xlsx`
+  - 报告：`D:\Desktop\jit\DXXmall\DXXMALLminimini新核价\7月2日_按已过核价模板重建_T换行修复_20260703_160222_report.json`
+
+验证结果：
+
+- 两个修复副本均为 `9` 行有效数据、`54` 列。
+- T 列 URL 计数分别为 `[10,10,10,10,7,7,8,10,9]`，均 `<=10`。
+- `预览图`、`轮播图`、`产品素材图` URL 校验通过。
+- `产品属性`、`SPU属性`、`SKC属性`、`SKU属性` JSON 校验通过。
+- 推荐版保留参考表的 `Sheet1`、`Sheet2`、`Sheet3` 结构。
+
+源头修复：
+
+- `tools\temu_control_panel.py`
+  - `_rows_to_tsv()` 改为使用 Excel-tab CSV 转义输出 TSV。
+  - 保留单元格内部换行，尤其 `轮播图` 一图一行，不再把换行替换为空格。
+- 已同步 live 后台：
+  - `C:\Users\Administrator\Documents\Codex\2026-06-08\comfyui\work\temu_control_panel.py`
+- 当前 8765 监听进程：`37048`。
+- `/api/d-groups?d=E9A&store=DXXmall` 验证：`3` 行、每行 `54` 列；T 列每行 `10` 个 URL、内部换行保留；`sanitized_skc_count=3`。

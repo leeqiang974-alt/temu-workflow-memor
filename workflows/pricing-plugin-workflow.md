@@ -32,6 +32,7 @@
 - 复制的是该指纹匹配到的完整 D 变体行，不带表头。
 - 同 D 多行必须一起复制。
 - 复制到 Excel/WPS 模板时默认只写入 TSV 文本，不写 `text/html` 表格。原因：Excel/WPS 接收 HTML 剪贴板时会把 `mso-number-format`、换行、列宽等 HTML 样式带入目标表，导致新核价模板格式被覆盖；TSV 粘贴会按列落格并保留目标表格式。
+- TSV 生成必须使用 Excel-tab 转义，保留单元格内部换行。特别是 `轮播图` 多 URL 必须保持一图一行，不能把单元格内换行替换为空格；否则上传器会把整串空格拼接 URL 当成一个非法图片链接。
 - `/api/d-groups` 仍可返回 `html/htmlRows/column_count` 供审计或特殊调试，但插件的一键复制、单条复制必须使用 `tsv` 作为主复制 payload。
 - `/api/d-groups` 和 `/api/d-groups-batch` 在返回复制 payload 前必须清洗 `SKC属性` JSON：若 `parentSpecName/specName` 为空，必须用同一行 `变种属性名称一/变种属性值一` 和 `SKU属性` 第一项的 `parentSpecId/specId` 回填；否则插件复制到新核价表后，平台会报 `变种属性取值不能为空`。
 - 批量复制不能只在长时间异步查行后静默写剪贴板。必须显示进度；若浏览器因用户激活过期拒绝 TSV 写入，必须在弹窗状态栏保留“立即复制已准备数据”按钮，让第二次点击直接复制已缓存 payload，不重新查行，也不能静默标记为已复制。
