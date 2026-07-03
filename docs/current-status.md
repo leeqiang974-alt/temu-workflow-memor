@@ -909,3 +909,43 @@ L043060503 主池最终 3 套：
   - `C:\Users\Administrator\Documents\Codex\2026-06-08\comfyui\work\temu_control_panel.py`
 - 当前 8765 监听进程：`37048`。
 - `/api/d-groups?d=E9A&store=DXXmall` 验证：`3` 行、每行 `54` 列；T 列每行 `10` 个 URL、内部换行保留；`sanitized_skc_count=3`。
+
+## 2026-07-03 196 表回填 197x3 通过 T 首图
+
+用户指定源表：
+
+- `D:\Desktop\jit\DXXmall\outputs\store_newskill_final_199_writeback_20260702_fix_feedback_20260702\0616-2_199_最终回传_已应用反馈_L042J重做_T清理_通过T回填_20260702_剔除已复制D_过程_不入库_20260703_162610.xlsx`
+
+通过池：
+
+- `D:\Desktop\jit\DXXmall\outputs\store_newskill_197x3_passed_pool_20260703\197x3_passed_pool_selected_591.json`
+- 通过池为 `197` 个 D、每 D `3` 套候选图；本次源表实际 `196` 个 D，额外未用 D 为 `L076060505`。
+
+新增脚本：
+
+- `scripts\writeback_196_with_197x3_t_pool.py`
+
+执行规则：
+
+- 只生成副本，不覆盖源表。
+- 标题、英文标题、产品描述 C、预览图 J、SKU 相关列不改。
+- 每个 D 从已审核通过的 3 套候选图中轮换选择 T1，按同 L0xx 顺序分配 set1/set2/set3 做首图差异化。
+- 候选图先压缩为 800x800 JPEG，再上传 OSS，写入公网 `https://ozonshanghai.oss-cn-shanghai.aliyuncs.com/.../197x3-passed-t-writeback/...`。
+- T4 原尺寸图必须保留在第 4 张。
+- T 必须为 6-10 张；若旧 T 少于 6 张，不替换 T1，只追加同 D 候选图至够 6 张。
+- U 列跟随最终 T1。
+- 默认不跨 D 轮换旧 T 图，避免把历史删除/死刑/污染图带回其他 D；如确需旧图轮换，脚本提供显式 `--rotate-secondary`，不可默认使用。
+
+本次安全版输出：
+
+- `D:\Desktop\jit\DXXmall\outputs\store_newskill_196_writeback_197x3_t_20260703\0616-2_196_最终回传_197x3通过T首图回填_T4保留_T够6_不跨D旧图轮换_20260703.xlsx`
+- 报告：`D:\Desktop\jit\DXXmall\outputs\store_newskill_196_writeback_197x3_t_20260703\writeback_report.json`
+- 审核页：`D:\Desktop\jit\DXXmall\outputs\store_newskill_196_writeback_197x3_t_20260703\writeback_t_audit.html`
+
+独立校验：
+
+- 有效行 `322`，唯一 D `196`。
+- 标题、英文标题、C 产品描述、J 预览图、SKU 货号、变种属性值一/二未变化。
+- T 张数行级分布：`10` 张 `251` 行、`9` 张 `36` 行、`8` 张 `23` 行、`7` 张 `6` 行、`6` 张 `6` 行。
+- 所有行 T1 均为本次 OSS 回填地址。
+- T4 原位保留、T<=10、T>=6、U=T1、无本地 `/outputs` URL。
