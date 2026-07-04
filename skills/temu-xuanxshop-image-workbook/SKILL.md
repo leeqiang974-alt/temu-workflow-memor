@@ -57,6 +57,10 @@ Prefer local review outputs first. Upload/write back only after user approval.
    - Same `D` rows share title, T first image, T carousel, and U first material.
    - J is row-level: each row may have its own variant preview based on `G` and `SKU货号`.
    - Title fingerprints/tracking codes are per workbook and per exact D; do not reuse a title code from another file or another D.
+   - Classify the task before editing:
+     - **Complete/new/redo workbook**: title, J, T, U, T4, URL safety, feedback locks, and changed-cell diff are all in scope by default.
+     - **Late-stage repair/writeback**: only the explicitly requested columns are in scope, such as T/U replacement or URL repair.
+     - Do not classify broad wording such as "make a workbook", "redo a workbook", "do a table", or "final writeback table" as late-stage T-only repair unless the user explicitly says only T/U should change or titles/J should be preserved.
 
 3. **Preflight assets**
    - Match SKU/material candidates before generating or uploading.
@@ -103,6 +107,8 @@ Prefer local review outputs first. Upload/write back only after user approval.
    - Keep the fourth image as the size image when the workbook expects that. Detect size images by filename/title clues, not merely by original position.
    - Set U equal to T first image.
    - Write J row by row from approved variant previews.
+   - For a complete/new/redo workbook, write titles from the current run's title reconstruction with a per-file/per-exact-D fingerprint. Do not silently preserve source titles.
+   - For a late-stage T/J/URL repair, recover existing title fingerprints from the current final-confirmed source workbook by exact D only when the task is explicitly a repair or the user says to keep titles.
    - Do not change unrequested columns. If helper/status columns such as X/AC require updates for the shop workflow, validate them against the current shop rule and list the exact rows changed.
 
 8. **Validate**
@@ -131,6 +137,8 @@ Prefer local review outputs first. Upload/write back only after user approval.
 - T fourth image is a hard size-image slot. If a delete/reject removes the current fourth image, find another valid size image and force it back to T[4]. If none exists, do not deliver a final workbook.
 - T must contain at most 10 URLs after all deletes, T1 replacements, and T4 repairs.
 - Reconstructed titles must stay same-D consistent and keep the deterministic per-file/per-D tracking code. When creating a final writeback from a source/final-confirmed workbook, recover titles by exact D from that workbook so the original tracking code is preserved.
+- Title handling must match task mode. A complete/new/redo workbook must have an explicit title reconstruction step and title diff/fingerprint report. Preserving old titles is allowed only for explicit late-stage repair/writeback or when the user says titles must remain unchanged; in that case the delivery must state that title differentiation is intentionally zero.
+- A workbook that only changes T/U while preserving both title and J is not a complete "redo workbook"; it is only a T/U repair or T-first replacement artifact.
 - Preserve row identity and unrequested cells. D, G, SKU, row order, variant rows, formulas, and shop helper columns must not drift during T/J/U/title writeback.
 - Deleted/rejected/不要/死刑/wrong-color images must not return through existing workbook values, approved registries, or source folders.
 - Review feedback export must read live DOM/input/textarea values so Chinese comments are preserved even when localStorage or POST saving fails.

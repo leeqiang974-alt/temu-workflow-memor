@@ -1175,7 +1175,7 @@ Claude/NVIDIA final gate：
 
 2026-07-04 用户复盘指出：这次执行被错误收窄成 `T/U` 回填，未按“做一套表格/重新做表”的完整 workflow 重做并审核 J。该输出只能作为 `197x3 set2 T/U 回填过程产物` 参考，不能单独视为完整最终表。原因是 Claude/NVIDIA prompt 被 Codex 写窄为“本任务不是新生图，而是回填 197x3 T”，且 J gate 只检查了 `J 非空/未被破坏`，没有要求 J source/match 报告、J 审核页、行级变体匹配证据，因此审查机制形式通过但实质失效。
 
-补强规则：以后用户说“做一套表格 / 重新做表 / 新表 / 最终回传表”时，默认必须包含标题、J、T、U、T4、URL、反馈锁、changed-cell diff 和全局审核页；除非用户明确说“只改 T / J 保留不动”，不得擅自收窄为 T-only。Claude/NVIDIA final gate 必须看到 J source/match 记录与 J 审核页；只检查 `J 非空` 不算通过。
+补强规则：以后用户说“做一套表格 / 重新做表 / 新表 / 最终回传表”时，默认必须包含标题重构、title diff/fingerprint、J、T、U、T4、URL、反馈锁、changed-cell diff 和全局审核页；除非用户明确说“只改 T / 标题和 J 保留不动”，不得擅自收窄为 T-only。Claude/NVIDIA final gate 必须看到标题重构/title diff、J source/match 记录与 J 审核页；只检查 `标题同 D 一致` 或 `J 非空` 不算通过。如果标题和 J 都未重做、只替换 T/U，该产物只能标记为 `T/U 修复` 或 `T 首图替换过程产物`，不能称为完整重做表。
 
 输入：
 

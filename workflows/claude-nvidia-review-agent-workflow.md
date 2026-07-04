@@ -50,7 +50,7 @@
 5. 关键样例：T 图候选、J 图候选、反馈 JSON、校验 JSON。
 6. 明确要求它输出：通过/阻止/需修改。
 
-禁止把用户的宽口径表格请求在审查包里擅自收窄为 `T-only`、`只回填 T`、`J 非空即可`。除非用户明确说“只改 T”或“J 保留不动”，审查输入包必须包含完整表格范围：标题、J、T、U、T4、URL 安全、反馈锁、changed-cell diff、J source/match 报告和审核页。
+禁止把用户的宽口径表格请求在审查包里擅自收窄为 `T-only`、`只回填 T`、`J 非空即可`、`标题保持即可`。除非用户明确说“只改 T”或“标题/J 保留不动”，审查输入包必须包含完整表格范围：标题重构、title diff/fingerprint、J、T、U、T4、URL 安全、反馈锁、changed-cell diff、J source/match 报告和审核页。
 
 ## 审查输出格式
 
@@ -64,6 +64,7 @@ Claude+NVIDIA 必须输出 JSON + 人类摘要：
   "must_not_do": [],
   "required_fixes": [],
   "checks": {
+    "title_reconstruction": "pass|fail",
     "t_model_order": "pass|fail",
     "t_source_png_rotation": "pass|fail",
     "j_variant_match": "pass|fail",
@@ -94,6 +95,12 @@ Claude+NVIDIA 必须输出 JSON + 人类摘要：
 - 只检查 `empty_j_count=0` 或“J 未被破坏”不能通过最终 gate；这只能证明未清空，不能证明按变体重做和匹配正确。
 - 必须按变体匹配：颜色、规格、型号。
 - 不得因为同 D 而把一个 SKU 图套给所有行。
+
+### 标题
+
+- 宽口径完整表格必须有标题重构、title diff 和 per-file/per-exact-D fingerprint 证据。
+- 只有明确的 late-stage repair、T-only、URL-only，或用户明确要求保留标题时，才允许恢复旧标题。
+- 如果标题和 J 都未重做，只改 T/U，审查结论必须是 `block` 或将产物降级标记为 `T/U repair artifact`，不得通过为完整最终表。
 
 ### 表格入库
 
