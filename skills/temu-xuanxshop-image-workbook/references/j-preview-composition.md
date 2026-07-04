@@ -62,12 +62,15 @@ The review page for J must show:
 - prefix
 - `G` variant
 - SKU code
+- active `sku_root` / source family
 - wanted tokens
 - matched tokens
 - selected SKU source path
 - match mode
 - warning/fallback status
 - generated J preview image
+
+The review is not valid if it only shows the final J URL. It must expose the actual PNG source path used to compose each row-level J image. Missing source provenance blocks workbook delivery.
 
 For color-paired variants, also create a pair/group audit page when practical:
 

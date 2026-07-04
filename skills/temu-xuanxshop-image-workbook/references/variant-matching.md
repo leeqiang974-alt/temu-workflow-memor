@@ -14,6 +14,14 @@ sku_root/
 
 Do not hard-code drive letters. On another computer, the user may provide a different root.
 
+For a known batch, name the actual root before processing. Examples from memory:
+
+- Current DXXmall/0616-2 raw SKU source: `E:\jit制图\{L0xx}\sku`.
+- Current DXXmall/0616-2 processed/cutout SKU registry, when explicitly approved: `...\outputs\dxxmall_0616_2_sku_root_xiangji_cutout\cutouts\{L0xx}`.
+- Older 新店 runs: `E:\JIT制图--新店\{L0xx}\sku文件_最终抠图PNG`.
+
+Do not mix these roots in one run unless the user explicitly asks for that migration and the audit page labels the source family for each row.
+
 ## Clean Source Rules
 
 Allowed image extensions: `.png`, `.jpg`, `.jpeg`, `.webp`.
@@ -83,6 +91,8 @@ J is row-level:
 
 - Match each row using `G` + `SKU货号`.
 - Print row, D, G, SKU, wanted tokens, matched tokens, source image, match mode, and warnings.
+- Write a source manifest before Excel writeback. Each row must include `row`, `D`, `G`, `SKU货号`, `sku_root`, `sku_source`, `wanted_tokens`, `matched_tokens`, `match_mode`, `warning`, and generated J path/URL.
+- If `sku_source` is missing, source root is unknown, or the selected source comes from an unapproved old/new batch root, stop and show an audit page instead of filling J.
 - Use the five-preview textured J composition in `j-preview-composition.md`.
 - If the user says all J values are suspect, rebuild all J rows rather than patching a few rows.
 - If the user reports color/variant mismatch, verify the rendered image itself, not only the source folder or filename.
