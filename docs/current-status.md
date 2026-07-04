@@ -1168,3 +1168,44 @@ Claude/NVIDIA final gate：
 - J/T/U 空值 `0`，T>10 `0`，U!=T1 `0`，变体属性值空 `0`，SKC/SKU JSON bad `0`，多 D 行 `0`。
 - URL 编码校验：`changed_cell_count=90`，`changed_url_occurrence_count=150`，`total_url_occurrences_after=1260`，`unsafe_url_occurrences_after=0`，`unsafe_url_cells_after=0`。
 - Claude/NVIDIA final gate：`D:\Desktop\jit\DXXmall\DXXMALLminimini新核价\claude_nvidia_delete_l063060503_5d_final_gate_20260703.md`，`decision=pass`，强制脚本 `ok=true`、`artifact_count=1`。三份 JSON 报告已写入 `claude_nvidia_review_path` 与 `claude_nvidia_gate_ok=true`。
+
+## 2026-07-04 195 表回填 197x3 第二套 T 首图
+
+用户要求对当前 195D 表执行“197 的新 T，第二套匹配”，并生成可审核表格。已按固定第二套执行，不轮换 set1/set3。
+
+输入：
+
+- 源表：`D:\Desktop\jit\DXXmall\outputs\store_newskill_final_199_writeback_20260702_fix_feedback_20260702\0616-2_199_最终回传_已应用反馈_L042J重做_T清理_通过T回填_20260702_剔除已复制D_过程_不入库_20260704_125505.xlsx`
+- 197x3 通过主池：`D:\Desktop\jit\DXXmall\outputs\store_newskill_197x3_passed_pool_20260703\197x3_passed_pool_selected_591.json`
+
+脚本更新：
+
+- `scripts\writeback_196_with_197x3_t_pool.py` 新增 `--fixed-first-set 1|2|3`，可按用户要求固定某一套 passed candidate 作为所有 D 的 T1。
+- 本次命令使用 `--fixed-first-set 2`，`chosen_set_dist={"2":195}`。
+- 新增 `scripts\finalize_195_set2_writeback.py`，专项处理本次 L095 T4 截断 URL、最终硬校验和审核 HTML。
+
+输出：
+
+- 最终表：`D:\Desktop\jit\DXXmall\outputs\store_newskill_195_writeback_197x3_set2_20260704\0616-2_195_最终回传_197x3第二套T首图回填_T4保留_T够6_URL编码校验_L095T4修复_FINAL_20260704.xlsx`
+- 写回报告：`D:\Desktop\jit\DXXmall\outputs\store_newskill_195_writeback_197x3_set2_20260704\writeback_report.json`
+- L095 T4 修复报告：`D:\Desktop\jit\DXXmall\outputs\store_newskill_195_writeback_197x3_set2_20260704\l095_t4_repair_report_FINAL_20260704.json`
+- 最终硬校验：`D:\Desktop\jit\DXXmall\outputs\store_newskill_195_writeback_197x3_set2_20260704\hard_validation_FINAL_20260704.json`
+- 审核页：`http://127.0.0.1:8765/outputs/store_newskill_195_writeback_197x3_set2_20260704/writeback_t_audit_FINAL_20260704.html`
+
+关键结果：
+
+- 有效行 `321`，唯一 D `195`。
+- `replace_t1_count=195`，`append_only_count=0`，全部 D 固定使用第二套 T 首图。
+- T 数分布：`10=149`、`9=26`、`8=14`、`7=3`、`6=3`，满足 T 至少 6 且最多 10。
+- L095060505 两行 T4 旧截断 URL 已替换为完整 percent-encoded `.jpg` URL，`repair_count=2`。
+- J 空值 `0`，T 空值 `0`，U!=T1 `0`，同 D 标题不一致 `0`，同 D T 不一致 `0`。
+- T4 缺失 `0`，T4 非尺寸图 `0`，T4 不可访问 `0`，`all_t4_display_ok=true`。
+- 全工作簿 URL 扫描：`total_url_occurrences_after=6987`，`unsafe_url_occurrences_after=0`，`unsafe_url_cells_after=0`。
+- `pass_hard_checks=true`。
+
+Claude/NVIDIA final gate：
+
+- 审查文件：`D:\Desktop\jit\DXXmall\outputs\store_newskill_195_writeback_197x3_set2_20260704\claude_nvidia_195_set2_writeback_final_gate_20260704.md`
+- 审查结论：`decision=pass`
+- 强制检查脚本结果：`ok=true`，`artifact_count=1`
+- `writeback_report.json`、`l095_t4_repair_report_FINAL_20260704.json`、`hard_validation_FINAL_20260704.json` 已写入 `claude_nvidia_review_path` 与 `claude_nvidia_gate_ok=true`。

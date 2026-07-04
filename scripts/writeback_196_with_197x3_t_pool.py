@@ -139,6 +139,12 @@ def chosen_order(d_value: str, prefix_index: int) -> list[int]:
     return [first] + [value for value in (1, 2, 3) if value != first]
 
 
+def fixed_chosen_order(first: int) -> list[int]:
+    if first not in (1, 2, 3):
+        raise ValueError(f"fixed first set must be 1, 2, or 3; got {first}")
+    return [first] + [value for value in (1, 2, 3) if value != first]
+
+
 def build_urls(old_urls: list[str], candidate_urls: list[str], replace_first: bool) -> tuple[list[str], str]:
     size_url = old_urls[3] if len(old_urls) >= 4 else ""
     if replace_first:
@@ -236,6 +242,13 @@ def main() -> int:
     parser.add_argument("--out-dir", required=True)
     parser.add_argument("--output-name", default="")
     parser.add_argument(
+        "--fixed-first-set",
+        type=int,
+        choices=(1, 2, 3),
+        default=0,
+        help="Use the same passed candidate set as T1 for every D instead of rotating set1/set2/set3.",
+    )
+    parser.add_argument(
         "--rotate-secondary",
         action="store_true",
         help="Rotate non-first/non-fourth old T images within each L0xx prefix. Disabled by default to avoid bringing back rejected legacy images.",
@@ -289,10 +302,13 @@ def main() -> int:
         prefix = d_value[:4]
         index = prefix_order[prefix]
         prefix_order[prefix] += 1
-        order = chosen_order(d_value, index)
+        order = fixed_chosen_order(args.fixed_first_set) if args.fixed_first_set else chosen_order(d_value, index)
         records_by_set = {int(record["set_no"]): record for record in pool[d_value]}
+        old_urls = original_by_d[d_value]
+        replace_first = len(old_urls) >= 6
+        upload_order = order if not replace_first else [order[0]]
         candidate_urls: list[str] = []
-        for set_no in order:
+        for set_no in upload_order:
             record = records_by_set[set_no]
             local_path = Path(record["local_path"])
             compressed = compressed_dir / prefix / f"{d_value}_set{set_no}_tfirst_800.jpg"
@@ -300,8 +316,6 @@ def main() -> int:
             uploaded[(d_value, set_no)] = upload_once(bucket, manifest_path, manifest, d_value, set_no, compressed)
             candidate_urls.append(uploaded[(d_value, set_no)])
 
-        old_urls = original_by_d[d_value]
-        replace_first = len(old_urls) >= 6
         final_urls, mode = build_urls(old_urls, candidate_urls, replace_first)
         final_by_d[d_value] = final_urls
         changes.append(
@@ -363,6 +377,7 @@ def main() -> int:
         "append_only_count": sum(1 for item in changes if item["mode"] == "append_until_t6"),
         "t_count_dist": dict(Counter(len(final_by_d[d]) for d in final_by_d)),
         "chosen_set_dist": dict(Counter(item["chosen_set"] for item in changes)),
+        "fixed_first_set": args.fixed_first_set or None,
         "secondary_rotations": secondary_rotations,
         "compression": {
             "count": len(compressed_report),
