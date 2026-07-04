@@ -94,7 +94,7 @@ Prefer local review outputs first. Upload/write back only after user approval.
 6. **Generate J preview images**
    - Rebuild J by row-level variant matching.
    - J preview images are SKU/variant driven and may use SKU PNGs; this does not imply T first images should use the same SKU preview source.
-   - Before rebuilding J, declare the exact batch `sku_root` and candidate source family. For current DXXmall/0616-2 work this is usually `E:\jit制图\{L0xx}\sku` or the batch's approved Xiangji/cutout SKU PNG registry; older 新店 memories used `E:\JIT制图--新店\{L0xx}\sku文件_最终抠图PNG`. Do not mix these roots silently.
+   - Before rebuilding J, declare the exact batch `sku_root` and candidate source family. Historical DXXmall/0616-2 J correction records used `E:\JIT制图--新店\{L0xx}\sku文件_最终抠图PNG`, with L043 explicitly using `白\白.png` and `灰\灰.png`; raw DXXmall SKU images may also exist under `E:\jit制图\{L0xx}\sku`. Do not substitute T product-material PNG pools such as selected/kept/Xiangji T cutout libraries for J unless the user explicitly approves that migration.
    - J source provenance is a hard gate: every generated row must have a machine-readable match record containing `row`, exact `D`, `G`, `SKU货号`, `sku_root`, `sku_source`, `wanted_tokens`, `matched_tokens`, `match_mode`, and `warning`. If the source root is unknown or any row lacks `sku_source`, stop before writing back.
    - Use the established five-preview textured composition, not a plain white background, unless the user explicitly asks for white.
    - Print or review every row-level match: `D`, row, `G`, `SKU货号`, matched tokens, selected SKU source, and warning if fallback was used.

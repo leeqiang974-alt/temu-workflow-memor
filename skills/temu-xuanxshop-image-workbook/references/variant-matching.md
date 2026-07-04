@@ -16,11 +16,12 @@ Do not hard-code drive letters. On another computer, the user may provide a diff
 
 For a known batch, name the actual root before processing. Examples from memory:
 
-- Current DXXmall/0616-2 raw SKU source: `E:\jit制图\{L0xx}\sku`.
-- Current DXXmall/0616-2 processed/cutout SKU registry, when explicitly approved: `...\outputs\dxxmall_0616_2_sku_root_xiangji_cutout\cutouts\{L0xx}`.
-- Older 新店 runs: `E:\JIT制图--新店\{L0xx}\sku文件_最终抠图PNG`.
+- Historical DXXmall/0616-2 J correction source: `E:\JIT制图--新店\{L0xx}\sku文件_最终抠图PNG`.
+- L043 historical J correction source: `E:\JIT制图--新店\L043\sku文件_最终抠图PNG\白\白.png` and `...\灰\灰.png`, with `15 PCS` / `30 PCS` red quantity labels derived from `G` + `SKU货号`.
+- Raw DXXmall SKU image source: `E:\jit制图\{L0xx}\sku`.
+- Separate new SKU/Xiangji trial source, only when explicitly selected: `D:\Desktop\jit\sku图\sku图` -> `...\outputs\dxxmall_0616_2_sku_root_xiangji_cutout`.
 
-Do not mix these roots in one run unless the user explicitly asks for that migration and the audit page labels the source family for each row.
+Do not mix these roots in one run unless the user explicitly asks for that migration and the audit page labels the source family for each row. Never use T first-image/product-material libraries such as `selected_280_xiangji_cutout`, `kept_plus_sku_variant...`, image2/Seedream candidate pools, or `t_first_800` as J SKU sources unless the task explicitly says to rebuild J from those materials.
 
 ## Clean Source Rules
 
