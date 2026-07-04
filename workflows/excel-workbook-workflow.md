@@ -47,12 +47,14 @@
 - U = T1。
 - T4 是尺寸图。死规则：不能只保留“原第4张”；必须从 T URL 文件名/标题线索识别尺寸图（如 `尺寸`、`size`、`尺码`），并强制矫正到第4张。若用户标记某个 T4 删除，删除后仍必须重新寻找/保留一个合法尺寸图在第4位；没有合法尺寸图时最终表不得交付。
 - J 按行变体匹配，不按 D 盲用。
+- “做一套表格 / 重新做表 / 新表”默认是完整表格流程，必须包含标题、J、T、U、T4、URL、反馈锁和 changed-cell diff。除非用户明确说“只改 T / J 保留不动”，否则不得把任务收窄成只回填 T/U。
+- J 审查不能只看 `预览图` 非空。必须输出 J 来源匹配记录和审核页：每行 row、D、G、SKU、wanted tokens、matched tokens、SKU source path、warning/fallback、生成 J URL。没有 J source/match 报告或 J 审核页时，最终表不得交付。
 - L042 J 死规则：L042 的 SKU/J 要保留整张 SKU 尺寸信息图，包括 `Black/Green size` 文字、尺寸标注、30PCS 钉子排和产品主体；不得误抠成仅产品主体。优先使用 `E:\jit制图\L042\sku\黑色` 与 `E:\jit制图\L042\sku\绿色` 的一级文件生成复核图，并按行属性匹配黑/绿后从对应一级文件夹随机生成五宫格；不能只信文件夹名，必须做视觉颜色校验，黑色源图不得呈现绿色标题/绿色主体，绿色源图必须呈现绿色标题/绿色主体，混放源图要写入 rejected 清单并剔除。五宫格必须按 800x800 画布等分 3x3 九宫格，取左上、右上、正中、左下、右下五个格子，每张图居中并尽量铺满自己的格子，均等排布且不重叠。禁止使用变体内二级目录、`九宫格`、`out`、`output` 目录图片。只有用户明确要求或可用额度允许时，才调用 remove.bg API 试抠图；若 remove.bg 返回 `insufficient_credits`，立即停止并回到黑/绿一级文件夹随机五宫格方案。
 - 用户删除/不要/死刑/多次删除过的 T/J URL 或白色/错误配色图不得回流；应用反馈时必须用锁文件精确删除 URL，并在最终校验中确认这些 URL 不存在。
 - 应用 T/J 复核反馈是死规则：必须先汇总所有可用反馈记录（DOM 导出、feedback lock、raw feedback、review records），去重后形成 `decision=D+type+index+url` 清单；T 删除不能只靠 URL 精确匹配，必须同时按 `精确 URL` 和 `D + T 序号(index)` 执行兜底删除。若 URL 已因重排或修复变化，仍按记录中的 `D + T序号` 删除当前 T 列对应位置，并在报告里写明 `delete-index-fallback`。`redo` 的旧 T1 必须从 T 和 U 中同时移除，并用审核通过的新 T1 回填；没有通过新 T1 时不得交付。所有用户标记删除/不要/死刑/白色/错误配色/多次删除图都要进入 delete lock，最终校验必须输出：反馈删除记录数、redo 记录数、实际移除数、残留 URL 数、按序号兜底删除数。
 - L058 特别污染锁：`l058-extra-fixed-under145k`、`L058_extra_fixed_800_under145k` 等历史补图不得回流到 L058 的 T 值；如果用户再次指出 L058 有删除项，必须先查全量 feedback/raw/review 记录，再对当前表按 URL 和 `D+T序号` 双重执行删除。
 - T 值最多 10 张，应用删除、T4 矫正、T1 替换后必须再次截断并校验。
-- 执行任何表格回填、图片删除、T/J 修复、最终表输出后，必须准备 Claude Code + NVIDIA 复核包并要求复核通过后再声称完成。复核包至少包含：执行命令/脚本摘要、输入表与输出表路径、反馈记录来源、删除/redo 清单、changed-cell diff、残留校验报告、T4/U/T≤10/J 非空校验。没有完成该复核，不得说“完成/已处理好”。复核完成后还必须运行 `scripts\require_claude_nvidia_review.ps1 -ReviewPath <审查文件> -ArtifactPath <最终输出表>`；脚本未通过时，该表只能算过程产物。
+- 执行任何表格回填、图片删除、T/J 修复、最终表输出后，必须准备 Claude Code + NVIDIA 复核包并要求复核通过后再声称完成。复核包至少包含：执行命令/脚本摘要、输入表与输出表路径、反馈记录来源、删除/redo 清单、changed-cell diff、残留校验报告、T4/U/T≤10、J 来源匹配报告、J 审核页、J URL 可访问校验。只检查 `J 非空` 不算通过；没有完成该复核，不得说“完成/已处理好”。复核完成后还必须运行 `scripts\require_claude_nvidia_review.ps1 -ReviewPath <审查文件> -ArtifactPath <最终输出表>`；脚本未通过时，该表只能算过程产物。
 - 复核页反馈导出必须读取页面实时 DOM 中的标记和 textarea 中文；不得只依赖 localStorage 或 POST 后台接口。若后台保存失败，必须仍能导出完整 JSON。
 - T 和 J URL 可访问。
 - 含中文、空格、括号的 OSS 图片 URL 必须在最终表中做 URL percent-encode；特别是 T4 尺寸图常见 `尺寸图 (8).jpg`，不能只靠 Excel 原始字符串。最终交付前必须按 T 列原始换行行读取第 4 张，并验证编码后的 URL 可访问。

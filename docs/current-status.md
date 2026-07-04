@@ -1173,6 +1173,10 @@ Claude/NVIDIA final gate：
 
 用户要求对当前 195D 表执行“197 的新 T，第二套匹配”，并生成可审核表格。已按固定第二套执行，不轮换 set1/set3。
 
+2026-07-04 用户复盘指出：这次执行被错误收窄成 `T/U` 回填，未按“做一套表格/重新做表”的完整 workflow 重做并审核 J。该输出只能作为 `197x3 set2 T/U 回填过程产物` 参考，不能单独视为完整最终表。原因是 Claude/NVIDIA prompt 被 Codex 写窄为“本任务不是新生图，而是回填 197x3 T”，且 J gate 只检查了 `J 非空/未被破坏`，没有要求 J source/match 报告、J 审核页、行级变体匹配证据，因此审查机制形式通过但实质失效。
+
+补强规则：以后用户说“做一套表格 / 重新做表 / 新表 / 最终回传表”时，默认必须包含标题、J、T、U、T4、URL、反馈锁、changed-cell diff 和全局审核页；除非用户明确说“只改 T / J 保留不动”，不得擅自收窄为 T-only。Claude/NVIDIA final gate 必须看到 J source/match 记录与 J 审核页；只检查 `J 非空` 不算通过。
+
 输入：
 
 - 源表：`D:\Desktop\jit\DXXmall\outputs\store_newskill_final_199_writeback_20260702_fix_feedback_20260702\0616-2_199_最终回传_已应用反馈_L042J重做_T清理_通过T回填_20260702_剔除已复制D_过程_不入库_20260704_125505.xlsx`

@@ -94,6 +94,8 @@ Prefer local review outputs first. Upload/write back only after user approval.
    - Print or review every row-level match: `D`, row, `G`, `SKU货号`, matched tokens, selected SKU source, and warning if fallback was used.
    - For color variants, build a pair/group audit page when practical: show same-D rows side by side with `G`, `SKU货号`, source path, visual source checks, and generated J.
    - If many rows have no positive token match, stop before writeback and ask for better SKU folders or mapping.
+   - If the user asks to "make a workbook", "redo a workbook", "do a new table", or similar broad workbook wording, J rebuild and J source audit are in scope by default. Only skip J rebuilding when the user explicitly says the task is T-only or J must be preserved.
+   - Final validation must prove more than "J is non-empty": include J source/match records, row-level variant matching status, generated J review/audit path, and whether the user approved the J review.
 
 7. **Write back only after approval**
    - Insert approved T first image as first URL in T for all rows with same `D`.
@@ -125,6 +127,7 @@ Prefer local review outputs first. Upload/write back only after user approval.
 - Reviewed image2 `redo` items are failures for final writeback. They must enter feedback lock first, then go to Seedream/Jimeng fallback or a specific redo plan; do not write those image2 outputs back to T/U.
 - Future image generation, reconstruction, Seedream fallback, or image2 redo must pass Claude Code + NVIDIA review before execution. The review package must include GitHub memory evidence, redo/fallback D list with Chinese feedback, source PNG allocation, scene/color/composition plan, and high-risk product locks.
 - Final delivery is also gated. Before saying a Temu workbook, image batch, plugin fix, or upload-ready sheet is complete, create a Claude Code + NVIDIA final review file, then run `scripts\require_claude_nvidia_review.ps1` against the review file and the exact output artifact path. Missing review, non-pass decision, or a review that does not mention the artifact path blocks delivery.
+- Claude/NVIDIA review prompts must not narrow a broad workbook request into "T-only" unless the user explicitly scoped it that way. For broad workbook outputs, the prompt must include title, J, T, U, T4, feedback locks, URL safety, changed-cell diff, and review-page evidence. A final gate that only checks "J non-empty" is insufficient and must be treated as a failed gate.
 - T fourth image is a hard size-image slot. If a delete/reject removes the current fourth image, find another valid size image and force it back to T[4]. If none exists, do not deliver a final workbook.
 - T must contain at most 10 URLs after all deletes, T1 replacements, and T4 repairs.
 - Reconstructed titles must stay same-D consistent and keep the deterministic per-file/per-D tracking code. When creating a final writeback from a source/final-confirmed workbook, recover titles by exact D from that workbook so the original tracking code is preserved.
