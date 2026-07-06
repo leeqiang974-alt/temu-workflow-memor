@@ -8,14 +8,17 @@ Scope for 2026-07-06:
 - preserve the size image at T4 and cap T at 10 URLs
 - set U = T1 for changed D rows
 - fix L085 weight to 150
-- keep existing titles and J URLs, but audit them
+- rewrite title tracking codes for this workbook
+- rebuild all J preview images, and sync SKC属性.previewImgUrls
 """
 
 from __future__ import annotations
 
 import argparse
+import hashlib
 import html
 import json
+import random
 import re
 import shutil
 import sys
@@ -23,12 +26,13 @@ import time
 import uuid
 import urllib.parse
 from collections import Counter, defaultdict
+from io import BytesIO
 from pathlib import Path
 from typing import Any
 
 import oss2
 from openpyxl import load_workbook
-from PIL import Image
+from PIL import Image, ImageDraw, ImageEnhance, ImageFilter, ImageOps
 
 
 COMFYUI_BASE = Path(r"C:\Users\Administrator\Documents\Codex\2026-06-08\comfyui")
@@ -48,10 +52,41 @@ except Exception:  # pragma: no cover
 TARGET_SIZE = 800
 TARGET_MAX_BYTES = 150 * 1024
 OSS_PREFIX = "temu-jit/dxxmall-0616-2/195x3-passed-t-writeback"
+J_OSS_PREFIX = "temu-jit/dxxmall-0616-2/192-set1-j-row-sku-variant"
 URL_RE = re.compile(r"https?://.*?(?=(?:[,;，；]?\s*https?://)|$)", re.S)
 SIZE_RE = re.compile(r"(尺寸|尺码|size|cm|inch|length|height|width|宽|长|高)", re.I)
 IMAGE_EXTS = {".png", ".jpg", ".jpeg", ".webp"}
 FORBIDDEN_SOURCE_WORDS = ("九宫格", "9grid", "out", "output", "背景素材")
+L042_SKU_ROOT = Path(r"E:\jit制图\L042\sku")
+L086_SKU_ROOT = Path(r"E:\JIT制图--新店\L086\sku文件_最终抠图PNG")
+FORBIDDEN_TITLE_WORDS = [
+    "自动",
+    "智能",
+    "AI",
+    "APP",
+    "蓝牙",
+    "wifi",
+    "遥控",
+    "感应",
+    "电动",
+    "充电",
+    "电池",
+    "USB",
+    "儿童",
+    "玩具",
+    "环保",
+    "有机",
+    "可降解",
+    "食品级",
+    "最佳",
+    "最好",
+    "顶级",
+    "久用不塌陷",
+    "长久不变形",
+    "亲肤",
+    "高弹填充",
+    "四面延伸",
+]
 
 BROKEN_L095_T4 = (
     "https://ozonshanghai.oss-cn-shanghai.aliyuncs.com/temu-jit/carousel-ocr-size/20260605/"
@@ -301,6 +336,212 @@ def choose_j_source(prefix: str, variant: str, sku: str, roots: list[Path]) -> d
     }
 
 
+def stable_int(text: str) -> int:
+    return int(hashlib.sha256(text.encode("utf-8")).hexdigest()[:16], 16)
+
+
+def stable_tracking_code(d_value: str, used: set[str], salt: str) -> str:
+    letters = "ABCDEFGHJKLMNPQRSTUVWXYZ"
+    digits = "23456789"
+    nonce = 0
+    while True:
+        digest = hashlib.sha256(f"{salt}|{d_value}|{nonce}".encode("utf-8")).digest()
+        code = letters[digest[0] % len(letters)] + digits[digest[1] % len(digits)] + letters[digest[2] % len(letters)]
+        if code not in used:
+            used.add(code)
+            return code
+        nonce += 1
+
+
+def apply_tracking_code(title: object, code: str) -> str:
+    text = re.sub(r"\s+[A-Z][0-9][A-Z]\s*$", "", str(title or "").strip())
+    if len(text) + 4 > 80:
+        text = text[:76].rstrip("，、 -")
+    return f"{text} {code}".strip()
+
+
+def color_scores(path: Path) -> dict[str, float]:
+    image = ImageOps.exif_transpose(Image.open(path)).convert("RGB").resize((300, 300), Image.Resampling.LANCZOS)
+    pixels = list(image.getdata())
+    green_pixels = sum(1 for r, g, b in pixels if g > r + 18 and g > b + 12 and g > 55)
+    title = image.crop((0, 0, 120, 46))
+    title_pixels = list(title.getdata())
+    title_green = sum(1 for r, g, b in title_pixels if g > r + 12 and g > b + 8 and g > 40)
+    return {
+        "overall_green": green_pixels / max(1, len(pixels)),
+        "title_green": title_green / max(1, len(title_pixels)),
+    }
+
+
+def l042_variant(g_value: object, sku_value: object) -> tuple[str, str]:
+    text = f"{g_value or ''} {sku_value or ''}".lower()
+    if "绿" in text or "green" in text or "l042-02" in text:
+        return "green", "绿色"
+    return "black", "黑色"
+
+
+def l042_first_level_sources(color_cn: str, reject_dir: Path) -> list[Path]:
+    folder = L042_SKU_ROOT / color_cn
+    if not folder.exists():
+        raise FileNotFoundError(f"L042 source folder missing: {folder}")
+    files = [p for p in sorted(folder.iterdir()) if p.is_file() and p.suffix.lower() in IMAGE_EXTS]
+    filtered: list[Path] = []
+    rejected: list[dict[str, Any]] = []
+    for path in files:
+        scores = color_scores(path)
+        if color_cn == "绿色":
+            keep = scores["overall_green"] >= 0.05 and scores["title_green"] >= 0.03
+        else:
+            keep = scores["overall_green"] < 0.05 and scores["title_green"] < 0.03
+        if keep:
+            filtered.append(path)
+        else:
+            rejected.append({"path": str(path), **{k: round(v, 4) for k, v in scores.items()}})
+    reject_dir.mkdir(parents=True, exist_ok=True)
+    (reject_dir / f"L042_rejected_{color_cn}_visual_mismatch.json").write_text(
+        json.dumps(rejected, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
+    if not filtered:
+        raise RuntimeError(f"no visually valid L042 {color_cn} first-level images in {folder}")
+    return filtered
+
+
+def l086_source(g_value: object, sku_value: object) -> tuple[Path, str, list[str], list[str]]:
+    text = f"{g_value or ''} {sku_value or ''}".lower()
+    if "白" in text or "white" in text:
+        raise RuntimeError(f"L086 white source is forbidden: {g_value} / {sku_value}")
+    if "黑" in text or "black" in text or "l086-00" in text:
+        return L086_SKU_ROOT / "黑" / "黑.png", "l086_black", ["black"], ["black"]
+    if any(token in text for token in ["米", "杏", "原木", "木色", "胡桃", "beige", "wood", "l086-01"]):
+        return L086_SKU_ROOT / "胡桃原木" / "原色.png", "l086_beige_mapped_to_wood", ["beige", "wood"], ["wood"]
+    raise RuntimeError(f"L086 variant has no safe match: {g_value} / {sku_value}")
+
+
+def texture_bg(seed: int) -> Image.Image:
+    rng = random.Random(seed)
+    palettes = [
+        ((237, 232, 220), (214, 223, 207)),
+        ((235, 225, 211), (224, 233, 236)),
+        ((232, 228, 218), (235, 215, 204)),
+        ((224, 232, 221), (238, 228, 205)),
+        ((230, 224, 237), (216, 225, 232)),
+    ]
+    top, bottom = palettes[seed % len(palettes)]
+    bg = Image.new("RGB", (TARGET_SIZE, TARGET_SIZE), top)
+    px = bg.load()
+    for y in range(TARGET_SIZE):
+        t = y / (TARGET_SIZE - 1)
+        base = tuple(int(top[i] * (1 - t) + bottom[i] * t) for i in range(3))
+        for x in range(TARGET_SIZE):
+            n = rng.randint(-4, 4)
+            px[x, y] = tuple(max(0, min(255, c + n)) for c in base)
+    bg = bg.filter(ImageFilter.GaussianBlur(0.35))
+    draw = ImageDraw.Draw(bg, "RGBA")
+    for x in range(-80, 900, 150):
+        draw.line((x, 0, x + 260, TARGET_SIZE), fill=(255, 255, 255, 24), width=3)
+    return bg
+
+
+def save_jpeg_under(image: Image.Image, out_path: Path, max_bytes: int = TARGET_MAX_BYTES) -> dict[str, Any]:
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    rgb = image.convert("RGB")
+    best = b""
+    quality_used = 90
+    for quality in range(90, 42, -4):
+        buf = BytesIO()
+        rgb.save(buf, format="JPEG", quality=quality, optimize=True, progressive=True, subsampling=1)
+        best = buf.getvalue()
+        quality_used = quality
+        if len(best) <= max_bytes:
+            break
+    out_path.write_bytes(best)
+    return {"bytes": len(best), "quality": quality_used, "width": TARGET_SIZE, "height": TARGET_SIZE}
+
+
+def make_l042_five_grid(source: Path, out_path: Path, seed: int) -> dict[str, Any]:
+    rng = random.Random(seed)
+    source_img = ImageOps.exif_transpose(Image.open(source)).convert("RGB")
+    source_img.thumbnail((252, 252), Image.Resampling.LANCZOS)
+    bg = texture_bg(seed)
+    cell = TARGET_SIZE / 3
+    placements = [
+        (cell * 0.5, cell * 0.5),
+        (cell * 2.5, cell * 0.5),
+        (cell * 1.5, cell * 1.5),
+        (cell * 0.5, cell * 2.5),
+        (cell * 2.5, cell * 2.5),
+    ]
+    for cx, cy in placements:
+        item = source_img.copy()
+        scale = rng.uniform(0.98, 1.02)
+        item = item.resize((int(item.width * scale), int(item.height * scale)), Image.Resampling.LANCZOS)
+        x = round(cx - item.width / 2)
+        y = round(cy - item.height / 2)
+        layer = bg.convert("RGBA")
+        shadow = Image.new("RGBA", item.size, (0, 0, 0, 0))
+        shadow.putalpha(Image.new("L", item.size, 42).filter(ImageFilter.GaussianBlur(8)))
+        layer.alpha_composite(shadow, (x + 7, y + 9))
+        bg = layer.convert("RGB")
+        bg.paste(item, (x, y))
+    return save_jpeg_under(bg, out_path)
+
+
+def make_generic_five_preview(source: Path, out_path: Path, seed: int) -> dict[str, Any]:
+    rng = random.Random(seed)
+    canvas = texture_bg(seed).convert("RGBA")
+    slots = [(0, 0, 400, 270), (400, 0, 400, 270), (200, 265, 400, 270), (0, 530, 400, 270), (400, 530, 400, 270)]
+    for index, (left, top, width, height) in enumerate(slots):
+        item = ImageOps.exif_transpose(Image.open(source)).convert("RGBA")
+        bbox = item.getbbox()
+        if bbox:
+            item = item.crop(bbox)
+        scale = min((width * 0.74) / item.width, (height * 0.74) / item.height, 1.55)
+        item = item.resize((max(1, int(item.width * scale)), max(1, int(item.height * scale))), Image.Resampling.LANCZOS)
+        x = left + (width - item.width) // 2 + [-8, 8, 0, -6, 6][index]
+        y = top + (height - item.height) // 2 + [5, -5, 0, -4, 4][index]
+        alpha = item.getchannel("A")
+        shadow = Image.new("RGBA", item.size, (0, 0, 0, 0))
+        shadow.putalpha(alpha.filter(ImageFilter.GaussianBlur(9 + rng.randint(0, 4))))
+        canvas.paste(shadow, (x + 8, y + 10), shadow)
+        canvas.paste(item, (x, y), item)
+    canvas = ImageEnhance.Contrast(ImageEnhance.Color(canvas.convert("RGB")).enhance(1.04)).enhance(1.06)
+    return save_jpeg_under(canvas, out_path)
+
+
+def upload_j_once(bucket: oss2.Bucket, manifest_path: Path, manifest: dict[str, Any], row_key: str, image_path: Path) -> str:
+    cache_key = f"{row_key}|{image_path.resolve()}"
+    uploaded = manifest.setdefault("uploaded", {})
+    if cache_key in uploaded:
+        return uploaded[cache_key]
+    object_key = f"{J_OSS_PREFIX}/{time.strftime('%Y%m%d')}/{uuid.uuid4().hex}_{row_key}_j_800.jpg"
+    bucket.put_object_from_file(object_key, str(image_path), headers={"Content-Type": "image/jpeg"})
+    endpoint = bucket.endpoint.replace("https://", "").replace("http://", "")
+    url = f"https://{bucket.bucket_name}.{endpoint}/{object_key}"
+    uploaded[cache_key] = url
+    save_json(manifest_path, manifest)
+    return url
+
+
+def update_skc_preview(value: object, preview_url: str) -> tuple[str, bool]:
+    text = str(value or "").strip()
+    if not text:
+        return text, False
+    try:
+        data = json.loads(text)
+    except Exception:
+        return text, False
+    changed = False
+    if isinstance(data, list):
+        for item in data:
+            if isinstance(item, dict) and item.get("previewImgUrls") != preview_url:
+                item["previewImgUrls"] = preview_url
+                changed = True
+    elif isinstance(data, dict) and data.get("previewImgUrls") != preview_url:
+        data["previewImgUrls"] = preview_url
+        changed = True
+    return json.dumps(data, ensure_ascii=False, separators=(",", ":")), changed
+
+
 def file_url(path: str) -> str:
     try:
         return Path(path).resolve().as_uri()
@@ -394,6 +635,16 @@ def main() -> int:
     col_t = col(h, "轮播图")
     col_u = col(h, "产品素材图")
     col_weight = col(h, "重量")
+    col_skc = col(h, "SKC属性")
+    j_manifest_path = args.out_dir / "j_upload_manifest.json"
+    j_manifest = load_manifest(j_manifest_path)
+    j_generated_dir = args.out_dir / "j_generated"
+    j_reject_dir = args.out_dir / "j_rejects"
+    l042_pools = {
+        "black": l042_first_level_sources("黑色", j_reject_dir),
+        "green": l042_first_level_sources("绿色", j_reject_dir),
+    }
+    title_salt = f"0616-2-192-set{args.set_no}-title-fingerprint-20260706"
 
     deleted_rows: list[int] = []
     for row_idx in range(ws.max_row, 1, -1):
@@ -426,11 +677,96 @@ def main() -> int:
             "T": ws.cell(row_idx, col_t).value,
             "U": ws.cell(row_idx, col_u).value,
             "weight": ws.cell(row_idx, col_weight).value,
+            "SKC": ws.cell(row_idx, col_skc).value,
         }
 
     missing_pool = sorted(set(d_rows) - set(selected_pool))
     if missing_pool:
         raise RuntimeError(f"workbook D missing from 195x3 passed pool: {missing_pool[:30]}")
+
+    title_codes: dict[str, str] = {}
+    used_title_codes: set[str] = set()
+    title_changes: list[dict[str, Any]] = []
+    for d_value in sorted(d_rows):
+        title_codes[d_value] = stable_tracking_code(d_value, used_title_codes, title_salt)
+        for row_idx in d_rows[d_value]:
+            old_title = ws.cell(row_idx, col_title).value
+            new_title = apply_tracking_code(old_title, title_codes[d_value])
+            if old_title != new_title:
+                ws.cell(row_idx, col_title).value = new_title
+                title_changes.append({"row": row_idx, "D": d_value, "old": old_title, "new": new_title, "code": title_codes[d_value]})
+
+    j_roots = [Path(r"E:\JIT制图--新店"), Path(r"E:\jit制图")]
+    j_write_records: list[dict[str, Any]] = []
+    j_cell_changes: list[dict[str, Any]] = []
+    skc_preview_changes: list[dict[str, Any]] = []
+    for row_idx in range(2, ws.max_row + 1):
+        d_value = str(ws.cell(row_idx, col_d).value or "").strip()
+        if not d_value:
+            continue
+        prefix = d_value[:4]
+        g_value = str(ws.cell(row_idx, col_g).value or "").strip()
+        sku_value = str(ws.cell(row_idx, col_sku).value or "").strip()
+        old_j = str(ws.cell(row_idx, col_j).value or "").strip()
+        if prefix == "L042":
+            variant, color_cn = l042_variant(g_value, sku_value)
+            files = l042_pools[variant]
+            source = random.Random(stable_int(f"L042|{row_idx}|{d_value}|{g_value}|{sku_value}")).choice(files)
+            local = j_generated_dir / "L042" / f"row{row_idx}_{d_value}_{variant}_fivegrid.jpg"
+            image_info = make_l042_five_grid(source, local, stable_int(f"L042|{row_idx}|{d_value}|{source}"))
+            mode = f"l042_first_level_{color_cn}_true_five_grid"
+            wanted = [variant]
+            matched = [variant]
+            warning = ""
+        elif prefix == "L086":
+            source, mode, wanted, matched = l086_source(g_value, sku_value)
+            if not source.exists():
+                raise FileNotFoundError(f"L086 source missing: {source}")
+            local = j_generated_dir / "L086" / f"row{row_idx}_{d_value}_{mode}.jpg"
+            image_info = make_generic_five_preview(source, local, stable_int(f"L086|{row_idx}|{d_value}|{source}"))
+            warning = ""
+        else:
+            match = choose_j_source(prefix, g_value, sku_value, j_roots)
+            if not match.get("sku_source"):
+                raise RuntimeError(f"missing J source for row {row_idx} {d_value}: {match}")
+            source = Path(str(match["sku_source"]))
+            if not source.exists():
+                raise FileNotFoundError(f"J source missing for row {row_idx} {d_value}: {source}")
+            local = j_generated_dir / prefix / f"row{row_idx}_{d_value}_{stable_int(str(source)) & 0xffff:x}_fivegrid.jpg"
+            image_info = make_generic_five_preview(source, local, stable_int(f"{prefix}|{row_idx}|{d_value}|{source}"))
+            mode = str(match.get("match_mode") or "")
+            wanted = list(match.get("wanted_tokens") or [])
+            matched = list(match.get("matched_tokens") or [])
+            warning = str(match.get("warning") or "")
+        j_url = upload_j_once(bucket, j_manifest_path, j_manifest, f"{d_value}_r{row_idx}", local)
+        ws.cell(row_idx, col_j).value = j_url
+        j_cell_changes.append({"row": row_idx, "D": d_value, "column": "预览图", "old": old_j, "new": j_url})
+        old_skc = ws.cell(row_idx, col_skc).value
+        new_skc, skc_changed = update_skc_preview(old_skc, j_url)
+        if skc_changed:
+            ws.cell(row_idx, col_skc).value = new_skc
+            skc_preview_changes.append({"row": row_idx, "D": d_value, "column": "SKC属性", "old": old_skc, "new": new_skc})
+        j_write_records.append(
+            {
+                "row": row_idx,
+                "D": d_value,
+                "G": g_value,
+                "SKU": sku_value,
+                "old_j": old_j,
+                "current_j": j_url,
+                "new_j": j_url,
+                "oss_url": j_url,
+                "local_image": str(local),
+                "sku_root": str(source.parent),
+                "sku_source": str(source),
+                "wanted_tokens": wanted,
+                "matched_tokens": matched,
+                "match_mode": mode,
+                "warning": warning,
+                "image_info": image_info,
+                "skc_preview_synced": skc_changed or (str(old_skc or "").find(j_url) >= 0),
+            }
+        )
 
     upload_records: dict[str, dict[str, Any]] = {}
     changes: list[dict[str, Any]] = []
@@ -503,12 +839,14 @@ def main() -> int:
     c_t = col(h2, "轮播图")
     c_u = col(h2, "产品素材图")
     c_weight = col(h2, "重量")
+    c_skc = col(h2, "SKC属性")
     by_d_titles: dict[str, set[str]] = defaultdict(set)
     by_d_t: dict[str, set[str]] = defaultdict(set)
+    title_code_by_d: dict[str, str] = {}
     issues: dict[str, list[Any]] = defaultdict(list)
     effective_rows = 0
-    j_records: list[dict[str, Any]] = []
-    j_roots = [Path(r"E:\JIT制图--新店"), Path(r"E:\jit制图")]
+    j_records: list[dict[str, Any]] = list(j_write_records)
+    j_record_by_row = {int(record["row"]): record for record in j_records}
     for row_idx, row in enumerate(ws2.iter_rows(min_row=2, values_only=True), start=2):
         d_value = str(row[c_d - 1] or "").strip()
         if not d_value:
@@ -520,10 +858,26 @@ def main() -> int:
         j_value = str(row[c_j - 1] or "").strip()
         urls = split_urls(row[c_t - 1])
         u_value = str(row[c_u - 1] or "").strip()
+        skc_value = str(row[c_skc - 1] or "")
         by_d_titles[d_value].add(title)
         by_d_t[d_value].add("\n".join(urls))
+        code_match = re.search(r"\s([A-Z][0-9][A-Z])$", title)
+        if not code_match:
+            issues["title_code_missing"].append({"row": row_idx, "D": d_value, "title": title})
+        else:
+            title_code_by_d.setdefault(d_value, code_match.group(1))
+            if title_code_by_d[d_value] != code_match.group(1):
+                issues["title_code_mismatch"].append({"row": row_idx, "D": d_value, "title": title})
+        forbidden_title_words = [word for word in FORBIDDEN_TITLE_WORDS if word.lower() in title.lower()]
+        if forbidden_title_words:
+            issues["forbidden_title_words"].append({"row": row_idx, "D": d_value, "words": forbidden_title_words, "title": title})
         if not j_value:
             issues["empty_j"].append({"row": row_idx, "D": d_value})
+        expected_j = j_record_by_row.get(row_idx, {}).get("oss_url")
+        if expected_j and j_value != expected_j:
+            issues["j_not_rebuilt_url"].append({"row": row_idx, "D": d_value, "expected": expected_j, "actual": j_value})
+        if expected_j and expected_j not in skc_value:
+            issues["skc_preview_not_synced_to_j"].append({"row": row_idx, "D": d_value})
         if not urls:
             issues["empty_t"].append({"row": row_idx, "D": d_value})
         if len(urls) > 10:
@@ -539,18 +893,26 @@ def main() -> int:
             issues["t1_not_selected_set"].append({"row": row_idx, "D": d_value})
         if d_value.startswith("L085") and row[c_weight - 1] != 150:
             issues["l085_weight_not_150"].append({"row": row_idx, "D": d_value, "weight": row[c_weight - 1]})
-        match = choose_j_source(d_value[:4], g_value, sku_value, j_roots)
-        j_records.append({"row": row_idx, "D": d_value, "G": g_value, "SKU": sku_value, "current_j": j_value, **match})
+        if d_value.startswith("L085"):
+            residual = []
+            for idx, value in enumerate(row, start=1):
+                if value is not None and "1500" in str(value):
+                    residual.append({"column": h2[idx - 1], "value": str(value)[:300]})
+            if residual:
+                issues["l085_1500_residual"].append({"row": row_idx, "D": d_value, "residual": residual})
+        if d_value.startswith("L058") and row[c_weight - 1] != 3500:
+            issues["l058_weight_changed"].append({"row": row_idx, "D": d_value, "weight": row[c_weight - 1]})
     wb2.close()
 
     for d_value, titles in by_d_titles.items():
         if len(titles) > 1:
             issues["same_d_title_mismatch"].append({"D": d_value})
-        if original_first_by_d.get(d_value, {}).get("title") not in titles:
-            issues["title_changed"].append({"D": d_value})
     for d_value, t_values in by_d_t.items():
         if len(t_values) > 1:
             issues["same_d_t_mismatch"].append({"D": d_value})
+    duplicate_title_codes = [code for code, count in Counter(title_code_by_d.values()).items() if count > 1]
+    if duplicate_title_codes:
+        issues["duplicate_title_code"].extend({"code": code} for code in duplicate_title_codes)
 
     j_missing_source = [r for r in j_records if not r.get("sku_source")]
     j_missing_file = [r for r in j_records if r.get("sku_source") and not Path(str(r["sku_source"])).exists()]
@@ -569,8 +931,15 @@ def main() -> int:
         "t1_not_selected_set_count",
         "same_d_title_mismatch_count",
         "same_d_t_mismatch_count",
-        "title_changed_count",
+        "title_code_missing_count",
+        "title_code_mismatch_count",
+        "duplicate_title_code_count",
+        "forbidden_title_words_count",
+        "j_not_rebuilt_url_count",
+        "skc_preview_not_synced_to_j_count",
+        "l085_1500_residual_count",
         "l085_weight_not_150_count",
+        "l058_weight_changed_count",
     ]:
         issue_counts.setdefault(required, 0)
     issue_counts.update(
@@ -589,7 +958,7 @@ def main() -> int:
     if isinstance(t4_validation, dict) and "t4_unreachable_count" in t4_validation:
         issue_counts["t4_unreachable_count"] = t4_validation["t4_unreachable_count"]
 
-    hard_check_exempt = {"j_warning_count", "j_missing_source_count", "j_missing_file_count"}
+    hard_check_exempt = {"j_warning_count"}
     pass_hard_checks = all(value == 0 for key, value in issue_counts.items() if key not in hard_check_exempt and isinstance(value, int))
     validation = {
         "source": str(args.source),
@@ -599,6 +968,9 @@ def main() -> int:
         "unique_d": len(by_d_t),
         "deleted_blank_d_rows": sorted(deleted_rows),
         "changed_d_count": len(changes),
+        "title_changes_count": len(title_changes),
+        "j_changes_count": len(j_cell_changes),
+        "skc_preview_changes_count": len(skc_preview_changes),
         "weight_changes": weight_changes,
         "issue_counts": issue_counts,
         "pass_hard_checks": pass_hard_checks,
@@ -609,7 +981,12 @@ def main() -> int:
             "missing_file": len(j_missing_file),
             "warnings": len(j_warning),
             "forbidden_sources": len(j_forbidden_sources),
-            "note": "J was preserved, not rewritten, in this late-stage T writeback.",
+            "note": "J was rebuilt for every effective row and SKC属性.previewImgUrls was synced to the rebuilt J URL.",
+        },
+        "title_rewrite_summary": {
+            "changed_cells": len(title_changes),
+            "unique_codes": len(set(title_code_by_d.values())),
+            "salt": title_salt,
         },
         "t_count_dist": dict(Counter(item["final_count"] for item in changes)),
         "mode_counts": dict(Counter(item["mode"] for item in changes)),
@@ -624,13 +1001,28 @@ def main() -> int:
         "set_no": args.set_no,
         "changes": changes,
         "upload_records": upload_records,
+        "title_changes": title_changes,
+        "j_cell_changes": j_cell_changes,
+        "skc_preview_changes": skc_preview_changes,
         "weight_changes": weight_changes,
         "validation": validation,
     }
     diff = {
-        "allowed_columns": ["轮播图", "产品素材图", "重量"],
+        "allowed_columns": ["产品标题", "预览图", "SKC属性", "轮播图", "产品素材图", "重量"],
         "deleted_blank_d_rows": sorted(deleted_rows),
         "changed_cells": [
+            {"row": item["row"], "D": item["D"], "column": "产品标题", "old": item["old"], "new": item["new"]}
+            for item in title_changes
+        ]
+        + [
+            {"row": item["row"], "D": item["D"], "column": "预览图", "old": item["old"], "new": item["new"]}
+            for item in j_cell_changes
+        ]
+        + [
+            {"row": item["row"], "D": item["D"], "column": "SKC属性", "old": item["old"], "new": item["new"]}
+            for item in skc_preview_changes
+        ]
+        + [
             {"row": row, "D": item["D"], "column": "轮播图", "old": snapshots[str(row)]["T"], "new": "\n".join(item["final_urls"])}
             for item in changes
             for row in item["rows"]
