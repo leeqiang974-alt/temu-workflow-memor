@@ -53,6 +53,16 @@ EXPANDED_SCENE_BANK: dict[str, list[str]] = {
         "wide backyard landscaping scene with mulch bed and clean grass, product around 18 percent height, use scene depth and background garden context, not a tight catalog crop",
         "wide courtyard planting bed with white wall and stone walkway, product around 25 percent height, exact roll geometry and tab pattern preserved",
         "wide outdoor garden-supply scene on a patio table near a flower bed, product around 22 percent height, black spiral stakes kept as original accessories with correct shape",
+        "wide suburban garden renovation scene with half-finished flower border, product around 20 percent height, original spiral stakes grouped beside edging, no straight pins",
+        "wide cottage garden edge beside brick walkway, product around 22 percent height, roll and perforated tabs preserved, stakes remain short black spiral accessories",
+        "wide modern courtyard planter strip with gravel and ornamental grass, product around 21 percent height, no extra holes, no fence-like stake arrangement",
+        "wide lawn-and-mulch transition scene with curved border, product lower-right around 23 percent height, black stakes visible but not redesigned",
+        "wide outdoor shed workbench scene beside a flower bed, product around 24 percent height, garden context visible, no measurement graphics or text",
+        "wide townhouse patio planting bed with pavers and low shrubs, product around 19 percent height, exact roll geometry and tab spacing frozen",
+        "wide park-style garden border sample scene, product around 20 percent height, original bundled black spiral stakes placed naturally on soil",
+        "wide raised vegetable bed edge scene, product around 22 percent height, product used only as edging, no new support rods or straight stakes",
+        "wide side-yard landscaping scene with stepping stones, product around 21 percent height, keep black spiral stakes short and accessory-like",
+        "wide nursery garden display scene with plants in background, product around 24 percent height, exact flexible edging roll, holes and tabs preserved",
     ],
     "L043": [
         "wide laundry folding table scene with wardrobe in background, product around 20 percent height, several folded shirts nearby but not covering holes, keep all board holes and small center hole exact",
@@ -65,6 +75,16 @@ EXPANDED_SCENE_BANK: dict[str, list[str]] = {
         "wide linen cabinet scene with towels and shirts, product center-right around 23 percent height, no redraw of hole positions",
         "wide wardrobe drawer organization scene, product partly on folding surface, product around 22 percent height, exact board hardware and panel seams preserved",
         "wide clean folding station beside closet mirror, product around 18 percent height, strong scene difference from sibling images, no generic plastic tray",
+        "wide laundry sorting counter scene with woven baskets in background, product around 21 percent height, board holes and rear raised detail visible",
+        "wide Scandinavian wardrobe room scene, product on pale wood folding bench around 19 percent height, realistic clothing scale, no tray transformation",
+        "wide linen closet shelf scene with stacked towels, product around 20 percent height, keep small center hole and all panel seams exact",
+        "wide apartment bedroom folding corner, product lower-left around 23 percent height, shirts nearby but not covering product structure",
+        "wide family laundry room island scene, product center-right around 22 percent height, rear raised edge and holes frozen",
+        "wide compact dorm closet scene, product around 20 percent height, gray/white board exact, no oversized scale",
+        "wide boutique apparel prep table scene, product around 21 percent height, folded clothing as loose props, board outline unchanged",
+        "wide open wardrobe drawer scene, product around 18 percent height, strong depth and varied palette, no generic mat redesign",
+        "wide neutral walk-in closet floor-and-shelf scene, product around 22 percent height, holes, seams and raised detail must remain",
+        "wide modern laundry cabinet scene with clean countertop, product around 24 percent height, board complete and not cropped",
     ],
     "L047": [
         "wide garden arch scene on grass path, arch legs insert directly into soil/grass, no base plates, no pedestal, no extra feet, product around 26 percent height",
@@ -77,6 +97,16 @@ EXPANDED_SCENE_BANK: dict[str, list[str]] = {
         "wide gravel garden path scene, arch legs inserted into ground, no base plates, flowers optional only on original rods",
         "wide rose garden entrance scene, one black arch, product around 26 percent height, no extra rods or duplicate arches",
         "wide balcony garden display scene with planter boxes, arch supported by original legs only, no pedestal or base",
+        "wide backyard lawn ceremony path, one black arch, legs inserted into grass, no base plate, product around 24 percent height",
+        "wide courtyard flower walkway with stone border, arch complete and single, no pedestal, product around 23 percent height",
+        "wide villa garden side path with shrubs, arch legs go directly into soil, no bottom board, product around 25 percent height",
+        "wide garden gate preview scene with gravel and greenery, single black arch, equal support legs, product around 22 percent height",
+        "wide patio planter entrance scene, arch planted in soil boxes, no foot stand, product around 24 percent height",
+        "wide outdoor wedding lawn with simple floral accents, flowers attached only to existing arch rods, no second arch or base",
+        "wide cottage rose path scene, arch lower-center, original legs only, no invented feet, product around 25 percent height",
+        "wide garden nursery display row, arch on grass/soil, no base plates or platforms, product around 23 percent height",
+        "wide courtyard pergola-adjacent scene, black arch remains separate single product, no extra rods, no base, product around 22 percent height",
+        "wide park garden photo spot scene, one black arch with original leg count, no pedestal, product around 24 percent height",
     ],
     "L063": [
         "wide empty boutique gym scene, dark rubber floor and wall mirrors, no people or body parts, product on floor around 24 percent height, exact board outline and holes frozen",
@@ -89,6 +119,16 @@ EXPANDED_SCENE_BANK: dict[str, list[str]] = {
         "wide training room with storage rack far behind, no person using product, product lower-right around 25 percent height",
         "wide neutral fitness studio with side daylight, no human model, product around 23 percent height, no invented rails or pedals",
         "wide empty exercise area with mat and towel in background only, product around 24 percent height, fixed PNG-like fidelity",
+        "wide compact home gym corner with rubber tiles, no person, product around 23 percent height, exact board holes, handles and accessories preserved",
+        "wide professional training room with wall bars far behind, no people, product lower-right around 22 percent height, no product-use action",
+        "wide bright Pilates studio with mirrors and wood floor, no people, product around 24 percent height, fixed board silhouette",
+        "wide neutral basement gym scene, no human body parts, product around 25 percent height, rails and holes unchanged",
+        "wide empty physiotherapy-style exercise room, no patient, product around 22 percent height, exact board surface pattern",
+        "wide premium athletic studio with gray mat lane, no people, product center-left around 23 percent height, no accessory redesign",
+        "wide home workout storage corner with dumbbells far in background, no person, product around 24 percent height, do not merge with props",
+        "wide clean yoga studio floor scene, no people, product around 21 percent height, product remains the same fitness board not a yoga mat",
+        "wide sports club training floor, no people, product around 25 percent height, exact handles, pedals and bands frozen",
+        "wide empty garage workout bay with daylight door, no people, product around 23 percent height, fixed cutout-like fidelity",
     ],
     "L082": [
         "wide under-sink kitchen cabinet scene, product shows left-right expandable function under cabinet, no side drawer rails, product around 24 percent height",
@@ -101,6 +141,16 @@ EXPANDED_SCENE_BANK: dict[str, list[str]] = {
         "wide laundry cabinet storage scene, product in cabinet, telescoping relation clear, no extra tracks",
         "wide compact apartment kitchen cabinet scene, product around 23 percent height, front structure preserved",
         "wide pantry counter lower shelf scene, product around 22 percent height, left and right extension visible and believable",
+        "wide pull-out under-cabinet organizer scene, product around 24 percent height, left-right extension visible, no side rails invented",
+        "wide kitchen lower-shelf scene with spice bottles as loose contents, product around 22 percent height, no drawer slides on sides",
+        "wide sink base cabinet scene with cleaning bottles, product center-right around 23 percent height, telescoping relationship clear",
+        "wide apartment pantry cabinet interior, product around 21 percent height, exact shelf/body outline and support surfaces",
+        "wide bathroom storage cabinet scene with towels in background, product around 22 percent height, no side tracks or bottom rails",
+        "wide utility room cabinet floor scene, product lower-left around 24 percent height, expandable width shown front-facing",
+        "wide kitchen island lower shelf scene, product around 23 percent height, no generic drawer redesign",
+        "wide narrow cabinet organization scene, product around 22 percent height, left-right sliding extension visible without extra hardware",
+        "wide modern pantry pull-out area, product around 24 percent height, frame and shelf silhouette frozen",
+        "wide under-stove cabinet storage scene, product around 21 percent height, no rail hardware beyond original product",
     ],
     "L086": [
         "wide kitchen countertop organizer scene, black/walnut or beige-wood product only, no white product material, product around 24 percent height",
@@ -113,6 +163,16 @@ EXPANDED_SCENE_BANK: dict[str, list[str]] = {
         "wide home sideboard storage scene, product around 23 percent height, avoid industrial workshop references, no white rack",
         "wide compact kitchen storage scene, product around 25 percent height, original non-white product color only",
         "wide utility cabinet countertop scene, product around 22 percent height, no white source or white generated product allowed",
+        "wide warm walnut pantry sideboard scene, product around 23 percent height, black/walnut/beige-wood only, exact drawer/basket units",
+        "wide cool gray kitchen countertop scene with appliance station far behind, product around 22 percent height, no white rack",
+        "wide small apartment coffee bar scene, product lower-left around 24 percent height, non-white product only, front grid frozen",
+        "wide breakfast station side counter scene, product around 23 percent height, no industrial shelving merge, no white material",
+        "wide walk-in pantry shelf scene with jars as loose contents, product around 22 percent height, original non-white rack preserved",
+        "wide home appliance corner with microwave far behind, product center-right around 24 percent height, no white variant",
+        "wide kitchen storage nook with wood cabinets, product around 23 percent height, legs, supports and top board exact",
+        "wide closet utility shelf scene, product around 22 percent height, black/walnut/beige-wood material only",
+        "wide sideboard organizer scene with bowls and cups as loose props, product around 24 percent height, drawer faces unchanged",
+        "wide premium pantry counter scene with stone backsplash, product around 23 percent height, no white generated product",
     ],
     "L095": [
         "wide balcony planter scene with railing and city daylight, product around 22 percent height, hanging/planter structure clear, green plants varied",
@@ -125,6 +185,16 @@ EXPANDED_SCENE_BANK: dict[str, list[str]] = {
         "wide backyard raised-bed scene, product near patio edge around 23 percent height, natural soil/greenery context",
         "wide modern balcony corner with white wall and terracotta pots, product around 24 percent height, strong color difference from sibling images",
         "wide garden workbench scene with seedlings and hand tools far away, product around 22 percent height, no text or logo, structure preserved",
+        "wide herb balcony scene with black railing and morning light, product around 23 percent height, planter cells visible and distinct",
+        "wide courtyard herb wall scene with stone wall and vines, product lower-right around 22 percent height, no repeated green backdrop",
+        "wide greenhouse aisle scene with seedlings and misty daylight, product around 24 percent height, frame and hanging structure clear",
+        "wide rooftop terrace planter scene with city background, product around 22 percent height, varied palette and real support surface",
+        "wide porch corner with wooden bench and potted herbs, product around 23 percent height, cells and waterproof box shape frozen",
+        "wide backyard potting table scene with soil tray in background, product around 24 percent height, no close-up-only composition",
+        "wide apartment window herb garden scene, product around 22 percent height, bright indoor-outdoor balcony context",
+        "wide garden fence planter display scene, product around 23 percent height, hanging/holder structure visible and unchanged",
+        "wide Mediterranean patio planting scene with clay pots and white wall, product around 24 percent height, strong color change from sibling scenes",
+        "wide modern terrace vegetable planter scene with raised-bed context, product around 22 percent height, grid/box specification preserved",
     ],
 }
 
@@ -140,6 +210,16 @@ DEFAULT_EXPANDED_SCENES = [
     "wide expanded high-value scene, product around 24 percent height, safe household props and no repeated background pattern",
     "wide expanded scene with product on correct support surface, product around 22 percent height, different placement and camera distance",
     "wide expanded ecommerce lifestyle scene, product around 23 percent height, distinct color palette and composition from sibling images",
+    "wide expanded home-use scene with product lower-left around 21 percent height, room or outdoor depth clearly visible, safe unbranded props",
+    "wide expanded premium scene with product center-left around 24 percent height, different surface material and natural side light",
+    "wide expanded practical-use scene with product lower-right around 20 percent height, realistic surroundings and contact shadow",
+    "wide expanded lifestyle scene with product mid-frame around 23 percent height, varied background architecture and color palette",
+    "wide expanded scene with pulled-back camera and product around 22 percent height, no tight crop, no repeated generic backdrop",
+    "wide expanded product-in-use environment, product around 25 percent height, support surface and gravity obvious",
+    "wide expanded safe household scene with product around 21 percent height, foreground/background depth and varied props",
+    "wide expanded high-value environment, product around 24 percent height, different composition and lighting from sibling images",
+    "wide expanded category-correct scene, product around 22 percent height, clear surrounding space and non-template background",
+    "wide expanded realistic ecommerce scene, product around 23 percent height, visible context, believable scale and contact shadow",
 ]
 
 
@@ -152,6 +232,22 @@ PREFIX_HARD_LOCK_APPEND = {
     "L086": "L086 hard lock: this group has no white product. Never use or generate a white rack/shelf/product; use only black, walnut, original wood, or beige-wood/non-white material from approved sources.",
     "L095": "L095 hard lock: rotate balcony, patio, greenhouse, terrace, courtyard, porch, and garden workbench scenes; do not repeat the same generic garden/green backdrop across the prefix.",
 }
+
+
+MIN_SCENES_PER_PREFIX = 20
+
+
+def validate_scene_banks() -> None:
+    short = {
+        prefix: len(scenes)
+        for prefix, scenes in EXPANDED_SCENE_BANK.items()
+        if len(scenes) < MIN_SCENES_PER_PREFIX
+    }
+    if len(DEFAULT_EXPANDED_SCENES) < MIN_SCENES_PER_PREFIX:
+        short["DEFAULT"] = len(DEFAULT_EXPANDED_SCENES)
+    if short:
+        detail = ", ".join(f"{prefix}:{count}" for prefix, count in sorted(short.items()))
+        raise RuntimeError(f"Expanded scene bank must have at least {MIN_SCENES_PER_PREFIX} scenes per prefix; short banks: {detail}")
 
 
 def load_base_module():
@@ -637,6 +733,7 @@ Object.entries(feedback).forEach(([id, item]) => {{
 
 def main() -> None:
     OUT.mkdir(parents=True, exist_ok=True)
+    validate_scene_banks()
     module = load_base_module()
     wrap_source_filter(module)
     wrap_prompt_builder(module)

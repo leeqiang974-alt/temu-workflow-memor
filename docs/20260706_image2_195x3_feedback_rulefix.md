@@ -19,9 +19,10 @@ Locked fixes:
 
 - Added `L086_NEW_0001` to the local material rejectlist after user visual feedback.
 - `scripts/run_image2_197x3_t_candidates.py` now filters feedback-locked bad sources before planning.
-- The same script now assigns concrete expanded-scene lanes from 10-scene banks for high-risk prefixes including L042, L043, L047, L063, L082, L086, and L095.
+- The same script now assigns concrete expanded-scene lanes from 20-scene banks for high-risk prefixes including L042, L043, L047, L063, L082, L086, and L095.
+- Preflight now fails if any active custom or default expanded-scene bank has fewer than 20 concrete prompts.
 - Prompt append no longer relies on vague text such as "different scene mood"; it injects the concrete expanded scene directive.
-- Skills now require 10 concrete expanded-scene prompts per L0xx before bulk generation when expansion/differentiation is requested.
+- Skills now require 20 concrete expanded-scene prompts per L0xx before bulk generation when expansion/differentiation is requested.
 
 Verification:
 
@@ -30,4 +31,4 @@ Verification:
 - Missing source: 0
 - L086 bad source hits after fix: 0
 - Placeholder/old generic scene hits after fix: 0
-- Focus prefixes L042, L043, L063, L082, L086, and L095 all have concrete expanded-scene lanes.
+- Focus prefixes L042, L043, L063, L082, L086, and L095 all have concrete expanded-scene lanes, with 20-prompt banks after the follow-up rule change.
