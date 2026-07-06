@@ -20,6 +20,7 @@ For a known batch, name the actual root before processing. Examples from memory:
 - Historical DXXmall/0616-2 J correction source: `E:\JIT制图--新店\{L0xx}\sku文件_最终抠图PNG`.
 - L043 historical J correction source: `E:\JIT制图--新店\L043\sku文件_最终抠图PNG\白\白.png` and `...\灰\灰.png`, with `15 PCS` / `30 PCS` red quantity labels derived from `G` + `SKU货号`.
 - Current L043 quantity repair rule: preserve the existing good L043 five-grid J composition and overlay the derived `15 PCS` / `30 PCS` red label once at the whole image's top-left corner. Do not regenerate a new five-grid layout from the white/gray source PNG when the existing composition is visually approved.
+- For new workbook generation, the L043 rule still applies: if the source workbook already contains the approved L043 five-grid composition, use that current J image as the base and add the quantity overlay; do not replace it with a freshly composed five-grid from `白.png` / `灰.png`.
 - Raw DXXmall SKU image source: `E:\jit制图\{L0xx}\sku`.
 - Separate new SKU/Xiangji trial source, only when explicitly selected: `D:\Desktop\jit\sku图\sku图` -> `...\outputs\dxxmall_0616_2_sku_root_xiangji_cutout`.
 
@@ -35,8 +36,7 @@ Reject source paths containing:
 
 - `九宫格`
 - `9grid`
-- `out`
-- `output`
+- `out` / `output` / `outputs` as standalone path segments
 - `背景素材`
 - generated preview/output folders
 - prior product set folders unless the user explicitly chooses them
@@ -103,6 +103,7 @@ J is row-level:
 - Write a source manifest before Excel writeback. Each row must include `row`, `D`, `G`, `SKU货号`, `sku_root`, `sku_source`, `wanted_tokens`, `matched_tokens`, `match_mode`, `warning`, and generated J path/URL.
 - If `sku_source` is missing, source root is unknown, or the selected source comes from an unapproved old/new batch root, stop and show an audit page instead of filling J.
 - Use the five-preview textured J composition in `j-preview-composition.md`.
+- For L043, the row-level manifest must still record the white/gray source path and quantity tokens, but the generated J image should preserve the existing approved five-grid base when available and only overlay the quantity label.
 - If the user says all J values are suspect, rebuild all J rows rather than patching a few rows.
 - If the user reports color/variant mismatch, verify the rendered image itself, not only the source folder or filename.
 - Do not write back J until the row-level review page is approved.

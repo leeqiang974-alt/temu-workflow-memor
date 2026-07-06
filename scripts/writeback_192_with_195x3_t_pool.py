@@ -32,7 +32,7 @@ from typing import Any
 
 import oss2
 from openpyxl import load_workbook
-from PIL import Image, ImageDraw, ImageEnhance, ImageFilter, ImageOps
+from PIL import Image, ImageDraw, ImageEnhance, ImageFilter, ImageFont, ImageOps
 
 
 COMFYUI_BASE = Path(r"C:\Users\Administrator\Documents\Codex\2026-06-08\comfyui")
@@ -56,9 +56,14 @@ J_OSS_PREFIX = "temu-jit/dxxmall-0616-2/192-set1-j-row-sku-variant"
 URL_RE = re.compile(r"https?://.*?(?=(?:[,;，；]?\s*https?://)|$)", re.S)
 SIZE_RE = re.compile(r"(尺寸|尺码|size|cm|inch|length|height|width|宽|长|高)", re.I)
 IMAGE_EXTS = {".png", ".jpg", ".jpeg", ".webp"}
-FORBIDDEN_SOURCE_WORDS = ("九宫格", "9grid", "out", "output", "背景素材")
+FORBIDDEN_SOURCE_WORDS = ("九宫格", "9grid", "output", "背景素材")
+FORBIDDEN_SOURCE_DIRS = {"out", "output", "outputs"}
 L042_SKU_ROOT = Path(r"E:\jit制图\L042\sku")
 L086_SKU_ROOT = Path(r"E:\JIT制图--新店\L086\sku文件_最终抠图PNG")
+L043_APPROVED_FIX_JSON = Path(
+    r"D:\Desktop\jit\DXXmall\outputs\store_newskill_192_writeback_195x3_set1_full_title_j_20260706"
+    r"\l043_j_quantity_fix_review\l043_quantity_fix_records.json"
+)
 FORBIDDEN_TITLE_WORDS = [
     "自动",
     "智能",
@@ -93,13 +98,11 @@ BROKEN_L095_T4 = (
     "85ef73d852584a65aaf05a1c5615dac7_L095_%E5%B0%BA%E5%AF%B8_jimeng-2026-05-08-1613-"
     "%E8%BF%99%E5%BC%A0%E5%9B%BE%E7%89%87"
 )
+BROKEN_L095_T4_HASH = "85ef73d852584a65aaf05a1c5615dac7_L095"
 
 FULL_L095_T4 = (
     "https://ozonshanghai.oss-cn-shanghai.aliyuncs.com/temu-jit/carousel-ocr-size/20260605/"
-    "85ef73d852584a65aaf05a1c5615dac7_L095_%E5%B0%BA%E5%AF%B8_jimeng-2026-05-08-1613-"
-    "%E8%BF%99%E5%BC%A0%E5%9B%BE%E7%89%87%EF%BC%8C%E4%BF%9D%E6%8C%81%E4%BA%A7%E5%93%81"
-    "%E5%92%8C%E6%A0%87%E5%B0%BA%E3%80%81%E6%95%B0%E5%AD%97%E3%80%81%E6%96%87%E5%AD%97"
-    "%E4%BF%A1%E6%81%AF%E4%B8%8D%E5%81%9A.jpg"
+    "f6d7d52f6a3c405096b1cb687e5d0256_L095_%E5%B0%BA%E5%AF%B8_2.jpg"
 )
 
 
@@ -147,6 +150,12 @@ def dedupe(values: list[str]) -> list[str]:
     return result
 
 
+def repair_known_t4_url(url: str) -> str:
+    if BROKEN_L095_T4_HASH in str(url):
+        return FULL_L095_T4
+    return url
+
+
 def is_size_url(url: str) -> bool:
     text = str(url or "")
     if not text:
@@ -165,6 +174,7 @@ def find_size_url(urls: list[str]) -> str:
 
 
 def build_t_urls(old_urls: list[str], new_t1: str) -> tuple[list[str], str, str]:
+    old_urls = [repair_known_t4_url(url) for url in old_urls]
     size_url = find_size_url(old_urls)
     if len(old_urls) < 6:
         return dedupe(old_urls + [new_t1])[:10], "append_t1_because_old_t_below_6", size_url
@@ -262,11 +272,18 @@ def clean_source_files(folder: Path) -> list[Path]:
     for path in folder.rglob("*"):
         if not path.is_file() or path.suffix.lower() not in IMAGE_EXTS:
             continue
-        lower = str(path).lower()
-        if any(word.lower() in lower for word in FORBIDDEN_SOURCE_WORDS):
+        if has_forbidden_source_path(path):
             continue
         files.append(path)
     return sorted(files, key=lambda p: str(p))
+
+
+def has_forbidden_source_path(path: Path | str) -> bool:
+    text = str(path)
+    lower = text.lower()
+    if any(word.lower() in lower for word in FORBIDDEN_SOURCE_WORDS):
+        return True
+    return any(part.lower() in FORBIDDEN_SOURCE_DIRS for part in Path(text).parts)
 
 
 def choose_j_source(prefix: str, variant: str, sku: str, roots: list[Path]) -> dict[str, Any]:
@@ -275,13 +292,15 @@ def choose_j_source(prefix: str, variant: str, sku: str, roots: list[Path]) -> d
         base = roots[0] / "L043" / "sku文件_最终抠图PNG"
         color = "灰" if "gray" in wanted else "白"
         source = base / color / f"{color}.png"
+        quantity_label, quantity_token = l043_quantity_label(variant, sku)
         return {
             "sku_root": str(base),
             "sku_source": str(source),
             "wanted_tokens": sorted(wanted),
-            "matched_tokens": sorted(wanted & token_set(str(source))),
-            "match_mode": "l043_historical_white_gray_hard_rule",
-            "warning": "" if source.exists() else "missing_l043_source",
+            "matched_tokens": sorted((wanted & token_set(str(source))) | ({quantity_token} if quantity_label else set())),
+            "quantity_label": quantity_label,
+            "match_mode": "l043_preserve_existing_fivegrid_quantity_overlay",
+            "warning": "" if source.exists() and quantity_label else "missing_l043_source_or_quantity",
         }
 
     folder_names = ["sku文件_最终抠图PNG", "sku文件", "sku"]
@@ -513,6 +532,30 @@ def make_generic_five_preview(source: Path, out_path: Path, seed: int) -> dict[s
     return save_jpeg_under(canvas, out_path)
 
 
+def load_label_font(size: int) -> ImageFont.FreeTypeFont | ImageFont.ImageFont:
+    for path in [Path(r"C:\Windows\Fonts\arialbd.ttf"), Path(r"C:\Windows\Fonts\arial.ttf"), Path(r"C:\Windows\Fonts\msyhbd.ttc")]:
+        if path.exists():
+            return ImageFont.truetype(str(path), size=size)
+    return ImageFont.load_default()
+
+
+def l043_quantity_label(g_value: object, sku_value: object) -> tuple[str, str]:
+    text = re.sub(r"\s+", "", f"{g_value or ''} {sku_value or ''}")
+    if "30" in text or "三十" in text:
+        return "30 PCS", "30"
+    if "15" in text or "十五" in text:
+        return "15 PCS", "15"
+    return "", "missing_quantity"
+
+
+def make_l043_quantity_overlay(base_image: Path, label: str, out_path: Path) -> dict[str, Any]:
+    canvas = ImageOps.exif_transpose(Image.open(base_image)).convert("RGBA").resize((TARGET_SIZE, TARGET_SIZE), Image.Resampling.LANCZOS)
+    draw = ImageDraw.Draw(canvas, "RGBA")
+    font = load_label_font(38)
+    draw.text((22, 18), label, font=font, fill=(214, 28, 25, 255), stroke_width=2, stroke_fill=(255, 245, 190, 255))
+    return save_jpeg_under(canvas.convert("RGB"), out_path)
+
+
 def upload_j_once(bucket: oss2.Bucket, manifest_path: Path, manifest: dict[str, Any], row_key: str, image_path: Path) -> str:
     cache_key = f"{row_key}|{image_path.resolve()}"
     uploaded = manifest.setdefault("uploaded", {})
@@ -536,14 +579,23 @@ def update_skc_preview(value: object, preview_url: str) -> tuple[str, bool]:
     except Exception:
         return text, False
     changed = False
-    if isinstance(data, list):
-        for item in data:
-            if isinstance(item, dict) and item.get("previewImgUrls") != preview_url:
-                item["previewImgUrls"] = preview_url
-                changed = True
-    elif isinstance(data, dict) and data.get("previewImgUrls") != preview_url:
-        data["previewImgUrls"] = preview_url
-        changed = True
+
+    def visit(node: Any) -> None:
+        nonlocal changed
+        if isinstance(node, dict):
+            if "previewImgUrls" in node:
+                current = node.get("previewImgUrls")
+                replacement: Any = [preview_url] if isinstance(current, list) else preview_url
+                if current != replacement:
+                    node["previewImgUrls"] = replacement
+                    changed = True
+            for child in node.values():
+                visit(child)
+        elif isinstance(node, list):
+            for child in node:
+                visit(child)
+
+    visit(data)
     return json.dumps(data, ensure_ascii=False, separators=(",", ":")), changed
 
 
@@ -702,6 +754,11 @@ def main() -> int:
                 title_changes.append({"row": row_idx, "D": d_value, "old": old_title, "new": new_title, "code": title_codes[d_value]})
 
     j_roots = [Path(r"E:\JIT制图--新店"), Path(r"E:\jit制图")]
+    l043_base_by_row: dict[int, dict[str, Any]] = {}
+    if L043_APPROVED_FIX_JSON.exists():
+        l043_records = load_json(L043_APPROVED_FIX_JSON)
+        if isinstance(l043_records, list):
+            l043_base_by_row = {int(record["row"]): record for record in l043_records}
     j_write_records: list[dict[str, Any]] = []
     j_cell_changes: list[dict[str, Any]] = []
     skc_preview_changes: list[dict[str, Any]] = []
@@ -723,6 +780,24 @@ def main() -> int:
             wanted = [variant]
             matched = [variant]
             warning = ""
+        elif prefix == "L043":
+            match = choose_j_source(prefix, g_value, sku_value, j_roots)
+            source = Path(str(match["sku_source"]))
+            if not source.exists():
+                raise FileNotFoundError(f"L043 source missing for row {row_idx} {d_value}: {source}")
+            quantity_label = str(match.get("quantity_label") or "")
+            if not quantity_label:
+                raise RuntimeError(f"L043 quantity missing for row {row_idx} {d_value}: {g_value} / {sku_value}")
+            base_record = l043_base_by_row.get(row_idx)
+            base_image = Path(str((base_record or {}).get("old_generated") or ""))
+            if not base_image.exists():
+                raise FileNotFoundError(f"L043 approved base J missing for row {row_idx} {d_value}: {base_image}")
+            local = j_generated_dir / "L043" / f"row{row_idx}_{d_value}_{quantity_label.replace(' ', '')}_overlay_existing.jpg"
+            image_info = make_l043_quantity_overlay(base_image, quantity_label, local)
+            mode = str(match.get("match_mode") or "")
+            wanted = list(match.get("wanted_tokens") or [])
+            matched = list(match.get("matched_tokens") or [])
+            warning = str(match.get("warning") or "")
         elif prefix == "L086":
             source, mode, wanted, matched = l086_source(g_value, sku_value)
             if not source.exists():
@@ -827,13 +902,12 @@ def main() -> int:
             for row in sheet.iter_rows():
                 for cell in row:
                     if isinstance(cell.value, str) and "http" in cell.value:
-                        cell.value = cell.value.replace(BROKEN_L095_T4, FULL_L095_T4)
-                        cell.value = encode_text(cell.value)[0].replace(BROKEN_L095_T4, FULL_L095_T4)
+                        cell.value = encode_text(cell.value)[0]
 
     wb.save(output_path)
     wb.close()
 
-    wb2 = load_workbook(output_path, read_only=True, data_only=False, keep_links=False)
+    wb2 = load_workbook(output_path, read_only=False, data_only=False, keep_links=False)
     ws2 = wb2.active
     h2 = headers(ws2)
     c_title = col(h2, "产品标题")
@@ -922,9 +996,7 @@ def main() -> int:
     j_missing_source = [r for r in j_records if not r.get("sku_source")]
     j_missing_file = [r for r in j_records if r.get("sku_source") and not Path(str(r["sku_source"])).exists()]
     j_warning = [r for r in j_records if r.get("warning")]
-    j_forbidden_sources = [
-        r for r in j_records if any(word.lower() in str(r.get("sku_source", "")).lower() for word in FORBIDDEN_SOURCE_WORDS)
-    ]
+    j_forbidden_sources = [r for r in j_records if has_forbidden_source_path(str(r.get("sku_source", "")))]
     issue_counts = {name + "_count": len(items) for name, items in sorted(issues.items())}
     for required in [
         "empty_j_count",
