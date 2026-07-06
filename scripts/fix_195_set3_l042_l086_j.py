@@ -186,9 +186,12 @@ def texture_bg(seed: int) -> Image.Image:
 
 def make_l042_five_grid(source: Path, out_path: Path, seed: int) -> dict[str, Any]:
     rng = random.Random(seed)
-    source_img = ImageOps.exif_transpose(Image.open(source)).convert("RGB")
+    source_img = ImageOps.exif_transpose(Image.open(source)).convert("RGBA")
+    bbox = source_img.getchannel("A").getbbox()
+    if bbox:
+        source_img = source_img.crop(bbox)
     source_img.thumbnail((252, 252), Image.Resampling.LANCZOS)
-    bg = texture_bg(seed)
+    canvas = texture_bg(seed).convert("RGBA")
     cell = SIZE / 3
     placements = [
         (cell * 0.5, cell * 0.5),
@@ -203,13 +206,11 @@ def make_l042_five_grid(source: Path, out_path: Path, seed: int) -> dict[str, An
         item = item.resize((int(item.width * scale), int(item.height * scale)), Image.Resampling.LANCZOS)
         x = round(cx - item.width / 2)
         y = round(cy - item.height / 2)
-        layer = bg.convert("RGBA")
         shadow = Image.new("RGBA", item.size, (0, 0, 0, 0))
-        shadow.putalpha(Image.new("L", item.size, 42).filter(ImageFilter.GaussianBlur(8)))
-        layer.alpha_composite(shadow, (x + 7, y + 9))
-        bg = layer.convert("RGB")
-        bg.paste(item, (x, y))
-    return save_jpeg_under(bg, out_path)
+        shadow.putalpha(item.getchannel("A").filter(ImageFilter.GaussianBlur(8)).point(lambda v: min(42, v // 5)))
+        canvas.alpha_composite(shadow, (x + 7, y + 9))
+        canvas.alpha_composite(item, (x, y))
+    return save_jpeg_under(canvas.convert("RGB"), out_path)
 
 
 def make_generic_five_preview(source: Path, out_path: Path, seed: int) -> dict[str, Any]:

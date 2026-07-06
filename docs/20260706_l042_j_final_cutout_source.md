@@ -28,6 +28,12 @@ Updated and checked these scripts so their L042 source pools return only the nor
 - `scripts/fix_195_set3_l042_l086_j.py`
 - `scripts/repair_l042_j_neutral_review.py`
 
+Follow-up correction:
+
+- L042 J composition must preserve the source alpha channel. Do not convert the source PNG to `RGB` before compositing.
+- Crop by the alpha bounding box, build shadows from the source alpha channel, and composite onto the J soft-texture background.
+- The review script must use the same soft textured commercial background rule as `j-preview-composition.md`, not a plain neutral grid.
+
 The regenerated L042 review manifest has 10 rows:
 
 - 5 rows using `L042_black_final_cutout.png`

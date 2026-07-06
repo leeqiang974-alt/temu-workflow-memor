@@ -85,17 +85,38 @@ def source_for_record(record: dict[str, Any], pools: dict[str, list[Path]]) -> P
     return pools[variant][0]
 
 
-def neutral_five_grid(source: Path, out_path: Path) -> None:
-    source_img = ImageOps.exif_transpose(Image.open(source)).convert("RGB")
-    # Keep the whole size-chart image, including text, dimensions and nail count.
-    source_img.thumbnail((258, 258), Image.Resampling.LANCZOS)
-    canvas = Image.new("RGB", (SIZE, SIZE), (248, 248, 246))
+def skill_texture_bg(seed: int) -> Image.Image:
+    palettes = [
+        ((237, 232, 220), (214, 223, 207)),
+        ((235, 225, 211), (224, 233, 236)),
+        ((232, 228, 218), (235, 215, 204)),
+        ((224, 232, 221), (238, 228, 205)),
+        ((230, 224, 237), (216, 225, 232)),
+    ]
+    top, bottom = palettes[seed % len(palettes)]
+    canvas = Image.new("RGB", (SIZE, SIZE), top)
+    px = canvas.load()
+    for y in range(SIZE):
+        t = y / (SIZE - 1)
+        base = tuple(int(top[i] * (1 - t) + bottom[i] * t) for i in range(3))
+        for x in range(SIZE):
+            n = ((x * 17 + y * 31 + seed) % 9) - 4
+            px[x, y] = tuple(max(0, min(255, c + n)) for c in base)
+    canvas = canvas.filter(ImageFilter.GaussianBlur(0.35))
     draw = ImageDraw.Draw(canvas, "RGBA")
-    # Extremely subtle neutral grid only; no green/yellow/colored background.
-    for x in (SIZE // 3, SIZE * 2 // 3):
-        draw.line((x, 0, x, SIZE), fill=(230, 230, 226, 70), width=1)
-    for y in (SIZE // 3, SIZE * 2 // 3):
-        draw.line((0, y, SIZE, y), fill=(230, 230, 226, 70), width=1)
+    for x in range(-80, 900, 150):
+        draw.line((x, 0, x + 260, SIZE), fill=(255, 255, 255, 24), width=3)
+    return canvas
+
+
+def neutral_five_grid(source: Path, out_path: Path, seed: int) -> None:
+    source_img = ImageOps.exif_transpose(Image.open(source)).convert("RGBA")
+    bbox = source_img.getchannel("A").getbbox()
+    if bbox:
+        source_img = source_img.crop(bbox)
+    # Keep the whole size-chart content, including text, dimensions and nail count.
+    source_img.thumbnail((258, 258), Image.Resampling.LANCZOS)
+    canvas = skill_texture_bg(seed).convert("RGBA")
     cell = SIZE / 3
     placements = [
         (cell * 0.5, cell * 0.5),
@@ -109,13 +130,11 @@ def neutral_five_grid(source: Path, out_path: Path) -> None:
         x = round(cx - item.width / 2)
         y = round(cy - item.height / 2)
         shadow_layer = Image.new("RGBA", item.size, (0, 0, 0, 0))
-        shadow_layer.putalpha(Image.new("L", item.size, 30).filter(ImageFilter.GaussianBlur(6)))
-        layer = canvas.convert("RGBA")
-        layer.alpha_composite(shadow_layer, (x + 5, y + 6))
-        canvas = layer.convert("RGB")
-        canvas.paste(item, (x, y))
+        shadow_layer.putalpha(item.getchannel("A").filter(ImageFilter.GaussianBlur(6)).point(lambda v: min(34, v // 6)))
+        canvas.alpha_composite(shadow_layer, (x + 5, y + 6))
+        canvas.alpha_composite(item, (x, y))
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    canvas.save(out_path, format="JPEG", quality=88, optimize=True, progressive=True)
+    canvas.convert("RGB").save(out_path, format="JPEG", quality=88, optimize=True, progressive=True)
 
 
 def main() -> int:
@@ -128,7 +147,7 @@ def main() -> int:
         variant, color_cn = variant_from_row(record)
         source = source_for_record(record, pools)
         out_path = REVIEW_DIR / "generated" / f"row{record['row']}_{record['D']}_{variant}_neutral_fivegrid.jpg"
-        neutral_five_grid(source, out_path)
+        neutral_five_grid(source, out_path, record["row"])
         fixed.append({
             "row": record["row"],
             "D": record["D"],
@@ -154,7 +173,7 @@ def main() -> int:
             "<div class='grid'>"
             f"<figure><figcaption>源图 PNG/JPG</figcaption><img src='{html.escape(file_url(item['source']))}' loading='lazy'></figure>"
             f"<figure><figcaption>旧 J（错误：背景二次干扰）</figcaption><img src='{html.escape(file_url(item['old_generated']))}' loading='lazy'></figure>"
-            f"<figure><figcaption>新 J（中性五宫格）</figcaption><img src='{html.escape(file_url(item['new_generated']))}' loading='lazy'></figure>"
+            f"<figure><figcaption>新 J（透明 PNG + skill 软纹理五宫格）</figcaption><img src='{html.escape(file_url(item['new_generated']))}' loading='lazy'></figure>"
             "</div></section>"
         )
     REVIEW_HTML.write_text(
@@ -168,7 +187,7 @@ figure{{margin:0}} figcaption{{font-size:13px;font-weight:700;margin-bottom:6px}
 img{{width:100%;height:310px;object-fit:contain;background:#fafafa;border:1px solid #e5e7eb}}
 .bad{{color:#b42318;font-weight:700}}
 </style></head><body><header><h1>L042 J 专项纠错复核</h1>
-<p class='bad'>修正点：L042 不再使用随机彩色纹理背景；按 G + SKU 只选黑色/绿色一级文件夹源图，保留整张尺寸图文字和钉子，生成中性五宫格。</p>
+<p class='bad'>修正点：L042 按 G + SKU 只选 final cutout 透明 PNG，保留 alpha 通道和整张尺寸图文字/钉子，并按 J 背景 skill 生成软纹理五宫格。</p>
 <p>records: {len(fixed)}</p></header>{''.join(cards)}</body></html>""",
         encoding="utf-8",
     )
