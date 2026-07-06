@@ -521,6 +521,11 @@ def _url_for_local_path(value: str | None) -> str:
         resolved = path.resolve()
     except Exception:
         resolved = path
+    if os.environ.get("REVIEW_IMAGE_URL_MODE", "").lower() == "file":
+        try:
+            return resolved.as_uri()
+        except ValueError:
+            return ""
     mappings = [
         (OUT.resolve(), f"/outputs/{OUT.name}"),
         (ORIGINAL_OUT.resolve(), f"/outputs/{ORIGINAL_OUT.name}"),
