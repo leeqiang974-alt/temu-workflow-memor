@@ -19,6 +19,7 @@ For a known batch, name the actual root before processing. Examples from memory:
 
 - Historical DXXmall/0616-2 J correction source: `E:\JIT制图--新店\{L0xx}\sku文件_最终抠图PNG`.
 - L043 historical J correction source: `E:\JIT制图--新店\L043\sku文件_最终抠图PNG\白\白.png` and `...\灰\灰.png`, with `15 PCS` / `30 PCS` red quantity labels derived from `G` + `SKU货号`.
+- Current L043 quantity repair rule: preserve the existing good L043 five-grid J composition and overlay the derived `15 PCS` / `30 PCS` red label once at the whole image's top-left corner. Do not regenerate a new five-grid layout from the white/gray source PNG when the existing composition is visually approved.
 - Raw DXXmall SKU image source: `E:\jit制图\{L0xx}\sku`.
 - Separate new SKU/Xiangji trial source, only when explicitly selected: `D:\Desktop\jit\sku图\sku图` -> `...\outputs\dxxmall_0616_2_sku_root_xiangji_cutout`.
 
