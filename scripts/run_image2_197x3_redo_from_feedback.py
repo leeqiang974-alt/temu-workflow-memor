@@ -51,18 +51,34 @@ WORKERS = int(os.environ.get("WORKERS", "2") or "2")
 LIMIT = int(os.environ.get("LIMIT", "0") or "0")
 SOURCE_SHIFT_START = int(os.environ.get("SOURCE_SHIFT_START", "3") or "3")
 SOURCE_SHIFT_COUNT = int(os.environ.get("SOURCE_SHIFT_COUNT", "18") or "18")
+BATCH_LABEL = os.environ.get("BATCH_LABEL", "197x3")
+REDO_LABEL = os.environ.get("REDO_LABEL", "redo_61")
 
-PLAN_PATH = OUT / "redo_61_candidate_plan.json"
-RESULTS_PATH = OUT / "candidate_results_redo_61.json"
-PROGRESS_PATH = OUT / "candidate_progress_redo_61.jsonl"
-REVIEW_PATH = OUT / "0616_2_image2_197x3_redo_61_review.html"
+PLAN_PATH = OUT / f"{REDO_LABEL}_candidate_plan.json"
+RESULTS_PATH = OUT / f"candidate_results_{REDO_LABEL}.json"
+PROGRESS_PATH = OUT / f"candidate_progress_{REDO_LABEL}.jsonl"
+REVIEW_PATH = OUT / f"0616_2_image2_{BATCH_LABEL}_{REDO_LABEL}_review.html"
+SCENE_SCRIPT = Path(
+    os.environ.get(
+        "SCENE_SCRIPT",
+        r"C:\Users\Administrator\Documents\temu自动化\scripts\run_image2_197x3_t_candidates.py",
+    )
+)
+MATERIAL_REJECTLIST = Path(
+    os.environ.get(
+        "MATERIAL_REJECTLIST",
+        r"C:\Users\Administrator\Documents\Codex\2026-06-08\comfyui\work\material_rejectlist.json",
+    )
+)
 
 
 PRODUCT_LOCKS = {
     "L042": (
         "Freeze the garden edging strip/roll, fixing tabs, hole pattern, and black spiral stakes. "
-        "Reviewer repeatedly rejected wrong nail/stake threads and extra rolled protrusions. "
-        "Do not invent lower protruding parts; stakes may face inward or be hidden if needed."
+        "Reviewer repeatedly rejected wrong nail/stake shape and wrong stake placement. "
+        "Black spiral stakes must keep the original short spiral stake shape and correct quantity feeling. "
+        "Do not create long straight pins, fence rods, loose black sticks, outward-facing spikes, decorative bars, "
+        "extra lower protruding parts, or stake arrangements that look like a separate fence."
     ),
     "L043": (
         "Freeze the folding board outline, all holes, small center hole, rear raised detail, panel seams, "
@@ -74,6 +90,8 @@ PRODUCT_LOCKS = {
     ),
     "L058": "Freeze bucket, mop pole, basket, handle, quantity and proportions; do not add extra buckets or extra mops.",
     "L068": "Freeze organizer/rack appearance and visible structure; do not redesign the frame or compartments.",
+    "L071": "Freeze rectangular tabletop, white adjustable vertical support, black adjustment knob, X-shaped white base, and four black caster wheels. Avoid dark scenes that hide the base or wheels.",
+    "L072": "Freeze silver metal rods, black connector rings, flip-door drawer fronts, top double black curved handles, and front round handles. Do not turn it into a generic shoe cabinet or drawer chest.",
     "L078": "Use the product with the correct black handle on top. Freeze handle and tray/lid structure.",
     "L081": "Freeze product appearance, shelf/rack proportions, rods and supports; only loose contents may vary.",
     "L082": (
@@ -90,6 +108,7 @@ PRODUCT_LOCKS = {
         "Use only non-white product material; keep drawer/basket units, front grid/transparent face, top board, "
         "vertical supports, side frame, legs and proportions unchanged."
     ),
+    "L087": "Freeze source dimensions and product proportions. Reviewer rejected wrong generated size; preserve exact width/height relationship and all visible parts.",
     "L089": "Freeze product appearance and structure; do not make a generic rack.",
     "L091": (
         "Hard lock: top structure/groove/square-grid pattern is the failure point. Use strict front-facing or only slight perspective. "
@@ -150,6 +169,17 @@ def load_base_module():
     return module
 
 
+def load_scene_module():
+    spec = importlib.util.spec_from_file_location("image2_scene_bank", SCENE_SCRIPT)
+    if spec is None or spec.loader is None:
+        raise RuntimeError(f"Cannot load scene bank script: {SCENE_SCRIPT}")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    if hasattr(module, "validate_scene_banks"):
+        module.validate_scene_banks()
+    return module
+
+
 def source_fingerprint(item: dict) -> str:
     return str(item.get("source_id") or item.get("source_png") or item.get("source_library_rel") or "")
 
@@ -176,8 +206,35 @@ def looks_like_white_l086_source(path_value: str | None) -> bool:
         return False
 
 
+def load_material_reject_tokens() -> set[str]:
+    if not MATERIAL_REJECTLIST.exists():
+        return set()
+    data = load_json(MATERIAL_REJECTLIST, {})
+    tokens: set[str] = set()
+    for item in data.get("rejected", []):
+        for key in ("material_path", "source_path", "source_png", "source_id", "material_id"):
+            value = item.get(key)
+            if not value:
+                continue
+            text = str(value)
+            tokens.update({text, Path(text).name, Path(text).stem})
+    return tokens
+
+
+MATERIAL_REJECT_TOKENS = load_material_reject_tokens()
+
+
 def source_allowed(item: dict) -> bool:
     if not item.get("source_png") or not Path(item["source_png"]).exists():
+        return False
+    haystack = " ".join(
+        str(item.get(key) or "")
+        for key in ("source_id", "material_id", "source_png", "source_library_rel", "source_kind")
+    )
+    path = item.get("source_png")
+    if path:
+        haystack += f" {Path(path).name} {Path(path).stem}"
+    if any(token and token in haystack for token in MATERIAL_REJECT_TOKENS):
         return False
     if item.get("prefix") == "L086" and looks_like_white_l086_source(item.get("source_png")):
         return False
@@ -225,49 +282,31 @@ def choose_source(d_value: str, failed_candidate: dict, options: list[dict], fai
 def feedback_records(lock: dict) -> list[dict]:
     rows = []
     for record in lock.get("records", []):
-        if record.get("decision") == "redo":
+        if record.get("decision") in {"redo", "reject"}:
             rows.append(record)
+    for candidate_id, record in (lock.get("feedback") or {}).items():
+        if record.get("decision") not in {"redo", "reject"}:
+            continue
+        row = dict(record)
+        row["candidate_id"] = candidate_id
+        row["review_decision"] = record.get("decision")
+        row["set"] = record.get("set") or record.get("set_no")
+        rows.append(row)
     return rows
 
 
-def scene_lane(prefix: str, index: int) -> str:
-    specific = {
-        "L082": [
-            "under-shelf kitchen cabinet partition, product visibly expandable left-right",
-            "closet shelf divider scene, front structure clear, no side rails",
-            "home storage cabinet layer scene, product used as telescoping shelf organizer",
-        ],
-        "L083": [
-            "clean kitchen counter organizer scene, side rods and metal plate visible",
-            "pantry sideboard storage scene, straight rods and connectors clear",
-            "home storage shelf scene, product ratio preserved",
-        ],
-        "L086": [
-            "kitchen counter storage scene with non-white product, drawer/basket fronts clear",
-            "pantry sideboard scene with non-white product, top board and side frame clear",
-            "coffee station organizer scene with non-white product and exact drawer units",
-        ],
-        "L091": [
-            "strict front-facing wardrobe shelf scene, top groove/grid visible",
-            "front-view cool white closet scene, exact top structure visible",
-            "front-view dark premium closet scene, no angle change",
-        ],
-    }
-    choices = specific.get(prefix)
-    if choices:
-        return choices[index % len(choices)]
-    generic = [
-        "realistic use-context scene with product complete and clear",
-        "premium household scene with safe unbranded props",
-        "wider ecommerce lifestyle scene with believable support surface",
-        "front catalog lifestyle scene with clean background",
-    ]
-    return generic[index % len(generic)]
+def scene_lane(scene_module, prefix: str, index: int) -> str:
+    choices = (getattr(scene_module, "EXPANDED_SCENE_BANK", {}) or {}).get(prefix)
+    if not choices:
+        choices = getattr(scene_module, "DEFAULT_EXPANDED_SCENES", [])
+    if not choices:
+        raise RuntimeError(f"No concrete expanded scene lane for prefix {prefix}")
+    return choices[index % len(choices)]
 
 
 def prompt_append(item: dict) -> str:
     chunks = [
-        "This is an image2/APIMart redo for one failed 197x3 candidate after human review.",
+        f"This is an image2/APIMart redo for one failed {BATCH_LABEL} candidate after human review.",
         f"Failed candidate id: {item.get('failed_candidate_id')}.",
         f"Human review feedback in Chinese: {item.get('redo_reason_cn') or 'redo requested by reviewer'}.",
         f"Assigned scene lane: {item.get('scene_lane')}.",
@@ -294,7 +333,7 @@ def wrap_prompt_builder(module):
     module.build_prompt = build_prompt
 
 
-def build_redo_plan(module) -> list[dict]:
+def build_redo_plan(module, scene_module) -> list[dict]:
     lock = load_json(FEEDBACK_LOCK_PATH)
     records = feedback_records(lock)
     old_plan = {item["candidate_id"]: item for item in load_json(ORIGINAL_PLAN_PATH, [])}
@@ -327,19 +366,20 @@ def build_redo_plan(module) -> list[dict]:
         item["original_d"] = d_value
         item["failed_candidate_id"] = record["candidate_id"]
         item["failed_set"] = record.get("set")
+        item["review_decision"] = record.get("review_decision") or record.get("decision")
         item["redo_reason_cn"] = record.get("feedback") or ""
         item["redo_of"] = old_results.get(record["candidate_id"], {}).get("local_path")
         item["old_source_png"] = failed_candidate.get("source_png")
         item["old_source_id"] = failed_candidate.get("source_id")
         item["source_selection_note"] = note
         item["source_changed"] = source_fingerprint(item) != source_fingerprint(failed_candidate)
-        item["run_type"] = "image2_197x3_candidate_redo_from_feedback"
-        item["scene_lane"] = scene_lane(prefix, index)
+        item["run_type"] = f"image2_{BATCH_LABEL}_candidate_redo_from_feedback"
+        item["scene_lane"] = scene_lane(scene_module, prefix, index)
         item["color_lane"] = COLOR_LANES[index % len(COLOR_LANES)]
         item["composition_lane"] = COMPOSITION_LANES[index % len(COMPOSITION_LANES)]
         item["product_lock"] = PRODUCT_LOCKS.get(prefix, "")
         item["redo_prompt_append"] = prompt_append(item)
-        if prefix == "L086" and not source_allowed(item):
+        if not source_allowed(item):
             item["status"] = "blocked_no_nonwhite_source"
         items.append(item)
     save_json(PLAN_PATH, items)
@@ -352,12 +392,14 @@ def write_plan_summary(items: list[dict]) -> None:
     changed = sum(1 for item in items if item.get("source_changed"))
     blocked = [item for item in items if item.get("status") == "blocked_no_nonwhite_source"]
     rows = [
-        "# 197x3 image2 candidate-level redo plan",
+        f"# {BATCH_LABEL} image2 candidate-level redo plan",
         "",
         f"- generated_at: {datetime.now().isoformat(timespec='seconds')}",
         f"- workbook: `{WORKBOOK}`",
         f"- feedback_lock: `{FEEDBACK_LOCK_PATH}`",
         f"- output: `{OUT}`",
+        f"- batch_label: {BATCH_LABEL}",
+        f"- redo_label: {REDO_LABEL}",
         f"- redo_candidates: {len(items)}",
         f"- source_changed: {changed}",
         f"- blocked_no_nonwhite_source: {len(blocked)}",
@@ -390,7 +432,7 @@ def write_plan_summary(items: list[dict]) -> None:
         }
         values = {key: str(value).replace("|", "/") for key, value in values.items()}
         rows.append("| {redo_id} | {d} | {old} | {new} | {note} | {feedback} |".format(**values))
-    (OUT / "redo_61_candidate_plan.md").write_text("\n".join(rows), encoding="utf-8")
+    (OUT / f"{REDO_LABEL}_candidate_plan.md").write_text("\n".join(rows), encoding="utf-8")
 
 
 def existing_success() -> set[str]:
@@ -442,6 +484,7 @@ def run_items(module, items: list[dict]) -> list[dict]:
                 "original_d",
                 "failed_candidate_id",
                 "failed_set",
+                "review_decision",
                 "redo_reason_cn",
                 "redo_of",
                 "old_source_png",
@@ -543,7 +586,7 @@ def build_review() -> Path:
 <html lang="zh-CN">
 <head>
 <meta charset="utf-8">
-<title>0616-2 image2 197x3 redo 61 复核</title>
+<title>0616-2 image2 {BATCH_LABEL} {REDO_LABEL} 复核</title>
 <style>
 body{{font-family:Arial,"Microsoft YaHei",sans-serif;margin:0;background:#f6f4ef;color:#1f2933}}
 header{{position:sticky;top:0;z-index:10;background:#fff;border-bottom:1px solid #ddd;padding:12px 18px;box-shadow:0 2px 10px rgba(0,0,0,.06)}}
@@ -571,7 +614,7 @@ table{{border-collapse:collapse}} th,td{{border:1px solid #ddd;padding:4px 8px;f
 </head>
 <body>
 <header>
-  <h2>0616-2 image2 197x3 redo 61 复核</h2>
+  <h2>0616-2 image2 {BATCH_LABEL} {REDO_LABEL} 复核</h2>
   <div>generated_at: {_escape(datetime.now().isoformat(timespec='seconds'))} · redo candidates: {len(plan)} · generated: {len(results)}</div>
   <p>左：原失败图；中：本次新 source PNG；右：本次 image2 redo。只供复核，不自动写回表格。</p>
   <button onclick="exportFeedback()">导出筛选JSON</button>
@@ -583,7 +626,7 @@ table{{border-collapse:collapse}} th,td{{border:1px solid #ddd;padding:4px 8px;f
 <main class="wrap">{''.join(cards)}</main>
 <div id="modal" onclick="this.style.display='none'"><img id="modalImg"></div>
 <script>
-const REVIEW='0616_2_image2_197x3_redo_61_review';
+const REVIEW='0616_2_image2_{BATCH_LABEL}_{REDO_LABEL}_review';
 let feedback = safeLoadFeedback();
 function storageGet(key){{try{{return window.localStorage && window.localStorage.getItem(key)}}catch(e){{}} return null;}}
 function storageSet(key,value){{try{{window.localStorage && window.localStorage.setItem(key,value)}}catch(e){{}}}}
@@ -619,8 +662,9 @@ Object.entries(feedback).forEach(([id,item])=>{{const input=document.getElementB
 def main() -> None:
     OUT.mkdir(parents=True, exist_ok=True)
     module = load_base_module()
+    scene_module = load_scene_module()
     wrap_prompt_builder(module)
-    items = build_redo_plan(module)
+    items = build_redo_plan(module, scene_module)
     blocked = sum(1 for item in items if item.get("status") == "blocked_no_nonwhite_source")
     changed = sum(1 for item in items if item.get("source_changed"))
     print(
@@ -630,6 +674,8 @@ def main() -> None:
                 "workbook": str(WORKBOOK),
                 "feedback_lock": str(FEEDBACK_LOCK_PATH),
                 "out": str(OUT),
+                "batch_label": BATCH_LABEL,
+                "redo_label": REDO_LABEL,
                 "redo_candidates": len(items),
                 "source_changed": changed,
                 "blocked_no_nonwhite_source": blocked,
