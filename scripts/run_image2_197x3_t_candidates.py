@@ -4,6 +4,7 @@ import importlib.util
 import html
 import json
 import os
+import re
 import sys
 from collections import Counter, defaultdict
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -40,6 +41,119 @@ RESULTS_PATH = OUT / "candidate_results_197x3.json"
 PROGRESS_PATH = OUT / "candidate_progress_197x3.jsonl"
 
 
+EXPANDED_SCENE_BANK: dict[str, list[str]] = {
+    "L042": [
+        "wide expanded villa garden border scene, camera pulled back, flower bed edge and lawn path visible, product occupies 18-24 percent of image height, black spiral stakes shown as the original bundled stakes beside the edging roll, no invented long pins",
+        "wide courtyard soil-edge landscaping scene with stone path and low plants, product placed along a real flower-bed border, product around 22 percent height, keep original roll, tabs, holes and black spiral stakes unchanged",
+        "wide patio garden corner with raised bed, gravel strip and lawn, product installed only as garden edging, product around 20 percent height, stakes remain original accessory shape and are not rearranged into fence rods",
+        "wide balcony planter border scene with soil trough and greenery, product around 24 percent height, exact green/black edging roll preserved, black spiral stakes laid naturally next to it",
+        "wide residential front-yard flower-bed scene, natural daylight, product lower-right, product around 19 percent height, no text, no measurement graphic, no extra stakes or altered tabs",
+        "wide garden path close-to-ground scene with premium plants and stone edging, product lower-left around 23 percent height, original perforated tabs and hole count frozen",
+        "wide lawn repair scene beside a curved flower border, product centered but small, around 21 percent height, original black stakes remain bundled or lightly scattered, not redesigned",
+        "wide backyard landscaping scene with mulch bed and clean grass, product around 18 percent height, use scene depth and background garden context, not a tight catalog crop",
+        "wide courtyard planting bed with white wall and stone walkway, product around 25 percent height, exact roll geometry and tab pattern preserved",
+        "wide outdoor garden-supply scene on a patio table near a flower bed, product around 22 percent height, black spiral stakes kept as original accessories with correct shape",
+    ],
+    "L043": [
+        "wide laundry folding table scene with wardrobe in background, product around 20 percent height, several folded shirts nearby but not covering holes, keep all board holes and small center hole exact",
+        "wide bright walk-in closet scene, product on shelf with folded sweaters, product around 18 percent height, rear raised detail and panel seams frozen",
+        "wide bedroom closet organization scene with open drawers and neutral textiles, product around 22 percent height, do not turn board into tray or pad",
+        "wide home laundry room countertop scene, daylight window, product lower-right around 24 percent height, board outline and holes unchanged",
+        "wide dorm wardrobe shelf scene with stacked shirts, product around 20 percent height, realistic scale relative to clothing, no huge board",
+        "wide boutique closet packing table scene, product left side around 21 percent height, show environment depth and folded garments, not a close crop",
+        "wide minimal white closet scene, product on light wood shelf, product around 19 percent height, rear raised part and small middle hole visible",
+        "wide linen cabinet scene with towels and shirts, product center-right around 23 percent height, no redraw of hole positions",
+        "wide wardrobe drawer organization scene, product partly on folding surface, product around 22 percent height, exact board hardware and panel seams preserved",
+        "wide clean folding station beside closet mirror, product around 18 percent height, strong scene difference from sibling images, no generic plastic tray",
+    ],
+    "L047": [
+        "wide garden arch scene on grass path, arch legs insert directly into soil/grass, no base plates, no pedestal, no extra feet, product around 26 percent height",
+        "wide flower-bed entrance scene, single black arch only, symmetrical legs planted in soil, no base, product around 24 percent height",
+        "wide courtyard stone path scene with greenery, arch stands by legs only, no bottom base or platform, product around 23 percent height",
+        "wide wedding garden path scene with light flowers attached to existing arch only, no base plates, no second arch, product around 25 percent height",
+        "wide patio lawn border scene, arch lower-center, legs go into grass, no invented support base, product around 22 percent height",
+        "wide villa backyard walkway, single black arch on soil, equal left/right leg count, no base, product around 24 percent height",
+        "wide garden gate decoration scene, product complete and centered, no bottom board or foot stand, product around 23 percent height",
+        "wide gravel garden path scene, arch legs inserted into ground, no base plates, flowers optional only on original rods",
+        "wide rose garden entrance scene, one black arch, product around 26 percent height, no extra rods or duplicate arches",
+        "wide balcony garden display scene with planter boxes, arch supported by original legs only, no pedestal or base",
+    ],
+    "L063": [
+        "wide empty boutique gym scene, dark rubber floor and wall mirrors, no people or body parts, product on floor around 24 percent height, exact board outline and holes frozen",
+        "wide bright professional fitness studio, wood floor and exercise mat, no people, product lower-left around 22 percent height, keep handles, slots and accessories exact",
+        "wide garage gym with concrete floor and neutral wall, no people, product around 25 percent height, use contact shadow only, do not redraw board",
+        "wide wellness studio with stone wall and olive-gray mat, no people, product center-right around 23 percent height, accessories visible but unchanged",
+        "wide minimal white training room, pale floor, distant gym equipment only, no demonstration, product around 26 percent height",
+        "wide home workout corner on rubber mat, no person, no hands, product around 24 percent height, exact surface pattern preserved",
+        "wide premium Pilates studio with clean mat area, no people, product around 22 percent height, board stays flat and complete",
+        "wide training room with storage rack far behind, no person using product, product lower-right around 25 percent height",
+        "wide neutral fitness studio with side daylight, no human model, product around 23 percent height, no invented rails or pedals",
+        "wide empty exercise area with mat and towel in background only, product around 24 percent height, fixed PNG-like fidelity",
+    ],
+    "L082": [
+        "wide under-sink kitchen cabinet scene, product shows left-right expandable function under cabinet, no side drawer rails, product around 24 percent height",
+        "wide pantry shelf organization scene, telescoping left-right structure visible, no extra tracks or side rails, product around 22 percent height",
+        "wide bathroom vanity under-cabinet scene, product placed on cabinet floor, extendable width visible, product around 23 percent height",
+        "wide kitchen sink-side lower cabinet scene, product front-facing, no sliding rail hardware on side, product around 24 percent height",
+        "wide utility cabinet storage scene with bottles as loose contents, product around 22 percent height, shelf/body outline frozen",
+        "wide closet shelf organizer scene, product lower-center, left-right extension shown, no drawer mechanism invented",
+        "wide modern kitchen cabinet interior, product around 25 percent height, support surfaces realistic, no side/bottom rail hallucination",
+        "wide laundry cabinet storage scene, product in cabinet, telescoping relation clear, no extra tracks",
+        "wide compact apartment kitchen cabinet scene, product around 23 percent height, front structure preserved",
+        "wide pantry counter lower shelf scene, product around 22 percent height, left and right extension visible and believable",
+    ],
+    "L086": [
+        "wide kitchen countertop organizer scene, black/walnut or beige-wood product only, no white product material, product around 24 percent height",
+        "wide pantry counter scene with small appliances far behind, no white rack, product around 23 percent height, drawers/baskets and top board unchanged",
+        "wide coffee station sideboard scene, product lower-right, no white product, product around 22 percent height, front grid and side frame frozen",
+        "wide closet storage counter scene, product around 24 percent height, use original non-white material only, no industrial shelf merging",
+        "wide modern kitchen island background, product on counter around 23 percent height, black/walnut/beige-wood product only, never white",
+        "wide appliance station scene with toaster far behind, product around 22 percent height, no white variant, exact two drawer/basket units preserved",
+        "wide pantry shelf scene, product center-left, no white material, product around 24 percent height, legs and vertical supports frozen",
+        "wide home sideboard storage scene, product around 23 percent height, avoid industrial workshop references, no white rack",
+        "wide compact kitchen storage scene, product around 25 percent height, original non-white product color only",
+        "wide utility cabinet countertop scene, product around 22 percent height, no white source or white generated product allowed",
+    ],
+    "L095": [
+        "wide balcony planter scene with railing and city daylight, product around 22 percent height, hanging/planter structure clear, green plants varied",
+        "wide garden patio planting corner, stone floor and outdoor plants, product around 23 percent height, not the same generic garden background",
+        "wide greenhouse bench scene with soil bags and seedlings in background, product around 24 percent height, product structure unchanged",
+        "wide sunny terrace scene with wall-mounted planter area, product around 22 percent height, clear 2/3-grid planter specification",
+        "wide courtyard wall garden scene with climbing greenery, product lower-left around 23 percent height, waterproof planting box visible",
+        "wide apartment balcony herb garden scene, product around 24 percent height, railing and pots visible, no repeated stock background",
+        "wide outdoor porch planting scene with wooden deck, product around 22 percent height, planter cells and frame frozen",
+        "wide backyard raised-bed scene, product near patio edge around 23 percent height, natural soil/greenery context",
+        "wide modern balcony corner with white wall and terracotta pots, product around 24 percent height, strong color difference from sibling images",
+        "wide garden workbench scene with seedlings and hand tools far away, product around 22 percent height, no text or logo, structure preserved",
+    ],
+}
+
+
+DEFAULT_EXPANDED_SCENES = [
+    "wide expanded lifestyle scene with real room depth, camera pulled back, product around 20 percent of image height, lower-left placement, safe unbranded props",
+    "wide expanded lifestyle scene, product center-right around 24 percent height, deeper background perspective and natural daylight",
+    "wide expanded realistic use scene, product lower-right around 22 percent height, strong contact shadow and non-templated background",
+    "wide expanded premium home scene, product around 25 percent height, visible surrounding space and varied color palette",
+    "wide expanded catalog lifestyle scene, product around 21 percent height, believable support surface and larger environment",
+    "wide expanded practical use scene, product around 23 percent height, different room scale and prop arrangement",
+    "wide expanded natural daylight scene, product around 20 percent height, more negative space and realistic depth",
+    "wide expanded high-value scene, product around 24 percent height, safe household props and no repeated background pattern",
+    "wide expanded scene with product on correct support surface, product around 22 percent height, different placement and camera distance",
+    "wide expanded ecommerce lifestyle scene, product around 23 percent height, distinct color palette and composition from sibling images",
+]
+
+
+PREFIX_HARD_LOCK_APPEND = {
+    "L042": "L042 hard lock: the black spiral stakes/nails must keep the original short spiral stake shape and correct quantity feeling; do not create long straight pins, fence rods, loose black sticks, outward-facing spikes, or decorative bars. Prefer wider garden context over tight product redraw.",
+    "L043": "L043 hard lock: if the board holes, small center hole, rear raised detail, panel seams, or realistic scale cannot be preserved, this candidate is invalid. Do not make all L043 scenes a similar close laundry crop; use the wide expanded scene lane.",
+    "L047": "L047 hard lock: no bottom base, no base plate, no pedestal, no platform, no extra feet. The arch legs insert directly into soil, grass, gravel, or planter ground.",
+    "L063": "L063 hard lock: no people, no hands, no body parts, no exercise demonstration. Keep the exact fitness board as a fixed cutout-like product on the floor or mat.",
+    "L082": "L082 hard lock: show the left-right expandable/telescoping function; do not add side rails, drawer rails, bottom tracks, or any slide hardware not present in the source.",
+    "L086": "L086 hard lock: this group has no white product. Never use or generate a white rack/shelf/product; use only black, walnut, original wood, or beige-wood/non-white material from approved sources.",
+    "L095": "L095 hard lock: rotate balcony, patio, greenhouse, terrace, courtyard, porch, and garden workbench scenes; do not repeat the same generic garden/green backdrop across the prefix.",
+}
+
+
 def load_base_module():
     os.environ["WORKBOOK"] = str(WORKBOOK)
     os.environ["OUT_DIR"] = str(OUT)
@@ -68,6 +182,77 @@ def load_json(path: Path, default):
     return default
 
 
+def load_feedback_bad_sources() -> set[str]:
+    paths: list[Path] = []
+    env_path = os.environ.get("MATERIAL_FEEDBACK_LOCK")
+    if env_path:
+        paths.append(Path(env_path))
+    paths.extend(sorted(OUT.glob("feedback_lock*_*.json")))
+
+    bad: set[str] = set()
+    for path in paths:
+        if not path.exists():
+            continue
+        data = load_json(path, {})
+        for source in (data.get("bad_sources") or {}).values():
+            values = source if isinstance(source, list) else [source]
+            for value in values:
+                if value:
+                    text = str(value)
+                    bad.update({text, Path(text).name, Path(text).stem})
+        for item in (data.get("feedback") or {}).values():
+            if item.get("reject_material") and item.get("source_png"):
+                text = str(item["source_png"])
+                bad.update({text, Path(text).name, Path(text).stem})
+    return bad
+
+
+def wrap_source_filter(module):
+    bad_sources = load_feedback_bad_sources()
+    if not bad_sources:
+        return
+
+    original_list_sources = module.list_sources
+
+    def list_sources(prefix: str):
+        records = original_list_sources(prefix)
+        filtered = []
+        for record in records:
+            haystack = " ".join(
+                str(record.get(key) or "")
+                for key in ("source_id", "material_id", "source_path", "library_path", "library_rel", "path")
+            )
+            path = record.get("path")
+            if path:
+                haystack += f" {Path(path).name} {Path(path).stem}"
+            if any(token and token in haystack for token in bad_sources):
+                continue
+            filtered.append(record)
+        if prefix == "L086":
+            filtered = [
+                record
+                for record in filtered
+                if not re.search(
+                    r"白|white|纯白",
+                    " ".join(
+                        str(record.get(key) or "")
+                        for key in ("source_id", "material_id", "source_path", "library_path", "library_rel", "path")
+                    ),
+                    re.I,
+                )
+            ]
+        return filtered
+
+    module.list_sources = list_sources
+
+
+def expanded_scene_for(item: dict, prefix_index: int) -> str:
+    prefix = item.get("prefix") or ""
+    scenes = EXPANDED_SCENE_BANK.get(prefix) or DEFAULT_EXPANDED_SCENES
+    scene_index = prefix_index % len(scenes)
+    return scenes[scene_index]
+
+
 def build_expanded_plan(module) -> list[dict]:
     by_set: dict[int, list[dict]] = {}
     original_shift = os.environ.get("SOURCE_SHIFT")
@@ -80,6 +265,7 @@ def build_expanded_plan(module) -> list[dict]:
         os.environ["SOURCE_SHIFT"] = original_shift
 
     expanded: list[dict] = []
+    prefix_index: defaultdict[str, int] = defaultdict(int)
     for set_no, plan in by_set.items():
         for item in plan:
             original_d = item["d"]
@@ -90,16 +276,20 @@ def build_expanded_plan(module) -> list[dict]:
             item["d"] = candidate_id
             item["set_no"] = set_no
             item["run_type"] = "image2_197x3_candidate_pool"
-            item["scene_lane"] = f"set_{set_no}_scene_lane"
+            item["scene_lane"] = expanded_scene_for(item, prefix_index[item["prefix"]])
             item["color_lane"] = f"set_{set_no}_color_lane"
             item["composition_lane"] = f"set_{set_no}_composition_lane"
+            hard_lock = PREFIX_HARD_LOCK_APPEND.get(item["prefix"], "")
             item["prompt_append"] = (
                 f"This is candidate set {set_no} of {SETS} for exact D {original_d}. "
                 "It is a spare candidate pool for future replacement, not an immediate workbook writeback. "
-                "Make this set visibly different from other sets for the same exact D: different source PNG where available, "
-                "different scene mood, color palette, product scale, placement and prop arrangement. "
+                "Use the assigned expanded-scene lane and source PNG rotation to make this candidate visibly different from sibling images for the same exact D and same L0xx. "
+                f"Expanded scene directive: {item['scene_lane']}. "
+                "Use a camera-pulled-back expanded lifestyle scene with real spatial depth; avoid tight product-only catalog crops unless the product-specific lock requires strict front view. "
+                f"{hard_lock} "
                 "Do not reuse any deleted/rejected/wrong-color image and do not imitate old all_sku_tfirst or Ali single-SKU outputs."
             )
+            prefix_index[item["prefix"]] += 1
             expanded.append(item)
 
     save_json(PLAN_PATH, expanded)
@@ -448,6 +638,7 @@ Object.entries(feedback).forEach(([id, item]) => {{
 def main() -> None:
     OUT.mkdir(parents=True, exist_ok=True)
     module = load_base_module()
+    wrap_source_filter(module)
     wrap_prompt_builder(module)
     items = build_expanded_plan(module)
     missing_source = sum(1 for item in items if not item.get("source_png"))
