@@ -292,26 +292,26 @@ SCENE_LANES: dict[str, list[str]] = {
         "home toolbox bench with scraper tools complete, neutral background and realistic repair context",
     ],
     "outdoor_grill": [
-        "backyard lawn picnic table scene with folded portable barbecue grill on a sturdy wooden outdoor table, grass and garden chairs clearly visible behind, no indoor counter",
-        "apartment balcony barbecue-prep scene with folded grill on a small metal balcony table, railing, potted plants and open sky daylight visible",
-        "courtyard wooden picnic table scene with folded grill centered on the table, travertine pavers, outdoor chairs and shrubs in the background",
-        "camping-style park picnic table scene with folded grill on weathered wood tabletop, lawn, trees and outdoor blanket far behind, no flame or smoke",
-        "villa terrace dining table scene with folded portable grill on outdoor table, visible patio floor, railing and garden greenery beyond",
-        "garden deck prep scene with folded grill on cedar outdoor table, deck boards, plants and backyard depth clearly visible",
-        "rooftop terrace outdoor table scene with folded grill on a compact patio table, railing and skyline greenery blur, no indoor cabinets",
-        "suburban backyard meal-prep table scene with folded grill on heat-safe outdoor tabletop, lawn and patio umbrella shadow far behind",
-        "Mediterranean courtyard picnic table scene with folded grill on wooden table, limewash wall, terracotta planters and open outdoor daylight",
-        "balcony side-table scene with folded grill on black metal outdoor table, railing and plants behind, product complete and clear",
-        "garden workbench outdoor prep scene with folded grill on simple wooden workbench, herbs and patio pavers visible, no kitchen sink",
-        "coastal terrace outdoor dining table scene with folded grill on pale patio table, white stucco wall and sea-light outdoor atmosphere",
-        "patio family dining table before cooking with folded grill on table, outdoor chairs, grass and plants in the background, no active cooking",
-        "yard picnic preparation scene with folded grill on folding camp table, green lawn and trees behind, no stove, fire or smoke",
-        "courtyard outdoor serving table scene with folded grill on weatherproof table, stone pavers and potted plants, clearly outside",
-        "modern balcony meal-prep scene with folded grill on compact outdoor table, gray railing and city greenery visible behind",
-        "backyard deck table scene with folded grill on outdoor tabletop, cedar deck boards and garden sofa far behind, no indoor appliance cues",
-        "terrace brunch setup before grilling with folded grill on patio table, linen runner, outdoor chairs and bright garden daylight",
-        "lawn-side wooden table scene with folded portable grill on sturdy table, grass edge and patio path visible, natural outdoor shadow",
-        "outdoor patio prep area with folded grill on picnic table, broad garden background, railing, plants and no kitchen-like countertop",
+        "wild camping scene with folded portable barbecue grill standing on its own legs on campsite grass and gravel, tent and folding chairs behind, open sky daylight",
+        "Western family backyard gathering scene with folded grill standing on lawn beside a picnic blanket, garden chairs and shrubs in the background, open-air daylight",
+        "patio pavers outdoor meal-prep scene with folded grill on its own legs on stone pavers, outdoor seating behind and garden plants around",
+        "RV campsite scene with folded grill standing on gravel pad beside grass, cooler and camp chairs in the background, open sky and natural daylight",
+        "garden party backyard scene with folded grill on its legs on grass near a low outdoor mat, family picnic props behind, broad lawn depth",
+        "terrace floor scene with folded grill standing on deck boards, railing, planters and open sky visible, product complete and clear",
+        "courtyard paver scene with folded portable grill on its own legs on travertine floor, shrubs and outdoor chairs set far behind",
+        "park picnic lawn scene with folded grill standing on grass near a blanket and cooler, trees and open sky in the background",
+        "lakeside campsite scene with folded grill on gravel and grass at ground level, tent and chairs blurred behind, safe daylight with no flame",
+        "suburban backyard patio scene with folded grill standing on patio floor beside lawn edge, family seating area in background",
+        "wood deck outdoor gathering scene with folded grill on its own legs on cedar boards, garden plants and patio chairs behind",
+        "open-air courtyard picnic scene with folded grill on paver floor near a woven outdoor mat, planters and stucco wall in the background",
+        "backyard lawn outdoor dining preparation scene with folded grill standing on grass, plates and food props on a separate blanket far aside",
+        "campground picnic area scene with folded grill on its legs on gravel beside grass, bench and chairs separated in the background",
+        "garden path edge scene with folded grill standing on heat-safe pavers near lawn and flower beds, broad outdoor depth",
+        "rooftop terrace floor scene with folded grill on deck tiles, railing, planters and open sky, not on patio furniture",
+        "family outdoor picnic scene with folded grill standing on grass beside a low picnic blanket, people softly blurred far behind",
+        "backyard barbecue preparation scene with folded grill on patio pavers, lawn and outdoor chairs behind, product on its own legs before use",
+        "courtyard garden floor scene with folded grill standing on stone floor, green plants and outdoor seating in the distance, realistic contact shadow",
+        "terrace-and-lawn transition scene with folded portable grill on deck floor beside grass, broad open-air family gathering context",
     ],
     "cleaning_set": [
         "luxury laundry room tiled floor with stone-look wall, oak cabinet, linen basket and no messy clutter",
@@ -520,7 +520,7 @@ PREFIX_PROFILES: dict[str, PrefixProfile] = {
     "L092": PrefixProfile("cutting_board", "cutting board set", "board count, hole count, hole positions, shape, color and surface structure", "on kitchen counter, sink side, prep island or pantry sideboard"),
     "L094": PrefixProfile("fruit_display", "fruit bowl or tiered fruit stand", "bamboo stand, white ceramic bowls, screws, rods and tier structure", "on kitchen island, dining table, sideboard or pantry counter"),
     "L095": PrefixProfile("planter", "hanging or planting basket", "basket/frame/planter body, grid or cells, hanging/holder geometry and waterproof box shape", "on balcony, patio, terrace, greenhouse, fence, wall garden or planting workbench"),
-    "L096": PrefixProfile("outdoor_grill", "folding portable barbecue grill", "folding grill body, frame, legs, grate, hinge/locking structure, panels, supports, color and product silhouette", "on an outdoor patio table, terrace table, picnic table, garden workbench, outdoor cart or heat-safe outdoor prep surface only"),
+    "L096": PrefixProfile("outdoor_grill", "folding portable barbecue grill", "folding grill body, frame, legs, grate, hinge/locking structure, panels, supports, color and product silhouette", "standing on its own legs on grass, campsite ground, gravel, patio pavers, courtyard floor, deck boards, terrace floor, or another heat-safe outdoor ground/floor surface only"),
 }
 
 
@@ -529,7 +529,7 @@ def build_luxury_prompt(prefix: str, scene: str, index: int) -> str:
     if prefix == "L096":
         palette = [
             "fresh green backyard daylight",
-            "warm wood picnic-table daylight",
+            "warm wood backyard daylight",
             "cool gray terrace daylight with plants",
             "neutral overcast patio realism",
             "coastal outdoor terrace daylight",
@@ -584,10 +584,10 @@ def build_luxury_prompt(prefix: str, scene: str, index: int) -> str:
         position = ["center", "lower-center", "center-right", "center-left"][index % 4]
         scale = [28, 30, 32, 34, 29, 31][index % 6]
         extra_lock = (
-            "L096 outdoor-only lock: the scene must visibly be outdoors with lawn, railing, patio pavers, terrace, garden plants, or open sky. "
-            "Every L096 prompt must include at least three clear outdoor cues from this whitelist: lawn, balcony railing, patio pavers, terrace, garden plants, deck boards, open sky. "
-            "Use a clearly outdoor support surface only, with visible open-air surroundings and natural outdoor daylight. "
-            "Show the folded portable grill on a wooden picnic table, metal balcony table, patio table, camp table, or outdoor workbench before use."
+            "L096 outdoor ground/floor-use lock: the scene must visibly be outdoors with cues such as lawn, campsite ground, gravel, patio pavers, terrace floor, garden plants, deck boards, railing, or open sky. "
+            "The folded portable grill must stand on its own legs on grass, campsite ground, gravel, patio pavers, courtyard floor, deck boards, or terrace floor before use. "
+            "The only support is an outdoor ground or floor plane; keep raised furniture and storage surfaces separate in the background. "
+            "Broaden the scene across camping, backyard gathering, family picnic, Western friends/family yard party, RV campsite, garden party, terrace floor, deck, and courtyard paver contexts."
         )
     elif prefix == "L085":
         scale = [30, 32, 34, 28, 31, 33][index % 6]

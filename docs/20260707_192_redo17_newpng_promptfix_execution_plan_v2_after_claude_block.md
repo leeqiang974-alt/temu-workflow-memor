@@ -20,7 +20,7 @@
 - L082: Do not mirror, rotate, or flip. Preserve left-right telescoping orientation horizontally and front-facing. No side rails, drawer tracks, or invented hardware.
 - L085: Scene must be home repair, wall patching, paint-prep, drop cloth, or utility workbench. Preserve three scraper sizes, metal blades, handles and straight edges.
 - L091: Front-facing or very slight perspective only. Product 30-36% frame height. Use closet shelf, vanity shelf, entry cabinet or storage cubby. Preserve top groove/grid, upper edge, drawer face, black handle, white frame.
-- L096: Outdoor-only folding portable grill. Every prompt must include at least 3 cues from whitelist: lawn, balcony railing, patio pavers, terrace, garden plants, deck boards, open sky. Product on picnic/patio/balcony/camp/outdoor table before use. Ban kitchen/counter/sink/cabinet/appliance/pantry/sideboard/stone island/cooking station/fire/smoke/lit charcoal.
+- L096: superseded by the 2026-07-07 ground/floor-use correction. Every prompt must show a real outdoor use context and the folded portable grill must stand on its own legs on grass, campsite ground, gravel, patio pavers, courtyard floor, deck boards, terrace floor, or another heat-safe outdoor ground/floor surface. Do not support it on tabletop/workbench/cart/counter/shelf/cabinet surfaces. Rotate wild camping, lawn picnic, Western family/friends backyard gathering, courtyard/patio outdoor meal prep, RV campsite, garden party, park picnic, terrace/deck floor, and open-air family outdoor dining scenes.
 
 ## Items
 - L043060501__set1__redo_newpng2: `L043_NEW_0001` -> `L043_NEW_0004`, source `kept_0023_0023_L043_NEW_0004_kept.png`, risk critical, feedback `不要这个png，重新用别的png来重做`

@@ -19,7 +19,7 @@
 - L082: Do not mirror, rotate, or flip. Preserve left-right telescoping orientation horizontally and front-facing. No side rails, drawer tracks, or invented hardware.
 - L085: Scene must be home repair, wall patching, paint-prep, drop cloth, or utility workbench. Preserve three scraper sizes, metal blades, handles and straight edges.
 - L091: Front-facing or very slight perspective only. Product 30-36% frame height. Use closet shelf, vanity shelf, entry cabinet or storage cubby. Preserve top groove/grid, upper edge, drawer face, black handle, white frame.
-- L096: Outdoor-only folding portable grill. Must show visible outdoor cues: lawn, balcony railing, patio pavers, terrace, garden plants, deck boards, open sky. Place folded grill before use on wooden picnic table, metal balcony table, patio table, camp table, or garden workbench.
+- L096: superseded by the 2026-07-07 ground/floor-use correction. Folding portable grill must stand on its own legs on grass, campsite ground, gravel, patio pavers, courtyard floor, deck boards, terrace floor, or another heat-safe outdoor ground/floor surface. Do not use tabletop/workbench/cart/counter/shelf/cabinet support. Rotate wild camping, lawn picnic, Western family/friends backyard gathering, courtyard/patio outdoor meal prep, RV campsite, garden party, park picnic, terrace/deck floor, and open-air family outdoor dining scenes.
 
 ## 明细
 - L043060501__set1__redo_newpng1: old `L043_NEW_0001` -> new `L043_NEW_0007`; feedback `不要这个png，重新用别的png来重做`; scene #1; risk critical

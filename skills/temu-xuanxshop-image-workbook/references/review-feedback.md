@@ -55,8 +55,10 @@ Do not mutate Excel from browser localStorage alone. Export delete list to JSON,
 
 - T delete: remove exact URL from every same-D T list if requested.
 - J delete: remove or regenerate only affected row URL.
-- Preserve T size image unless user explicitly deletes it.
-- Revalidate URL count and U after delete.
+- Preserve T size image unless user explicitly deletes it; if deleted, find another valid size image and force it to T[4].
+- Revalidate URL count, U, deleted URL absence, and T4 after delete.
+- Deleted/rejected/不要/死刑/wrong-color images must be locked out of workbook values, approved registries, and source reuse.
+- If browser POST/localStorage export fails, recover feedback from live DOM state and textarea values so Chinese comments are not lost.
 
 ## Round Workflow
 
@@ -70,3 +72,15 @@ For each round:
 6. Wait for approval before writeback.
 
 If interrupted, resume from records JSON and skip completed OK tasks unless feedback invalidates them.
+
+## Review Page Export Rule
+
+When a review page has decisions plus free-text feedback:
+
+- Export from the current live controls, not stale localStorage.
+- Include Chinese textarea/input content in JSON.
+- The export action must be non-destructive: do not navigate the current tab, do not replace the review page with a JSON-only page, and do not rely on `window.open()` popup previews that can steal focus or lose the card state.
+- Preferred export pattern: save current controls to an in-memory object, download a JSON blob, optionally copy JSON to clipboard, and show an inline modal/textarea preview while leaving all cards, decisions, and typed comments in place.
+- Persist or recover decisions from live DOM state (`.active` decision buttons plus textarea/input values) so a failed download, blocked clipboard, failed POST, or localStorage problem never loses user selections.
+- If server save returns 4xx/5xx or unsupported method, still provide a downloadable/exported JSON or recover from the DOM.
+- Keep the recovered lock next to the review artifacts and apply that lock before any writeback.

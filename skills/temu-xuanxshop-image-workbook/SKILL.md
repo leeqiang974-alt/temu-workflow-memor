@@ -50,40 +50,31 @@ Prefer local review outputs first. Upload/write back only after user approval.
    - Detect header columns by name, not column letters.
    - Treat blank `产品货号` rows as separators and do not process them.
    - Count effective rows and unique exact `D` values.
-<<<<<<< HEAD
    - Snapshot immutable/key columns before changes: row index, D, G, SKU, source title, existing J/T/U, and any shop-specific helper columns such as X/AC.
-=======
->>>>>>> 4497e36904ae3bcba5dd514045c90e117c9a6577
 
 2. **Build group model**
    - Exact `D` is the product group.
    - Same `D` rows share title, T first image, T carousel, and U first material.
    - J is row-level: each row may have its own variant preview based on `G` and `SKU货号`.
-<<<<<<< HEAD
    - Title fingerprints/tracking codes are per workbook and per exact D; do not reuse a title code from another file or another D.
    - Classify the task before editing:
      - **Complete/new/redo workbook**: title, J, T, U, T4, URL safety, feedback locks, and changed-cell diff are all in scope by default.
      - **Late-stage repair/writeback**: only the explicitly requested columns are in scope, such as T/U replacement or URL repair.
      - Do not classify broad wording such as "make a workbook", "redo a workbook", "do a table", or "final writeback table" as late-stage T-only repair unless the user explicitly says only T/U should change or titles/J should be preserved.
-=======
->>>>>>> 4497e36904ae3bcba5dd514045c90e117c9a6577
 
 3. **Preflight assets**
    - Match SKU/material candidates before generating or uploading.
    - Report missing folders, missing clean first-level images, variant ambiguity, and forbidden paths.
    - Never silently recurse into generated folders such as `九宫格`, `9grid`, `out`, `output`, or background/output directories.
-<<<<<<< HEAD
    - Do not trust folder names alone for color variants. When a batch has known mixed source folders, verify visual color/title signals and write rejected source files to a machine-readable reject list.
-=======
->>>>>>> 4497e36904ae3bcba5dd514045c90e117c9a6577
 
 4. **Create review artifacts before writeback**
    - For image-heavy work, build an HTML review page.
    - Use lazy loading or per-D loading for large 100+ image audits.
    - Include row, D, prefix, variant, SKU, source image, generated image, prompt/scene, and status.
    - Add delete/reject/restore/export controls when the user is screening images.
-<<<<<<< HEAD
    - Export feedback from the current UI state, not only previously saved browser localStorage. If the user types Chinese feedback after clicking `redo`/`reject`, the export must read live input values so reasons are not lost.
+   - Feedback export must be non-destructive. Never navigate away from the review page, replace the current tab, open a blank/JSON-only page that steals the review state, or depend on a popup window. Use download, clipboard, inline modal/textarea preview, and live DOM recovery so the page remains usable after export.
 
 5. **Generate/edit T first images**
    - One T first image per unique exact `D`, unless the user explicitly asks row-level T images.
@@ -101,21 +92,14 @@ Prefer local review outputs first. Upload/write back only after user approval.
    - "扩图/扩场景" means camera-pulled-back lifestyle scenes with real spatial depth, product occupying roughly 18-28% of the frame when safe, varied support surfaces, placement, room/garden scale, color palette, and props. A tight product crop with a slightly different background does not satisfy expanded-scene differentiation.
    - A batch cannot pass the preflight if a same-`L0xx` group has enough source PNGs but most candidates still share one visual product pose, one background type, or one generic close-up composition.
    - If the user says a same-`L0xx` group uses overly uniform PNG material, the next redo must switch or expand the source material pool instead of reusing one near-identical product cutout across many exact `D` values. Current known risk groups include L042 and L043.
-   - Current L043 rule: folding-board T redos must rotate distinct source PNGs and preserve board holes, small center hole, rear raised detail, outline, and realistic scale against clothing. Do not continue using one unified-looking PNG across the whole L043 group; if the material pool is insufficient, pause to add/select better source PNGs or use fixed-PNG compositing.
+   - Current L043 rule: folding-board T redos are a critical high-failure group. Rotate distinct source PNGs and preserve board holes, small center hole, rear/front raised detail, outline, panel seams, thin board thickness, and realistic scale against clothing. Do not continue using one unified-looking PNG across the whole L043 group. If the user says `不要这个png`, `删掉这个png`, or source consistency is poor, lock out that exact `source_png/source_id` before any rerun. After repeated L043 structure failures, do not keep free-redrawing the product with the same model/prompt; switch to a different approved PNG, fixed-PNG compositing/scene-only generation, or pause to add better material.
    - Record each generated T first image with `provider`, `model`, `source_png`, `prompt`, `status`, and `fallback_of` when Seedream is used after image2 failure.
    - Treat SKU variant PNGs as T fallback only when no approved product-material cutout exists, or when the user explicitly asks to use SKU images for T.
-=======
-
-5. **Generate/edit T first images**
-   - One T first image per unique exact `D`, unless the user explicitly asks row-level T images.
-   - Reuse approved outputs only if no later user feedback rejects or marks them similar/wrong.
->>>>>>> 4497e36904ae3bcba5dd514045c90e117c9a6577
    - Preserve product body. For high-risk structures, prefer fixed PNG compositing or conservative background generation.
    - For same `L0xx`, differentiate by scene, scale, position, orientation, background, and props.
 
 6. **Generate J preview images**
    - Rebuild J by row-level variant matching.
-<<<<<<< HEAD
    - J preview images are SKU/variant driven and may use SKU PNGs; this does not imply T first images should use the same SKU preview source.
    - Before rebuilding J, declare the exact batch `sku_root` and candidate source family. Historical DXXmall/0616-2 J correction records used `E:\JIT制图--新店\{L0xx}\sku文件_最终抠图PNG`, with L043 explicitly using `白\白.png` and `灰\灰.png`; raw DXXmall SKU images may also exist under `E:\jit制图\{L0xx}\sku`. Do not substitute T product-material PNG pools such as selected/kept/Xiangji T cutout libraries for J unless the user explicitly approves that migration.
    - J source provenance is a hard gate: every generated row must have a machine-readable match record containing `row`, exact `D`, `G`, `SKU货号`, `sku_root`, `sku_source`, `wanted_tokens`, `matched_tokens`, `match_mode`, and `warning`. If the source root is unknown or any row lacks `sku_source`, stop before writing back.
@@ -126,33 +110,21 @@ Prefer local review outputs first. Upload/write back only after user approval.
    - If the user asks to "make a workbook", "redo a workbook", "do a new table", or similar broad workbook wording, J rebuild and J source audit are in scope by default. Only skip J rebuilding when the user explicitly says the task is T-only or J must be preserved.
    - Final validation must prove more than "J is non-empty": include J source/match records, row-level variant matching status, generated J review/audit path, and whether the user approved the J review.
    - For every complete/new/redo workbook, J execution is mandatory and must be treated as a first-class deliverable, not a side effect of T writeback. The run must include a full row-level J source manifest, a generated/repaired J image for every effective row, a review/audit page, SKC preview synchronization evidence, and changed-cell validation. Do not deliver a new workbook if J was skipped, silently preserved, or only checked as non-empty.
-=======
-   - Use the established five-preview textured composition, not a plain white background, unless the user explicitly asks for white.
-   - Print or review every row-level match: `D`, row, `G`, `SKU货号`, matched tokens, selected SKU source, and warning if fallback was used.
-   - If many rows have no positive token match, stop before writeback and ask for better SKU folders or mapping.
->>>>>>> 4497e36904ae3bcba5dd514045c90e117c9a6577
 
 7. **Write back only after approval**
    - Insert approved T first image as first URL in T for all rows with same `D`.
    - Preserve or reorder existing T according to user instruction.
-<<<<<<< HEAD
    - Keep the fourth image as the size image when the workbook expects that. Detect size images by filename/title clues, not merely by original position.
    - Set U equal to T first image.
    - Write J row by row from approved variant previews.
    - For a complete/new/redo workbook, write titles from the current run's title reconstruction with a per-file/per-exact-D fingerprint. Do not silently preserve source titles.
    - For a late-stage T/J/URL repair, recover existing title fingerprints from the current final-confirmed source workbook by exact D only when the task is explicitly a repair or the user says to keep titles.
    - Do not change unrequested columns. If helper/status columns such as X/AC require updates for the shop workflow, validate them against the current shop rule and list the exact rows changed.
-=======
-   - Keep fourth image as the size image when the workbook expects that.
-   - Set U equal to T first image.
-   - Write J row by row from approved variant previews.
->>>>>>> 4497e36904ae3bcba5dd514045c90e117c9a6577
 
 8. **Validate**
    - Run the checklist in `references/workbook-contract.md`.
    - Produce a machine-readable JSON report and a human-readable summary.
 
-<<<<<<< HEAD
 9. **Repair workbook image URLs when upload errors mention images**
    - If Temu/Xuanxshop upload errors mention empty image links, carousel image URL, SKC preview image URL, image upload timeout, 404, or an OSS URL that does not respond, do not repair only the single D or URL named in the error.
    - Run a workbook-wide scan for every `ozonshanghai.oss-cn-shanghai.aliyuncs.com` URL in every cell.
@@ -182,6 +154,7 @@ Prefer local review outputs first. Upload/write back only after user approval.
 - Preserve row identity and unrequested cells. D, G, SKU, row order, variant rows, formulas, and shop helper columns must not drift during T/J/U/title writeback.
 - Deleted/rejected/不要/死刑/wrong-color images must not return through existing workbook values, approved registries, or source folders.
 - Review feedback export must read live DOM/input/textarea values so Chinese comments are preserved even when localStorage or POST saving fails.
+- Review feedback export must never destroy the review page. Export buttons must not navigate the current tab, replace the page with JSON, or rely on popup-only previews. Every review page must keep the original cards and user selections available after export and must support DOM-based recovery if download/clipboard fails.
 - L042 J special rule: use first-level `黑色` and `绿色` source folders only, match by row `G` + `SKU货号`, reject visually mixed source files, and compose true five-cell grid previews from whole SKU size-chart images unless the user explicitly asks for cutouts.
 - L042 T hard rule: the black spiral stakes/nails must keep the original short spiral stake shape and correct quantity feeling. Do not generate long straight pins, fence rods, loose black sticks, outward-facing spikes, or decorative bars. Prefer wide garden-border expanded scenes or fixed-PNG compositing over product redraw when image2 changes the stakes or perforated edging tabs.
 - L082 hard T rule: preserve the left-right expandable product function. The product side must not contain hallucinated slide rails, extra tracks, drawer rails, or bottom/side rail hardware; any such candidate is a redo/reject and cannot enter T/U.
@@ -189,18 +162,12 @@ Prefer local review outputs first. Upload/write back only after user approval.
 - L086 hard material rule: this product group has no white variant. Remove and lock out all white product sources, white product material records, and generated white-product outputs from T/J/candidate/writeback workflows. Later approved registries or workbook values cannot resurrect white L086 images. Do not rely only on path text such as `white`/`白`; if user visual review marks a PNG as white or wrong-color, add that exact source path/source_id to the material rejectlist and feedback lock before any rerun. For J/variant matching, `米杏色`/`杏色` must map to the original wood/walnut source such as `胡桃原木/原色.png`; never fall back to black when beige tokens do not directly match a folder name.
 - L095 hard scene rule: hanging/planting basket outputs must rotate balcony, patio, greenhouse, terrace, courtyard wall, porch, raised-bed, garden workbench, and herb-garden scenes. A batch where L095 images share the same generic green garden background or close-up planter composition fails scene differentiation even if the source PNG changes.
 - L091 hard T rule: top structure/groove/grid pattern is the failure point. Avoid angle changes, keep strict front-facing or slight perspective, freeze the exact top structure and upper edge, and reject any output that adds/removes/changes top parts.
+- L096 hard T scene rule: folding portable barbecue grill is an outdoor ground/floor-use product. It must stand on its own legs on grass, campsite ground, gravel, patio pavers, courtyard floor, deck boards, terrace floor, or another heat-safe outdoor ground/floor surface. Do not place it on a kitchen counter, indoor surface, ordinary table, picnic table, patio table, balcony table, camp table, workbench, sideboard, shelf, cabinet, or cart as the support. Acceptable scenes include wild camping, lawn picnic, Western family/friends backyard gathering, courtyard/patio outdoor meal prep, RV campsite, garden party, park picnic, terrace/deck floor, and open-air family outdoor dining; props/people may stay in the background and must not touch/block/merge with the product. Prompts should broaden reasonable outdoor usage scenarios, not collapse into one tabletop direction.
 - Do not let a previous round’s approved registry skip a D that appears in the current redo list.
 - Never write into the only source workbook. Always copy first.
 - Image URL upload fixes must be workbook-wide. Do not deliver a sheet after only fixing one reported D, one T4 URL, or one known bad OSS prefix; full scan and post-scan report are mandatory.
 - T4 display fixes must validate the raw workbook line, not a whitespace-splitting regex token. A size-image URL with Chinese text or spaces must be percent-encoded and then HEAD/GET checked before delivery.
 - URL display fixes must include a whole-workbook unsafe URL scan after writing the output. `unsafe_url_occurrences_after` must be `0`; a D-based validator returning zero effective rows is not proof that an upload sheet is safe.
-=======
-## Non-Negotiable Rules
-
-- User feedback beats historical approved state. If the user says a D/image/PNG is wrong, similar, hallucinated, or “不要”, lock it out before rerunning.
-- Do not let a previous round’s approved registry skip a D that appears in the current redo list.
-- Never write into the only source workbook. Always copy first.
->>>>>>> 4497e36904ae3bcba5dd514045c90e117c9a6577
 - Never expose access keys or credentials in chat or reports.
 - Do not upload or write back unreviewed AI images.
 - If the page is too heavy to browse, rebuild it with lazy loading, pagination, or per-D loading.
@@ -215,7 +182,4 @@ For a complete run, create:
 - Generated records JSON: prompts, source material, local output, model response, status
 - Final workbook copy
 - Validation JSON/summary
-<<<<<<< HEAD
 - Cell-level diff summary for all changed columns, with unchanged protected columns explicitly checked.
-=======
->>>>>>> 4497e36904ae3bcba5dd514045c90e117c9a6577

@@ -53,9 +53,12 @@ def build_prompt(item: dict) -> str:
     prefix_extra = ""
     if prefix == "L096":
         prefix_extra = (
-            "Use only a clearly outdoor setting with at least three visible cues: lawn, patio pavers, garden plants, open sky, "
-            "balcony railing, deck boards, terrace furniture. Place the folded portable grill before use on a picnic table, "
-            "patio table, balcony table, camp table, or garden workbench. Use natural outdoor daylight and open-air space."
+            "Use only a clearly outdoor setting with visible cues such as lawn, campsite ground, gravel, patio pavers, garden plants, "
+            "open sky, balcony railing, deck boards, terrace floor, or courtyard floor. The folded portable grill must stand on its own "
+            "legs on grass, gravel, patio pavers, deck boards, terrace floor, or campsite ground before use. Keep the product supported only "
+            "by the outdoor ground or floor plane, with any raised furniture separated into the background. Rotate realistic outdoor use scenes: "
+            "wild camping, backyard family/friends gathering, lawn picnic, RV campsite, garden party, terrace/deck floor, "
+            "courtyard pavers, and park picnic."
         )
     elif prefix == "L043":
         prefix_extra = (
@@ -336,18 +339,33 @@ img{{max-width:100%;height:320px;object-fit:contain;display:block;margin:auto}}
 .controls button.active[data-decision=reject]{{background:#ef4444;color:white}}
 textarea{{min-height:42px;resize:vertical;border:1px solid #d1d5db;border-radius:6px;padding:8px;font-family:inherit}}
 </style></head><body>
-<div class="bar"><b>0616_2 image2 192 redo17 v2</b><button onclick="exportJson()">导出反馈 JSON</button><span id="count">{len(items)} 条</span></div>
+<div class="bar"><b>0616_2 image2 192 redo17 v2</b><button onclick="exportJson()">导出反馈 JSON</button><button onclick="copyJson()">复制反馈 JSON</button><span id="count">{len(items)} 条</span></div>
+<textarea id="jsonPreview" style="display:none;position:sticky;top:58px;z-index:20;width:calc(100% - 32px);height:180px;margin:12px 16px;border:2px solid #14b8a6;border-radius:8px;font-family:Consolas,monospace;background:#f8fafc"></textarea>
 <div class="wrap">{''.join(cards)}</div>
 <script>
-const state={{}};
+const STORAGE_KEY='0616_2_image2_192_redo17_v2_review_state';
+const state=JSON.parse(localStorage.getItem(STORAGE_KEY)||'{{}}');
+function persist(){{localStorage.setItem(STORAGE_KEY,JSON.stringify(state));}}
 function mark(id,decision){{
   state[id]=state[id]||{{}};
   state[id].decision=decision;
+  persist();
   document.querySelectorAll(`[id='fb_${{id}}']`).forEach(()=>{{}});
   const card=[...document.querySelectorAll('.card')].find(c=>c.querySelector(`#fb_${{id}}`));
   if(card) card.querySelectorAll('button[data-decision]').forEach(b=>b.classList.toggle('active', b.dataset.decision===decision));
 }}
-function exportJson(){{
+document.querySelectorAll('textarea[id^="fb_"]').forEach(t=>{{
+  const id=t.id.slice(3);
+  if(state[id]?.feedback) t.value=state[id].feedback;
+  t.addEventListener('input',()=>{{state[id]=state[id]||{{}};state[id].feedback=t.value;persist();}});
+}});
+document.querySelectorAll('.card').forEach(card=>{{
+  const raw=card.dataset.id;
+  const id=raw.replace(/[^A-Za-z0-9_-]/g,'_');
+  const decision=state[id]?.decision;
+  if(decision) card.querySelectorAll('button[data-decision]').forEach(b=>b.classList.toggle('active', b.dataset.decision===decision));
+}});
+function collectFeedback(){{
   const feedback={{}};
   document.querySelectorAll('.card').forEach(card=>{{
     const raw=card.dataset.id;
@@ -358,10 +376,25 @@ function exportJson(){{
       feedback[raw]={{decision:decision||'comment',feedback:text,prefix:card.dataset.prefix,ts:new Date().toISOString()}};
     }}
   }});
-  const data={{review:'0616_2_image2_192_redo17_v2_review',exported_at:new Date().toISOString(),feedback}};
+  return {{review:'0616_2_image2_192_redo17_v2_review',exported_at:new Date().toISOString(),feedback}};
+}}
+function showJson(data){{
+  const preview=document.getElementById('jsonPreview');
+  preview.style.display='block';
+  preview.value=JSON.stringify(data,null,2);
+  preview.focus();
+  preview.select();
+}}
+function exportJson(){{
+  const data=collectFeedback();
+  showJson(data);
   const blob=new Blob([JSON.stringify(data,null,2)],{{type:'application/json'}});
   const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='0616_2_image2_192_redo17_v2_feedback.json'; a.click();
-  const w=window.open(); w.document.write('<pre>'+JSON.stringify(data,null,2).replace(/[&<>]/g,c=>({{'&':'&amp;','<':'&lt;','>':'&gt;'}}[c]))+'</pre>');
+}}
+async function copyJson(){{
+  const data=collectFeedback();
+  showJson(data);
+  try{{await navigator.clipboard.writeText(JSON.stringify(data,null,2));}}catch(e){{}}
 }}
 </script></body></html>"""
     review = OUT / "0616_2_image2_192_redo17_v2_review.html"
