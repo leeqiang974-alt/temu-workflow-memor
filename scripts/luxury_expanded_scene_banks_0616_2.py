@@ -520,7 +520,7 @@ PREFIX_PROFILES: dict[str, PrefixProfile] = {
     "L092": PrefixProfile("cutting_board", "cutting board set", "board count, hole count, hole positions, shape, color and surface structure", "on kitchen counter, sink side, prep island or pantry sideboard"),
     "L094": PrefixProfile("fruit_display", "fruit bowl or tiered fruit stand", "bamboo stand, white ceramic bowls, screws, rods and tier structure", "on kitchen island, dining table, sideboard or pantry counter"),
     "L095": PrefixProfile("planter", "hanging or planting basket", "basket/frame/planter body, grid or cells, hanging/holder geometry and waterproof box shape", "on balcony, patio, terrace, greenhouse, fence, wall garden or planting workbench"),
-    "L096": PrefixProfile("outdoor_grill", "folding portable barbecue grill", "folding grill body, frame, legs, grate, hinge/locking structure, panels, supports, color and product silhouette", "on an outdoor patio table, terrace table, picnic table, garden workbench, outdoor cart or heat-safe outdoor prep surface only; never on an indoor kitchen counter"),
+    "L096": PrefixProfile("outdoor_grill", "folding portable barbecue grill", "folding grill body, frame, legs, grate, hinge/locking structure, panels, supports, color and product silhouette", "on an outdoor patio table, terrace table, picnic table, garden workbench, outdoor cart or heat-safe outdoor prep surface only"),
 }
 
 
@@ -585,7 +585,8 @@ def build_luxury_prompt(prefix: str, scene: str, index: int) -> str:
         scale = [28, 30, 32, 34, 29, 31][index % 6]
         extra_lock = (
             "L096 outdoor-only lock: the scene must visibly be outdoors with lawn, railing, patio pavers, terrace, garden plants, or open sky. "
-            "Never use indoor kitchen counters, sinks, cabinets, appliances, pantry shelves, sideboards, stone kitchen islands, or any kitchen-like counter. "
+            "Every L096 prompt must include at least three clear outdoor cues from this whitelist: lawn, balcony railing, patio pavers, terrace, garden plants, deck boards, open sky. "
+            "Use a clearly outdoor support surface only, with visible open-air surroundings and natural outdoor daylight. "
             "Show the folded portable grill on a wooden picnic table, metal balcony table, patio table, camp table, or outdoor workbench before use."
         )
     elif prefix == "L085":
