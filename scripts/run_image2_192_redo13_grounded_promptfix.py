@@ -43,7 +43,7 @@ FORBIDDEN_L096_WORDS = {
 
 
 def load_json(path: Path):
-    return json.loads(path.read_text(encoding="utf-8"))
+    return json.loads(path.read_text(encoding="utf-8-sig"))
 
 
 def load_module(path: Path, name: str):
