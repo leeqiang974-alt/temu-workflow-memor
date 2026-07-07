@@ -1,4 +1,4 @@
-﻿---
+---
 name: product-lifestyle-scene
 description: Use when generating AI ecommerce lifestyle images from product SKU/reference images, especially when the product must stay visually consistent while scenes, people, scale, orientation, and contained items vary for bulk listing differentiation. Covers Seedream/Jimeng-style prompt strategy, clean PNG/cutout workflow, competitor-style expanded scenes, product compositing, and tableware/object replacement inside racks or storage products.
 metadata:
@@ -108,20 +108,16 @@ Round2 feedback learning:
 - Do not let “replaceable contents” become “replaceable hardware”. Contents can change only when they are loose objects placed on or inside the product; rods, frames, baskets, shelves, drawers, rails, handles, wheels, legs, and supports remain fixed.
 - If a product has a historically repeated failure, add a product-specific lock before generating again instead of relying on generic “do not change product” wording.
 - Control color tone as a first-class differentiation variable. Do not let every premium scene become warm yellow, beige, or sunset-toned. Rotate between cool white daylight, blue-gray marble, fresh green outdoor, dark luxury, warm wood, soft cream pastel, clean black-white contrast, and neutral overcast daylight.
-<<<<<<< HEAD
 - Treat source PNG allocation as a first-class differentiation variable for every L0xx, not just L043. Before running a new batch, prepare a per-D source PNG allocation table and a scene/color/composition plan. Every same-prefix group must vary both source PNG material and scene design. Current known source-uniformity risk groups include L042 and L043; this batch is not retroactively reworked, but all future execution must pass this gate.
 - For any user request that says "扩图", "扩场景", or asks for stronger differentiation, the prompt must contain a concrete expanded-scene lane. Do not use placeholders or vague wording such as "different scene mood". For each L0xx in a bulk batch, create or load at least 20 category-correct expanded lifestyle scene prompts and rotate/randomize them across exact D and set variants.
 - Treat a scene bank with fewer than 20 concrete prompts as incomplete. Preflight should block generation until the bank is expanded, because 10 prompts is too easy to repeat in 3-set / multi-D candidate pools.
 - Expanded-scene lanes must specify camera distance, room/garden scale, support surface, product placement, approximate product size in frame, palette, and safe props. The product should usually occupy about 18-28% of the image height unless a product-specific structural lock requires a larger or stricter front view.
 - Do not execute image generation, Seedream fallback, image2 redo, or bulk reconstruction until a Claude Code + NVIDIA review has checked the source PNG allocation plan, scene differentiation plan, product locks, and latest GitHub memory rules.
-=======
->>>>>>> 4497e36904ae3bcba5dd514045c90e117c9a6577
 
 ## Temu T-Column First Carousel Workflow
 
 Use this workflow when making the first image inserted into the workbook `T` carousel column.
 
-<<<<<<< HEAD
 ### Mandatory model order for workbook T images
 
 - For a new workbook/batch, the first pass must generate **every unique exact `D` T first image with image2/APIMart GPT-Image-2** using the current product PNG/material library and product-specific prompt rules.
@@ -130,8 +126,6 @@ Use this workflow when making the first image inserted into the workbook `T` car
 - If image2 already has an approved current-batch record for a `D`, reuse that current-batch image2 result. If not, generate it with image2 first; do not skip straight to Seedream.
 - When reporting or writing back T images, record provider/model per `D` as `image2_primary` or `seedream_fallback`, so later audits can identify which model produced each first image.
 
-=======
->>>>>>> 4497e36904ae3bcba5dd514045c90e117c9a6577
 1. **One image per unique D**
    - Treat exact `D` value as the generation unit.
    - Generate exactly one first-carousel image for each unique `D`.
@@ -154,25 +148,15 @@ Use this workflow when making the first image inserted into the workbook `T` car
    - This SKU logic is mainly for J previews, U/SKU material consistency, or last-resort T fallback; it is not the primary source-selection logic for high-differentiation AI T first images.
 
 4. **Model layering strategy**
-<<<<<<< HEAD
    - For current Temu workbook T first images, use image2/APIMart GPT-Image-2 as the primary full-batch generator.
    - Use Seedream/Jimeng only as a fallback for image2 review failures or targeted redo items.
    - Use Alibaba/DashScope background generation or deterministic compositing only when the user explicitly asks for conservative fixed-PNG compositing or when high-risk structure cannot survive generative fusion.
    - Never rely on any AI output without checking product drift; review gates decide whether image2 passes or Seedream fallback is needed.
-=======
-   - Use Alibaba/DashScope background generation for the final high-fidelity pass when the product structure must stay exact.
-   - Use Seedream/Jimeng for creative exploration when stronger lifestyle variation, contents changes, mirror direction, scale variation, or composition ideation matters.
-   - For bulk listing safety, prefer hybrid: Seedream/Jimeng explores scenes, then the true SKU PNG is composited back or passed through Alibaba/fixed compositing to preserve product fidelity.
-   - Never rely on a Seedream/Jimeng output without checking product drift.
->>>>>>> 4497e36904ae3bcba5dd514045c90e117c9a6577
 
 5. **Differentiation within the same L0xx**
    - For different `D` values under the same `L0xx`, vary at least three dimensions: scene, background, product scale, position, orientation/mirror, object arrangement, and foreground grouping.
    - Also vary the source product PNG itself whenever an approved material library has enough usable cutouts for that `L0xx`.
-<<<<<<< HEAD
    - Source PNG variation is mandatory, not optional, whenever the material library has multiple safe product cutouts. If the library does not have enough variety, pause to select/add material or use fixed-PNG compositing rather than pretending scene-only variation is enough.
-=======
->>>>>>> 4497e36904ae3bcba5dd514045c90e117c9a6577
    - Keep product appearance stable while using controlled variation such as horizontal mirroring, different left/right placement, different product size in frame, and slight angle-like composition changes.
    - For racks, shelves, trays, baskets, boxes, organizers, and similar container products, use replaceable loose contents as a major differentiation axis: tableware, bowls, cups, utensils, towels, files, fruit, flowers, greenery, small household items, or other category-safe props may change when they sit on or inside the product.
    - When replacing loose contents, explicitly freeze the product hardware/body: do not change rods, holes, shelves, tiers, baskets, handles, hooks, wheels, frames, rails, supports, product color, outline, or quantity of structural parts.
@@ -322,34 +306,30 @@ Only add natural contact shadow and slight environmental light matching.
 ### Current Product-Specific Corrections
 
 - **L042 garden edging strip**: high risk for AI redraw. Direct product-fusion often reconstructs the green strip surface, perforated fixing tabs, holes, and black spiral stakes incorrectly. Prefer deterministic compositing or scene-only generation plus exact PNG overlay. If using image generation, freeze the green flexible strip, edge fixing tabs, hole pattern, roll shape, and black spiral stakes; reject any output where the strip surface texture, hole count, tab structure, stake shape, or roll geometry is redesigned.
-<<<<<<< HEAD
 - **L042 nail/stake lock**: black spiral stakes must keep the original short spiral stake shape and correct quantity feeling. Reject long straight pins, fence rods, loose black sticks, outward-facing spikes, decorative bars, or any scene where the stakes are arranged as a separate fence-like object.
 - **L043 folding clothes stacking board**: high risk for source-material sameness and scale drift. Do not use one unified-looking PNG across all L043 exact D values. Rotate distinct source PNGs where possible, including different approved white/gray board sources or angles that clearly preserve the same board structure. Freeze the flat folding board outline, all holes, the small center hole, rear raised detail, panel seams, material, and realistic scale relative to clothing. Reject outputs where the board becomes a generic tray/pad, loses rear raised detail, changes hole positions, or appears unrealistically huge/small next to garments. If available L043 cutouts are too uniform, pause to select better source PNGs or use fixed-PNG compositing rather than hallucinating variety.
-=======
->>>>>>> 4497e36904ae3bcba5dd514045c90e117c9a6577
 - **L071 mobile adjustable table**: expanded lifestyle scenes can look good but may alter the product into a generic side table. Freeze rectangular tabletop, white adjustable vertical support, black adjustment knob, X-shaped white base, and four black caster wheels. Avoid dark lounge scenes that hide or simplify the base/wheels. Reject any output with changed leg/base geometry, missing wheels, added shelves/drawers, or wrong support structure.
 - **L072 flip-door shoe cabinet rack**: high hallucination risk. Freeze silver metal rods, black connector rings, vertically stacked flip-door drawers, top double black curved handles, three round handles on each drawer front, and no wheels. Do not let it become a generic shoe cabinet, dresser, drawer chest, or sideboard. Reject if drawer fronts, handles, rod frame, or connector rings are redesigned.
 - **L076 gray plush pet mat**: do not use images where the product becomes a cushion, blanket, rug, pet bed with side walls, or patterned fabric. Freeze one flat rectangular gray long-plush mat with white edge binding and visible thickness. Avoid pets covering the product; a pet may be nearby only if the mat surface remains visible. Reject if plush surface, shape, border, thickness, or color is changed.
 - **L047 garden arch**: do not let the source pool collapse to one or two near-identical PNGs. If approved `kept_cutout` material is limited after reject filtering, include safe `retry_new_original` product references that are not in the reject list. Keep one black arch only; flowers/ribbons may be added onto the existing arch but must not create an extra arch.
+- **L048 artificial greenery privacy fence**: do not use kitchen, pantry, counter, shelf, or indoor storage scenes. This product is an outdoor/balcony/terrace fence-screen product. Place it attached vertically to balcony railing, patio fence, courtyard wall, garden fence, terrace divider, or outdoor privacy screen support only. Freeze the leaf panel grid, vine coverage, connector points, sheet shape, color, and flexible fence-screen silhouette.
+- **L051 brown kraft paper gift bags**: do not use kitchen-storage scenes. Use gift wrapping tables, boutique retail counters, party favor tables, wedding/holiday packaging stations, small-shop checkout counters, or home craft packaging desks. Freeze kraft paper material, handle loops, bag quantity feeling, folded edges, and upright/open bag silhouettes. Avoid readable text, logos, branded labels, balloons, and food-packaging confusion.
+- **L068/L074/L075 dish drying racks**: generic `kitchen_storage` is too loose for these. Use sink-side, over-sink, drainboard, wet countertop, or dishwashing drying-zone scenes. The sink edge, faucet blur, drainboard, or wet-zone context should be visible. Freeze rack tiers, rods, drain tray, cover/top details, supports, length relationship, and detachable/over-sink structure. Reject dry pantry, sideboard, bedroom, bathroom, or ordinary countertop scenes without sink/drying context.
 - **L063 fitness board**: do not generate people using the product. The product should be fused as a fixed reference into an empty gym, fitness studio, training room, garage gym, rubber gym floor, or exercise mat scene. Avoid ordinary cozy home/bedroom styling unless explicitly requested. No hands, body parts, models, demonstrations, or product-use action shots. Do not change holes, rails, pedals, bands, handles, board outline, or surface structure. If a source PNG is identified as the wrong product, lock that source out immediately.
-<<<<<<< HEAD
+- **L077 cat scratcher / cat house**: never place this product on kitchen counters, pantry shelves, sideboards, or storage cabinets. It belongs on the floor in a living-room pet corner, bedroom pet area, hallway, home office, or window-side cat nook. Freeze corrugated scratch board texture, layered cat-house body, ventilation slots, openings, edges, color, and silhouette. Cats may appear only if they do not cover or merge with the product.
+- **L078 covered divided food/picnic tray**: do not treat this as generic storage. Use dining table, kitchen prep counter, patio table, outdoor picnic table, serving sideboard, or home buffet scenes. Freeze six compartments, transparent lid, black top handle, tray body, proportions, and food-safe serving shape. The black handle is a hard visual feature and must remain visible.
 - **L082 expandable under-shelf organizer**: keep the left-right expandable function visible and believable. Freeze the shelf/body outline, telescoping extension relationship, support surfaces, proportions, and front-facing structure. The side of the product must not gain slide rails, extra tracks, drawer rails, or hardware that is not present in the source. Reject any output with side/bottom rail hallucination, missing left-right expansion detail, changed usage context, or a generic shelf redesign.
-- **L083 storage rack / organizer**: high appearance-drift risk. Freeze the overall proportion, side straight rods, surface metal plate/sheet details, supports, connectors, frame geometry, and visible hardware. Prefer fixed-PNG compositing or a strict product-reference workflow when possible. Reject outputs that add an extra side-rod detail, change the surface metal plate, alter the product ratio, or turn it into a generic rack.
+- **L083 sliding under-sink cabinet rack**: high appearance-drift risk and not a generic countertop organizer. Use only under-sink cabinet, vanity lower cabinet, lower storage bay, or enclosed cabinet-interior scenes. Freeze the overall proportion, side straight rods, sliding basket/plate details, supports, connectors, frame geometry, and visible hardware. Reject open countertop/sideboard scenes, added side-rod details, changed surface plate, ratio drift, or generic rack conversion.
+- **L085 wall repair scraper set**: never use kitchen-storage or food scenes. This is a three-piece stainless putty scraper/wall repair tool set. Use home repair workbench, wall patching prep table, drop cloth, utility tool bench, paint-prep workstation, or interior wall maintenance context. Freeze three scraper sizes, metal blades, handles, straight edges, proportions, and tool-set quantity. Avoid active unsafe handling, hazardous chemicals, readable packaging, and power-tool domination.
 - **L086 kitchen/storage rack**: keep the two drawer/basket units, front grid/transparent drawer face, top board, vertical supports, side frame, legs, and proportions unchanged. Hard color/material lock: this group has no white variant, so remove and block every white product source, white product material record, and generated white-product output from T/J/candidate/writeback workflows. Use kitchen counter, sideboard, pantry, coffee station, closet/storage counter, or home appliance station scenes. Avoid industrial shelf/workshop references when they contain many racks or shelving units, because the model may merge them into the product and change scale/proportion.
 - **L086 visual reject lock**: path/name checks are not enough. If user review visually identifies a source PNG or generated candidate as white-product contamination, immediately add the exact `source_png`/`source_id` to the material rejectlist and exclude it before rerun.
+- **L087 two-tier under-sink metal rack**: do not use generic kitchen countertop or sideboard scenes. Use sink-base cabinet, vanity lower cabinet, utility cabinet, under-shelf bay, or cabinet-interior storage scenes. Freeze the two-tier frame, basket/shelf structure, width-height relationship, visible rods, supports, and proportions.
 - **L088 stepped fruit basket rack**: this is an offset stepped multi-basket rack, not a straight generic dessert stand. Freeze the offset basket layout, long bottom basket, upper baskets, central/vertical support rods, side rods, feet, color, outline, and all visible connectors. Do not simplify it into a three-tier tower, remove the middle vertical support, merge baskets, straighten the stepped layout, or convert it into a cafe dessert display stand. Prefer black/high-contrast product PNGs or add a clear product inset when rods are easy to lose.
 - **L091 drawer organizer**: top structure is a hard failure point. Avoid changing angle; use strict front-facing or only very slight perspective. Freeze the front-view drawer surface, transparent door, black handle, white frame, exact top structure, groove, square/grid recess pattern, and upper edge geometry. Do not add, remove, flatten, or invent top parts. Avoid same-tone closet scenes; rotate warm walnut closet, cool white closet, dark premium closet, and entryway cabinet palettes while preserving the exact top structure.
 - **L092 cutting board set**: vary kitchen color palettes strongly: cool gray marble, warm wood, dark stone, and white-tile sink-side scenes. Keep exact hole count and hole positions.
 - **L094 fruit bowl**: cross-use 2-layer and 3-layer specifications for differentiation. Alternate 2-tier foreground, 3-tier foreground, and natural scenes with both variants where appropriate. Keep bamboo stand, white ceramic bowls, screws, rods, and tier structure correct.
 - **L095 hanging/planting basket**: rotate a broad outdoor scene bank: balcony railing herb garden, patio planting corner, greenhouse bench, sunny terrace, courtyard wall garden, apartment balcony, porch deck, backyard raised-bed, modern balcony corner, and garden workbench. Reject batches where L095 shares one generic green garden background or close-up planter composition across most outputs.
 - **L096 folding portable barbecue grill**: this is an outdoor cooking product, not a kitchen-counter storage item. Use only realistic outdoor use contexts such as patio table, terrace table, picnic table, garden workbench, balcony outdoor side table, outdoor cooking cart, backyard dining table, courtyard meal-prep table, or camping-style safe prep table. Never place it on an indoor kitchen counter, pantry shelf, bedroom, closet, sofa, bathroom, or generic decorative surface. Keep folding grill body, frame, legs, grate, hinge/locking structure, panels, supports, color, and silhouette unchanged. Avoid open flame, smoke, lit charcoal, candles, alcohol, branded packaging, and electronics; show the grill folded or being prepared before use on a heat-safe outdoor support surface.
-=======
-- **L086 kitchen/storage rack**: keep the two drawer/basket units, front grid/transparent drawer face, top board, vertical supports, side frame, legs, and proportions unchanged. Use kitchen counter, sideboard, pantry, coffee station, closet/storage counter, or home appliance station scenes. Avoid industrial shelf/workshop references when they contain many racks or shelving units, because the model may merge them into the product and change scale/proportion.
-- **L088 stepped fruit basket rack**: this is an offset stepped multi-basket rack, not a straight generic dessert stand. Freeze the offset basket layout, long bottom basket, upper baskets, central/vertical support rods, side rods, feet, color, outline, and all visible connectors. Do not simplify it into a three-tier tower, remove the middle vertical support, merge baskets, straighten the stepped layout, or convert it into a cafe dessert display stand. Prefer black/high-contrast product PNGs or add a clear product inset when rods are easy to lose.
-- **L091 drawer organizer**: avoid same-tone closet scenes. Rotate warm walnut closet, cool white closet, dark premium closet, and entryway cabinet palettes while keeping the front-view drawer surface, transparent door, black handle, white frame, and exact top structure/groove/grid pattern unchanged. Prefer strict front-facing views when the top structure tends to hallucinate.
-- **L092 cutting board set**: vary kitchen color palettes strongly: cool gray marble, warm wood, dark stone, and white-tile sink-side scenes. Keep exact hole count and hole positions.
-- **L094 fruit bowl**: cross-use 2-layer and 3-layer specifications for differentiation. Alternate 2-tier foreground, 3-tier foreground, and natural scenes with both variants where appropriate. Keep bamboo stand, white ceramic bowls, screws, rods, and tier structure correct.
->>>>>>> 4497e36904ae3bcba5dd514045c90e117c9a6577
 
 ## Scene Differentiation Matrix
 
@@ -409,4 +389,3 @@ After generation, verify:
 - no Temu-risk elements appear: toys, electronics, screens, brand logos, fire/flames, visible decorative lights, dangerous goods, prohibited goods, alcohol, smoking items, medicines, or hazardous props
 
 If the model modifies the product too much, switch to a deterministic workflow: scene-only generation plus programmatic PNG compositing.
-
