@@ -292,26 +292,26 @@ SCENE_LANES: dict[str, list[str]] = {
         "home toolbox bench with scraper tools complete, neutral background and realistic repair context",
     ],
     "outdoor_grill": [
-        "premium patio outdoor cooking prep scene with stone table, folded grill placed on heat-safe outdoor tabletop, garden seating in background and no active flame",
-        "modern courtyard meal-prep area with travertine pavers, wooden outdoor table, folded portable grill on the table and green plants beyond",
-        "backyard terrace picnic setup with stone counter, neutral plates far behind, folded barbecue grill on outdoor support surface and no kitchen interior",
-        "camp-style garden dining scene with wooden camping table, folded grill placed safely on tabletop, lawn and patio depth in background",
-        "villa terrace outdoor dining corner with pale stone floor, linen table runner, folded portable barbecue grill centered on outdoor table",
-        "balcony barbecue preparation scene with metal outdoor side table, railing and plants, folded grill visible and not placed on kitchen counter",
-        "courtyard picnic table scene with oak outdoor table, folded grill on the table, ceramic plates as distant props and no fire or smoke",
-        "garden deck food-prep scene with cedar table, folded portable grill, greenery and wide outdoor spatial depth",
-        "modern patio sideboard scene with stone outdoor counter, folded barbecue grill placed on top, no indoor cabinets or kitchen sink",
-        "outdoor terrace storage-and-cooking prep scene with brushed metal cart, folded grill on cart surface and garden background",
-        "suburban backyard dining table scene with neutral outdoor chairs, folded grill on heat-safe tabletop and bright natural daylight",
-        "minimal rooftop terrace meal-prep scene with stone outdoor table, folded grill product in lower third and city greenery blur",
-        "Mediterranean patio lunch-prep scene with limewash wall, terracotta planters, folded grill on outdoor table and no open flame",
-        "camping picnic preparation scene with wooden table, folded grill complete and clear, tent-like fabric only far blurred in background",
-        "garden workbench outdoor cooking prep scene with stone surface, folded grill product, herbs and safe unbranded utensils nearby",
-        "coastal terrace outdoor dining scene with white stucco, pale stone tabletop, folded portable barbecue grill and ocean-light ambience",
-        "modern balcony meal-prep side table scene with plants, gray railing, folded grill on table and no indoor kitchen cues",
-        "patio corner with outdoor cabinet and stone counter, folded grill on counter, product complete with correct legs/frame and no flame",
-        "lawn picnic table scene with pulled-back view, folded grill placed on sturdy outdoor table and natural contact shadow",
-        "premium outdoor cooking station setup before use, folded barbecue grill on safe table surface, greenery and stone patio depth",
+        "backyard lawn picnic table scene with folded portable barbecue grill on a sturdy wooden outdoor table, grass and garden chairs clearly visible behind, no indoor counter",
+        "apartment balcony barbecue-prep scene with folded grill on a small metal balcony table, railing, potted plants and open sky daylight visible",
+        "courtyard wooden picnic table scene with folded grill centered on the table, travertine pavers, outdoor chairs and shrubs in the background",
+        "camping-style park picnic table scene with folded grill on weathered wood tabletop, lawn, trees and outdoor blanket far behind, no flame or smoke",
+        "villa terrace dining table scene with folded portable grill on outdoor table, visible patio floor, railing and garden greenery beyond",
+        "garden deck prep scene with folded grill on cedar outdoor table, deck boards, plants and backyard depth clearly visible",
+        "rooftop terrace outdoor table scene with folded grill on a compact patio table, railing and skyline greenery blur, no indoor cabinets",
+        "suburban backyard meal-prep table scene with folded grill on heat-safe outdoor tabletop, lawn and patio umbrella shadow far behind",
+        "Mediterranean courtyard picnic table scene with folded grill on wooden table, limewash wall, terracotta planters and open outdoor daylight",
+        "balcony side-table scene with folded grill on black metal outdoor table, railing and plants behind, product complete and clear",
+        "garden workbench outdoor prep scene with folded grill on simple wooden workbench, herbs and patio pavers visible, no kitchen sink",
+        "coastal terrace outdoor dining table scene with folded grill on pale patio table, white stucco wall and sea-light outdoor atmosphere",
+        "patio family dining table before cooking with folded grill on table, outdoor chairs, grass and plants in the background, no active cooking",
+        "yard picnic preparation scene with folded grill on folding camp table, green lawn and trees behind, no stove, fire or smoke",
+        "courtyard outdoor serving table scene with folded grill on weatherproof table, stone pavers and potted plants, clearly outside",
+        "modern balcony meal-prep scene with folded grill on compact outdoor table, gray railing and city greenery visible behind",
+        "backyard deck table scene with folded grill on outdoor tabletop, cedar deck boards and garden sofa far behind, no indoor appliance cues",
+        "terrace brunch setup before grilling with folded grill on patio table, linen runner, outdoor chairs and bright garden daylight",
+        "lawn-side wooden table scene with folded portable grill on sturdy table, grass edge and patio path visible, natural outdoor shadow",
+        "outdoor patio prep area with folded grill on picnic table, broad garden background, railing, plants and no kitchen-like countertop",
     ],
     "cleaning_set": [
         "luxury laundry room tiled floor with stone-look wall, oak cabinet, linen basket and no messy clutter",
@@ -526,16 +526,28 @@ PREFIX_PROFILES: dict[str, PrefixProfile] = {
 
 def build_luxury_prompt(prefix: str, scene: str, index: int) -> str:
     profile = PREFIX_PROFILES[prefix]
-    palette = [
-        "cool white marble and pale oak",
-        "blue-gray stone and brushed metal",
-        "warm walnut and cream linen",
-        "dark charcoal luxury with controlled daylight",
-        "soft cream travertine and ceramic",
-        "fresh green natural outdoor palette",
-        "black-white modern contrast",
-        "neutral overcast catalog realism",
-    ][index % 8]
+    if prefix == "L096":
+        palette = [
+            "fresh green backyard daylight",
+            "warm wood picnic-table daylight",
+            "cool gray terrace daylight with plants",
+            "neutral overcast patio realism",
+            "coastal outdoor terrace daylight",
+            "garden deck natural daylight",
+            "balcony daylight with railing and plants",
+            "suburban lawn daylight",
+        ][index % 8]
+    else:
+        palette = [
+            "cool white marble and pale oak",
+            "blue-gray stone and brushed metal",
+            "warm walnut and cream linen",
+            "dark charcoal luxury with controlled daylight",
+            "soft cream travertine and ceramic",
+            "fresh green natural outdoor palette",
+            "black-white modern contrast",
+            "neutral overcast catalog realism",
+        ][index % 8]
     position = [
         "lower-left",
         "center-right",
@@ -544,11 +556,50 @@ def build_luxury_prompt(prefix: str, scene: str, index: int) -> str:
         "lower-center",
     ][index % 5]
     scale = [18, 19, 20, 21, 22, 23, 24, 25, 26][index % 9]
+    extra_lock = ""
+    if prefix == "L043":
+        position = ["center", "lower-center", "center-right", "center-left"][index % 4]
+        scale = [34, 36, 38, 40, 35, 37][index % 6]
+        extra_lock = (
+            "L043 structural inspection lock: do not mirror, rotate, or redraw the folding board; keep the exact hole count, "
+            "all large holes, the small center hole, rear raised detail, panel seams, and thin board thickness clearly visible. "
+            "Use a clean front/top-front view with clothing nearby but not covering any holes."
+        )
+    elif prefix == "L082":
+        position = ["center", "lower-center", "center-right", "center-left"][index % 4]
+        scale = [30, 32, 34, 36, 31, 33][index % 6]
+        extra_lock = (
+            "L082 direction lock: do not mirror, rotate, flip, or change the left-right expandable orientation. "
+            "Show the telescoping left-right structure horizontally and front-facing; no side rails, drawer tracks, or invented hardware."
+        )
+    elif prefix == "L091":
+        position = ["center", "lower-center", "center-right", "center-left"][index % 4]
+        scale = [30, 32, 34, 36, 31, 33][index % 6]
+        extra_lock = (
+            "L091 proportion and use-context lock: product must be front-facing on a closet shelf, vanity shelf, or storage cubby, "
+            "not floating or oversized in a random scene. Keep the exact top groove/grid pattern, upper edge, drawer face, black handle, "
+            "white frame, and realistic organizer scale."
+        )
+    elif prefix == "L096":
+        position = ["center", "lower-center", "center-right", "center-left"][index % 4]
+        scale = [28, 30, 32, 34, 29, 31][index % 6]
+        extra_lock = (
+            "L096 outdoor-only lock: the scene must visibly be outdoors with lawn, railing, patio pavers, terrace, garden plants, or open sky. "
+            "Never use indoor kitchen counters, sinks, cabinets, appliances, pantry shelves, sideboards, stone kitchen islands, or any kitchen-like counter. "
+            "Show the folded portable grill on a wooden picnic table, metal balcony table, patio table, camp table, or outdoor workbench before use."
+        )
+    elif prefix == "L085":
+        scale = [30, 32, 34, 28, 31, 33][index % 6]
+        extra_lock = (
+            "L085 scene lock: this is a three-piece wall repair scraper/putty knife set. The scene must be home repair, wall patching, "
+            "paint-prep, drop cloth, or utility workbench context; never kitchen, dining, food, pantry, or storage-rack context."
+        )
     return (
         f"Expanded luxury lifestyle scene for {prefix}: {scene}. "
         f"Use the input product image as the exact {profile.product} reference; preserve {profile.fixed}. "
         f"Place it only {profile.placement}. Composition lane: product at {position}, about {scale} percent of image height, "
         f"complete and inspectable while the wider environment takes most of the frame. "
+        f"{extra_lock} "
         f"Luxury scene cues: {LUXURY_CUES}. Color palette lane: {palette}; avoid repeating the same palette across sibling images. "
         f"{COMMON_FRAME_RULE} No readable text, no logos, no branded luxury goods, no monogram patterns, no electronics screens, "
         f"no fire, no candles, no alcohol, no toys, no medicines, no weapons. Square 1:1 premium ecommerce image."
