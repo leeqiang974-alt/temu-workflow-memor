@@ -51,6 +51,7 @@ Claude+NVIDIA 必须输出 JSON + 人类摘要：
   "required_fixes": [],
   "checks": {
     "t_model_order": "pass|fail",
+    "t_image2_model_lock": "pass|fail",
     "t_source_png_rotation": "pass|fail",
     "j_variant_match": "pass|fail",
     "t4_size_image": "pass|fail",
@@ -67,6 +68,7 @@ Claude+NVIDIA 必须输出 JSON + 人类摘要：
 ### T 首图
 
 - 新表全部唯一 D 必须先 image2/APIMart。
+- image2/APIMart 必须使用低成本模型 `gpt-image-2`；任何贵价 official/unofficial 变体都必须阻断。
 - 只有 image2 复检失败项才走 Seedream/即梦 fallback。
 - 旧 Seedream、ComfyUI、阿里贴图、all_sku_tfirst 不能直接作为新表首轮 T。
 - 同一 L0xx 必须轮换 source PNG。
@@ -107,11 +109,12 @@ Claude+NVIDIA 必须输出 JSON + 人类摘要：
 
 请判断：
 1. 是否违背最新 T 首图模型顺序：image2 全量首轮，Seedream fallback。
-2. 是否错误复用了旧图/旧库。
-3. J 是否按行变体匹配。
-4. T4 是否保证尺寸图。
-5. 过程表是否会污染 D 查询库。
-6. 是否需要阻止执行。
+2. image2/APIMart 模型名是否严格为 `gpt-image-2`，脚本是否有拒绝贵模型的 runtime guard。
+3. 是否错误复用了旧图/旧库。
+4. J 是否按行变体匹配。
+5. T4 是否保证尺寸图。
+6. 过程表是否会污染 D 查询库。
+7. 是否需要阻止执行。
 
 输出 JSON，decision 只能是 pass/block/revise。
 如果 block，请说明必须改哪几处。

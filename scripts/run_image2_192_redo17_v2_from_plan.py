@@ -21,6 +21,7 @@ OUT = Path(r"D:\Desktop\jit\DXXmall\outputs\store_newskill_image2_192_redo17_v2_
 RESULTS_PATH = OUT / "candidate_results_192_redo17_v2.json"
 PLAN_OUT = OUT / "candidate_plan_192_redo17_v2.json"
 PROGRESS_PATH = OUT / "candidate_progress_192_redo17_v2.jsonl"
+IMAGE2_MODEL = "gpt-image-2"
 
 
 def load_base_module():
@@ -125,11 +126,13 @@ def run(workers: int, limit: int) -> list[dict]:
         return item["prompt"]
 
     def custom_submit(item: dict, index_in_prefix: int, prefix_total: int) -> dict:
+        if IMAGE2_MODEL != "gpt-image-2":
+            raise RuntimeError(f"Refusing expensive/nonstandard image2 model: {IMAGE2_MODEL}")
         key = module.read_key(module.APIMART_KEY)
         source = Path(item["source_png"])
         prompt = custom_prompt(item, index_in_prefix, prefix_total)
         payload = {
-            "model": "gpt-image-2-official",
+            "model": IMAGE2_MODEL,
             "prompt": prompt,
             "size": "1:1",
             "resolution": "2k",
@@ -174,7 +177,7 @@ def run(workers: int, limit: int) -> list[dict]:
         module.download(image_url, target)
         return {
             "provider": "APIMart",
-            "model": "gpt-image-2-official",
+            "model": IMAGE2_MODEL,
             "apimart_resolution": "2k",
             "apimart_quality": "high",
             "d": item["d"],

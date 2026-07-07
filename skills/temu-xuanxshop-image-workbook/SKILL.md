@@ -79,6 +79,7 @@ Prefer local review outputs first. Upload/write back only after user approval.
 5. **Generate/edit T first images**
    - One T first image per unique exact `D`, unless the user explicitly asks row-level T images.
    - Current T first-image rule: for a new workbook/batch, generate all unique exact `D` first images with image2/APIMart GPT-Image-2 first, then review. Only images that fail review should go to Seedream/Jimeng fallback or targeted redo.
+   - Image2/APIMart low-cost model is exactly `gpt-image-2`. Do not use expensive or unofficial/official variants for Temu bulk T-first work. Every image2 runner must declare the model as a constant and refuse to run if it is not exactly `gpt-image-2`.
    - Do not treat old Seedream approved records, old Ali single-SKU outputs, ComfyUI background+paste outputs, or `all_sku_tfirst` outputs as satisfying the new T first-image stage.
    - Reuse approved outputs only if no later user feedback rejects or marks them similar/wrong.
    - For AI product-fusion T first images, use the approved product-material PNG registry first, such as selected new-original/象寄 cutout PNG records. Do not repeatedly use the same SKU preview PNG for every `D` under one `L0xx`.
@@ -142,6 +143,7 @@ Prefer local review outputs first. Upload/write back only after user approval.
 
 - User feedback beats historical approved state. If the user says a D/image/PNG is wrong, similar, hallucinated, or “不要”, lock it out before rerunning.
 - New workbook T images must not bypass image2/APIMart first pass. Seedream/Jimeng is only the fallback for reviewed image2 failures unless the user explicitly overrides the model order.
+- APIMart image2 model lock: Temu bulk image2 generation must use exactly `gpt-image-2`. Any expensive official/unofficial variant is forbidden; scripts, plans, and generated records must not retain or reuse those variants. Add a runtime guard before every APIMart call.
 - Reviewed image2 `redo` items are failures for final writeback. They must enter feedback lock first, then go to Seedream/Jimeng fallback or a specific redo plan; do not write those image2 outputs back to T/U.
 - Future image generation, reconstruction, Seedream fallback, or image2 redo must pass Claude Code + NVIDIA review before execution. The review package must include GitHub memory evidence, redo/fallback D list with Chinese feedback, source PNG allocation, scene/color/composition plan, and high-risk product locks.
 - Claude/NVIDIA scene review must explicitly check product-specific scene reasoning, not just whether there are many prompts. The review must answer whether each active `L0xx` has the correct scene breadth for its real use envelope, and whether broader multi-scene variation is justified or should be constrained.
