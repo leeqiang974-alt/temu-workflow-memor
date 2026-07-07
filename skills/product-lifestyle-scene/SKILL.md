@@ -1,4 +1,4 @@
----
+﻿---
 name: product-lifestyle-scene
 description: Use when generating AI ecommerce lifestyle images from product SKU/reference images, especially when the product must stay visually consistent while scenes, people, scale, orientation, and contained items vary for bulk listing differentiation. Covers Seedream/Jimeng-style prompt strategy, clean PNG/cutout workflow, competitor-style expanded scenes, product compositing, and tableware/object replacement inside racks or storage products.
 metadata:
@@ -342,6 +342,7 @@ Only add natural contact shadow and slight environmental light matching.
 - **L092 cutting board set**: vary kitchen color palettes strongly: cool gray marble, warm wood, dark stone, and white-tile sink-side scenes. Keep exact hole count and hole positions.
 - **L094 fruit bowl**: cross-use 2-layer and 3-layer specifications for differentiation. Alternate 2-tier foreground, 3-tier foreground, and natural scenes with both variants where appropriate. Keep bamboo stand, white ceramic bowls, screws, rods, and tier structure correct.
 - **L095 hanging/planting basket**: rotate a broad outdoor scene bank: balcony railing herb garden, patio planting corner, greenhouse bench, sunny terrace, courtyard wall garden, apartment balcony, porch deck, backyard raised-bed, modern balcony corner, and garden workbench. Reject batches where L095 shares one generic green garden background or close-up planter composition across most outputs.
+- **L096 folding portable barbecue grill**: this is an outdoor cooking product, not a kitchen-counter storage item. Use only realistic outdoor use contexts such as patio table, terrace table, picnic table, garden workbench, balcony outdoor side table, outdoor cooking cart, backyard dining table, courtyard meal-prep table, or camping-style safe prep table. Never place it on an indoor kitchen counter, pantry shelf, bedroom, closet, sofa, bathroom, or generic decorative surface. Keep folding grill body, frame, legs, grate, hinge/locking structure, panels, supports, color, and silhouette unchanged. Avoid open flame, smoke, lit charcoal, candles, alcohol, branded packaging, and electronics; show the grill folded or being prepared before use on a heat-safe outdoor support surface.
 =======
 - **L086 kitchen/storage rack**: keep the two drawer/basket units, front grid/transparent drawer face, top board, vertical supports, side frame, legs, and proportions unchanged. Use kitchen counter, sideboard, pantry, coffee station, closet/storage counter, or home appliance station scenes. Avoid industrial shelf/workshop references when they contain many racks or shelving units, because the model may merge them into the product and change scale/proportion.
 - **L088 stepped fruit basket rack**: this is an offset stepped multi-basket rack, not a straight generic dessert stand. Freeze the offset basket layout, long bottom basket, upper baskets, central/vertical support rods, side rods, feet, color, outline, and all visible connectors. Do not simplify it into a three-tier tower, remove the middle vertical support, merge baskets, straighten the stepped layout, or convert it into a cafe dessert display stand. Prefer black/high-contrast product PNGs or add a clear product inset when rods are easy to lose.
@@ -408,3 +409,4 @@ After generation, verify:
 - no Temu-risk elements appear: toys, electronics, screens, brand logos, fire/flames, visible decorative lights, dangerous goods, prohibited goods, alcohol, smoking items, medicines, or hazardous props
 
 If the model modifies the product too much, switch to a deterministic workflow: scene-only generation plus programmatic PNG compositing.
+

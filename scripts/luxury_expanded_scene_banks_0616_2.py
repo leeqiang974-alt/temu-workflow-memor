@@ -159,6 +159,28 @@ SCENE_LANES: dict[str, list[str]] = {
         "soft cream kitchen alcove with plain ceramic decor, cotton towel and natural shadows",
         "blue-gray premium kitchen with low saturation, stone counter and deep cabinet perspective",
     ],
+    "outdoor_grill": [
+        "premium patio outdoor cooking prep scene with stone table, folded grill placed on heat-safe outdoor tabletop, garden seating in background and no active flame",
+        "modern courtyard meal-prep area with travertine pavers, wooden outdoor table, folded portable grill on the table and green plants beyond",
+        "backyard terrace picnic setup with stone counter, neutral plates far behind, folded barbecue grill on outdoor support surface and no kitchen interior",
+        "camp-style garden dining scene with wooden camping table, folded grill placed safely on tabletop, lawn and patio depth in background",
+        "villa terrace outdoor dining corner with pale stone floor, linen table runner, folded portable barbecue grill centered on outdoor table",
+        "balcony barbecue preparation scene with metal outdoor side table, railing and plants, folded grill visible and not placed on kitchen counter",
+        "courtyard picnic table scene with oak outdoor table, folded grill on the table, ceramic plates as distant props and no fire or smoke",
+        "garden deck food-prep scene with cedar table, folded portable grill, greenery and wide outdoor spatial depth",
+        "modern patio sideboard scene with stone outdoor counter, folded barbecue grill placed on top, no indoor cabinets or kitchen sink",
+        "outdoor terrace storage-and-cooking prep scene with brushed metal cart, folded grill on cart surface and garden background",
+        "suburban backyard dining table scene with neutral outdoor chairs, folded grill on heat-safe tabletop and bright natural daylight",
+        "minimal rooftop terrace meal-prep scene with stone outdoor table, folded grill product in lower third and city greenery blur",
+        "Mediterranean patio lunch-prep scene with limewash wall, terracotta planters, folded grill on outdoor table and no open flame",
+        "camping picnic preparation scene with wooden table, folded grill complete and clear, tent-like fabric only far blurred in background",
+        "garden workbench outdoor cooking prep scene with stone surface, folded grill product, herbs and safe unbranded utensils nearby",
+        "coastal terrace outdoor dining scene with white stucco, pale stone tabletop, folded portable barbecue grill and ocean-light ambience",
+        "modern balcony meal-prep side table scene with plants, gray railing, folded grill on table and no indoor kitchen cues",
+        "patio corner with outdoor cabinet and stone counter, folded grill on counter, product complete with correct legs/frame and no flame",
+        "lawn picnic table scene with pulled-back view, folded grill placed on sturdy outdoor table and natural contact shadow",
+        "premium outdoor cooking station setup before use, folded barbecue grill on safe table surface, greenery and stone patio depth",
+    ],
     "cleaning_set": [
         "luxury laundry room tiled floor with stone-look wall, oak cabinet, linen basket and no messy clutter",
         "premium bathroom utility corner with large-format tile, matte cabinet and product on correct floor surface",
@@ -366,7 +388,7 @@ PREFIX_PROFILES: dict[str, PrefixProfile] = {
     "L092": PrefixProfile("cutting_board", "cutting board set", "board count, hole count, hole positions, shape, color and surface structure", "on kitchen counter, sink side, prep island or pantry sideboard"),
     "L094": PrefixProfile("fruit_display", "fruit bowl or tiered fruit stand", "bamboo stand, white ceramic bowls, screws, rods and tier structure", "on kitchen island, dining table, sideboard or pantry counter"),
     "L095": PrefixProfile("planter", "hanging or planting basket", "basket/frame/planter body, grid or cells, hanging/holder geometry and waterproof box shape", "on balcony, patio, terrace, greenhouse, fence, wall garden or planting workbench"),
-    "L096": PrefixProfile("kitchen_storage", "household storage organizer", "frame, shelves, panels, supports, connectors, color and product silhouette", "on kitchen, pantry, utility, closet or sideboard support surface"),
+    "L096": PrefixProfile("outdoor_grill", "folding portable barbecue grill", "folding grill body, frame, legs, grate, hinge/locking structure, panels, supports, color and product silhouette", "on an outdoor patio table, terrace table, picnic table, garden workbench, outdoor cart or heat-safe outdoor prep surface only; never on an indoor kitchen counter"),
 }
 
 
