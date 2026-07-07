@@ -125,11 +125,11 @@ def run(workers: int, limit: int) -> list[dict]:
         source = Path(item["source_png"])
         prompt = custom_prompt(item, index_in_prefix, prefix_total)
         payload = {
-            "model": "gpt-image-2",
+            "model": "gpt-image-2-official",
             "prompt": prompt,
             "size": "1:1",
             "resolution": "2k",
-            "quality": "low",
+            "quality": "high",
             "response_format": "url",
             "image_urls": [module.image_to_data_url(source)],
         }
@@ -170,9 +170,9 @@ def run(workers: int, limit: int) -> list[dict]:
         module.download(image_url, target)
         return {
             "provider": "APIMart",
-            "model": "gpt-image-2",
+            "model": "gpt-image-2-official",
             "apimart_resolution": "2k",
-            "apimart_quality": "low",
+            "apimart_quality": "high",
             "d": item["d"],
             "prefix": item["prefix"],
             "rows": item["rows"],
@@ -183,7 +183,7 @@ def run(workers: int, limit: int) -> list[dict]:
             "local_path": str(target),
             "image_url": image_url,
             "prompt": prompt,
-            "cost_usd_est": 0.006,
+            "cost_usd_est": 0.053,
             "elapsed_sec": round(time.time() - started, 2),
             "created_at": datetime.now().isoformat(timespec="seconds"),
             "raw_task": raw_final,
