@@ -5,6 +5,7 @@ import html
 import importlib.util
 import json
 import re
+import shutil
 import sys
 import time
 from collections import Counter, defaultdict
@@ -261,14 +262,33 @@ def rel(path_value: str | None) -> str:
         return path.as_posix()
 
 
+def review_asset(path_value: str | None, asset_dir_name: str) -> str:
+    if not path_value:
+        return ""
+    path = Path(path_value)
+    if not path.exists():
+        return rel(path_value)
+    try:
+        return path.relative_to(OUT).as_posix()
+    except ValueError:
+        pass
+    asset_dir = OUT / "review_assets" / asset_dir_name
+    asset_dir.mkdir(parents=True, exist_ok=True)
+    safe_stem = re.sub(r"[^A-Za-z0-9_.-]+", "_", path.stem)[:140]
+    target = asset_dir / f"{safe_stem}{path.suffix.lower()}"
+    if not target.exists() or target.stat().st_size != path.stat().st_size:
+        shutil.copy2(path, target)
+    return target.relative_to(OUT).as_posix()
+
+
 def build_review() -> Path:
     items = build_items()
     results = {r.get("candidate_id") or r.get("d"): r for r in load_results()}
     cards = []
     for item in items:
         result = results.get(item["candidate_id"], {})
-        img = rel(result.get("local_path"))
-        src = rel(item.get("source_png"))
+        img = review_asset(result.get("local_path"), "results")
+        src = review_asset(item.get("source_png"), "sources")
         status = result.get("status", "missing")
         safe_id = re.sub(r"[^A-Za-z0-9_-]", "_", item["candidate_id"])
         cards.append(
