@@ -31,7 +31,7 @@ REVIEW_NAME = "0616_2_image2_192_redo13_grounded_promptfix_review"
 IMAGE2_MODEL = "gpt-image-2"
 IMAGE2_RESOLUTION = "1k"
 IMAGE2_QUALITY = "standard"
-LOCKED_SOURCE_IDS = {"L043_NEW_0008"}
+LOCKED_SOURCE_IDS = {"L043_NEW_0008", "L043_NEW_0003", "L043_NEW_0005", "L091_T_0015"}
 FORBIDDEN_L096_WORDS = {
     "table",
     "counter",

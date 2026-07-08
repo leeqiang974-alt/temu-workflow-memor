@@ -563,7 +563,8 @@ def build_luxury_prompt(prefix: str, scene: str, index: int) -> str:
         extra_lock = (
             "L043 structural inspection lock: do not mirror, rotate, or redraw the folding board; keep the exact hole count, "
             "all large holes, the small center hole, rear raised detail, panel seams, and thin board thickness clearly visible. "
-            "Use a clean front/top-front view with clothing nearby but not covering any holes."
+            "Use a clean front/top-front view with clothing nearby but not covering any holes. "
+            "Source-quality gate: do not use scene screenshots, clothing-covered product photos, text-labeled photos, or blurry non-cutout images as direct product references."
         )
     elif prefix == "L082":
         position = ["center", "lower-center", "center-right", "center-left"][index % 4]
@@ -578,7 +579,7 @@ def build_luxury_prompt(prefix: str, scene: str, index: int) -> str:
         extra_lock = (
             "L091 proportion and use-context lock: product must be front-facing on a closet shelf, vanity shelf, or storage cubby, "
             "not floating or oversized in a random scene. Keep the exact top groove/grid pattern, upper edge, drawer face, black handle, "
-            "white frame, and realistic organizer scale."
+            "white frame, and realistic organizer scale. Source-quality gate: do not use black-padded, low-resolution, contents-heavy, or partial-top-view scene screenshots as direct product references."
         )
     elif prefix == "L096":
         position = ["center", "lower-center", "center-right", "center-left"][index % 4]
@@ -587,7 +588,8 @@ def build_luxury_prompt(prefix: str, scene: str, index: int) -> str:
             "L096 outdoor ground/floor-use lock: the scene must visibly be outdoors with cues such as lawn, campsite ground, gravel, patio pavers, terrace floor, garden plants, deck boards, railing, or open sky. "
             "The folded portable grill must stand on its own legs on grass, campsite ground, gravel, patio pavers, courtyard floor, deck boards, or terrace floor before use. "
             "The only support is an outdoor ground or floor plane; keep raised furniture and storage surfaces separate in the background. "
-            "Broaden the scene across camping, backyard gathering, family picnic, Western friends/family yard party, RV campsite, garden party, terrace floor, deck, and courtyard paver contexts."
+            "Broaden the scene across camping, backyard gathering, family picnic, Western friends/family yard party, RV campsite, garden party, terrace floor, deck, and courtyard paver contexts. "
+            "Only loose contents on or near the grill grate may vary, such as safe unlit skewers, vegetables, grill tools, folded foil, or picnic-prep props; the grill body, legs, grate/frame, hinges, panels, supports, and silhouette are fixed hardware."
         )
     elif prefix == "L085":
         scale = [30, 32, 34, 28, 31, 33][index % 6]
