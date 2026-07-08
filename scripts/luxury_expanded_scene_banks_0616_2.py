@@ -564,7 +564,7 @@ def build_luxury_prompt(prefix: str, scene: str, index: int) -> str:
             "L043 structural inspection lock: do not mirror, rotate, or redraw the folding board; keep the exact hole count, "
             "all large holes, the small center hole, rear raised detail, panel seams, and thin board thickness clearly visible. "
             "Use a clean front/top-front view with clothing nearby but not covering any holes. "
-            "Source-quality gate: do not use scene screenshots, clothing-covered product photos, text-labeled photos, or blurry non-cutout images as direct product references."
+            "Source-use gate: for full product reconstruction use a clean product-only cutout or fixed compositing; if using a clothing-covered/contextual source, treat the whole visible product+clothing subject as the reference and do not invent hidden board parts."
         )
     elif prefix == "L082":
         position = ["center", "lower-center", "center-right", "center-left"][index % 4]

@@ -35,15 +35,17 @@ The source/reference images were not clean product PNG references:
 - `L043_NEW_0005`: contains `6pcs` text, folded clothing, heavy background, and non-cutout edges.
 - `L091_T_0015`: low-resolution black-padded scene image with candles/aromatherapy props and only partial top-structure visibility.
 
-When these are passed to image2 as product references, the model treats the input as a concept/scene and redraws a plausible product rather than preserving the actual source structure.
+When these are passed to image2 as if they were clean full-product reconstruction references, the model treats the input as a concept/scene and redraws a plausible product rather than preserving the actual visible source relationship.
+
+This does not mean every clothing-covered/contextual L043 source is unusable. The mistake is asking the model to infer a complete board from a partial or covered source. Such sources can still be used in a contextual-fusion mode where the whole visible PNG subject, such as board plus folded clothing, is fused into a larger lifestyle scene without inventing hidden product details.
 
 ## Rule Updates
 
-- L043 and L091 now have a source-quality gate: do not use scene screenshots, text-labeled images, clothing-covered product photos, black-padded images, or contents-heavy references as direct image2 product references.
-- For high-structure products such as L043 and L091, use clean product-only cutouts or generate the background separately and composite the fixed product PNG.
-- Lock out this round's bad source ids before any rerun:
-  - `L043_NEW_0003`
-  - `L043_NEW_0005`
+- L043 now has a source-use gate, not a blanket source ban:
+  - full product reconstruction or complete-structure inspection requires a clean product-only cutout, fixed-PNG compositing, or a scene-only generation plus overlay;
+  - clothing-covered/contextual sources such as `L043_NEW_0003` and `L043_NEW_0005` can be used as whole PNG+clothing fusion references, but prompts must preserve only the visible combined subject and must not invent hidden board parts.
+- L091 still has a source-quality gate: do not use black-padded, low-resolution, contents-heavy, or partial-top-view references as direct top-structure references.
+- Lock out only true hard-bad source ids for this redo path:
   - `L091_T_0015`
 - L096 passed, but prompts should explicitly distinguish fixed grill hardware from replaceable loose contents:
   - fixed: grill body, legs, grate/frame, hinges, panels, supports, silhouette
@@ -56,7 +58,8 @@ Do not rerun the failed L043/L091 items using the same image2 source-prompt patt
 
 Before generating:
 
-1. Find or create clean product-only cutouts for L043 and L091.
-2. If clean cutouts are not available, use fixed-PNG compositing or scene-only generation plus deterministic overlay.
-3. Run Claude/NVIDIA preflight on the source-quality gate before image generation.
-4. Keep image2 at `gpt-image-2` + `1k` unless the user explicitly approves higher cost.
+1. For L043 complete-structure images, find or create clean product-only cutouts.
+2. For L043 contextual images, use the whole visible PNG subject, such as product plus folded clothing, as the fusion reference and do not infer hidden board structure.
+3. For L091, use a clean product-only top-structure reference or fixed-PNG compositing.
+4. Run Claude/NVIDIA preflight on the source-use gate before image generation.
+5. Keep image2 at `gpt-image-2` + `1k` unless the user explicitly approves higher cost.

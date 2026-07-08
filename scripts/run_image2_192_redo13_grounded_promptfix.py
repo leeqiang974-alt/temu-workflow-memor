@@ -31,7 +31,8 @@ REVIEW_NAME = "0616_2_image2_192_redo13_grounded_promptfix_review"
 IMAGE2_MODEL = "gpt-image-2"
 IMAGE2_RESOLUTION = "1k"
 IMAGE2_QUALITY = "standard"
-LOCKED_SOURCE_IDS = {"L043_NEW_0008", "L043_NEW_0003", "L043_NEW_0005", "L091_T_0015"}
+LOCKED_SOURCE_IDS = {"L043_NEW_0008", "L091_T_0015"}
+CONTEXTUAL_FUSION_ALLOWED_SOURCE_IDS = {"L043_NEW_0003", "L043_NEW_0005"}
 FORBIDDEN_L096_WORDS = {
     "table",
     "counter",
@@ -247,6 +248,7 @@ def build_claude_review(items: list[dict]) -> Path:
                 "redo_only": True,
                 "image2_first": True,
                 "locked_source_ids": sorted(LOCKED_SOURCE_IDS),
+                "contextual_fusion_allowed_source_ids": sorted(CONTEXTUAL_FUSION_ALLOWED_SOURCE_IDS),
                 "locked_source_present": [item["candidate_id"] for item in locked_present],
                 "l096_forbidden_support_word_hits": l096_hits,
             },
@@ -258,6 +260,7 @@ def build_claude_review(items: list[dict]) -> Path:
         "Audit notes:",
         "- Only recovered DOM feedback entries with decision=redo are included; keep entries are preserved and excluded.",
         "- L043_NEW_0008 is locked out permanently because the user requested deleting that PNG from future use.",
+        "- L043_NEW_0003 and L043_NEW_0005 are not hard-bad sources; they are only unsuitable for complete hidden-structure reconstruction. They may be used in contextual fusion as whole visible product+clothing references.",
         "- For L043/L082/L085/L091, failed source ids and approved keep source ids are blocked before selecting fresh sources.",
         "- L096 prompts are positive outdoor ground/floor-use prompts; forbidden support terms are scanned before generation.",
         f"- Plan artifact reviewed: {PLAN_OUT}",
