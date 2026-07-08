@@ -124,7 +124,7 @@ Use this workflow when making the first image inserted into the workbook `T` car
 ### Mandatory model order for workbook T images
 
 - For a new workbook/batch, the first pass must generate **every unique exact `D` T first image with image2/APIMart GPT-Image-2** using the current product PNG/material library and product-specific prompt rules.
-- For Temu bulk T-first image2/APIMart runs, the low-cost model is exactly `gpt-image-2`; expensive official/unofficial variants are forbidden. Runners must hard-code/check the allowed model before submitting any APIMart request.
+- For Temu bulk T-first image2/APIMart runs, the low-cost setting is exactly `gpt-image-2` with `resolution: "1k"`; expensive official/unofficial variants and `2k`/`4k` are forbidden unless the user explicitly approves the higher cost. Runners must hard-code/check the allowed model and resolution before submitting any APIMart request.
 - Do **not** satisfy a new workbook/batch by directly reusing old Seedream/Jimeng approved records, old `all_sku_tfirst`, Ali single-SKU, ComfyUI background+paste, or background-library compositing outputs.
 - Seedream/Jimeng is a fallback/repair model only after image2 review: use it for images that the review marks failed, hallucinated, too similar, structurally wrong, or not premium enough.
 - If image2 already has an approved current-batch record for a `D`, reuse that current-batch image2 result. If not, generate it with image2 first; do not skip straight to Seedream.

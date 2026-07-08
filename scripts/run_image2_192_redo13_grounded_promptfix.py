@@ -29,6 +29,8 @@ CLAUDE_REVIEW_PATH = OUT / "claude_nvidia_192_redo13_grounded_promptfix_review_2
 
 REVIEW_NAME = "0616_2_image2_192_redo13_grounded_promptfix_review"
 IMAGE2_MODEL = "gpt-image-2"
+IMAGE2_RESOLUTION = "1k"
+IMAGE2_QUALITY = "standard"
 LOCKED_SOURCE_IDS = {"L043_NEW_0008"}
 FORBIDDEN_L096_WORDS = {
     "table",
@@ -277,14 +279,16 @@ def save_results(results: list[dict]) -> None:
 def submit_image2(module, item: dict) -> dict:
     if IMAGE2_MODEL != "gpt-image-2":
         raise RuntimeError(f"Refusing expensive/nonstandard image2 model: {IMAGE2_MODEL}")
+    if IMAGE2_RESOLUTION != "1k":
+        raise RuntimeError(f"Refusing non-low-cost image2 resolution without explicit approval: {IMAGE2_RESOLUTION}")
     key = module.read_key(module.APIMART_KEY)
     source = Path(item["source_png"])
     payload = {
         "model": IMAGE2_MODEL,
         "prompt": item["prompt"],
         "size": "1:1",
-        "resolution": "2k",
-        "quality": "high",
+        "resolution": IMAGE2_RESOLUTION,
+        "quality": IMAGE2_QUALITY,
         "response_format": "url",
         "image_urls": [module.image_to_data_url(source)],
     }
@@ -327,8 +331,8 @@ def submit_image2(module, item: dict) -> dict:
         "status": "ok",
         "provider": "APIMart",
         "model": IMAGE2_MODEL,
-        "apimart_resolution": "2k",
-        "apimart_quality": "high",
+        "apimart_resolution": IMAGE2_RESOLUTION,
+        "apimart_quality": IMAGE2_QUALITY,
         "candidate_id": item["candidate_id"],
         "previous_candidate_id": item["previous_candidate_id"],
         "exact_d": item["exact_d"],
@@ -344,7 +348,8 @@ def submit_image2(module, item: dict) -> dict:
         "scene_prompt": item["scene_prompt"],
         "user_feedback": item.get("user_feedback", ""),
         "claude_nvidia_plan_review": str(CLAUDE_REVIEW_PATH),
-        "cost_usd_est": 0.053,
+        "cost_usd_est": 0.006,
+        "cost_credits_est": 0.06,
         "elapsed_sec": round(time.time() - started, 2),
         "created_at": datetime.now().isoformat(timespec="seconds"),
         "raw_task": raw_final,

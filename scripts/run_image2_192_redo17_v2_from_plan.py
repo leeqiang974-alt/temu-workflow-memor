@@ -22,6 +22,8 @@ RESULTS_PATH = OUT / "candidate_results_192_redo17_v2.json"
 PLAN_OUT = OUT / "candidate_plan_192_redo17_v2.json"
 PROGRESS_PATH = OUT / "candidate_progress_192_redo17_v2.jsonl"
 IMAGE2_MODEL = "gpt-image-2"
+IMAGE2_RESOLUTION = "1k"
+IMAGE2_QUALITY = "standard"
 
 
 def load_base_module():
@@ -128,6 +130,8 @@ def run(workers: int, limit: int) -> list[dict]:
     def custom_submit(item: dict, index_in_prefix: int, prefix_total: int) -> dict:
         if IMAGE2_MODEL != "gpt-image-2":
             raise RuntimeError(f"Refusing expensive/nonstandard image2 model: {IMAGE2_MODEL}")
+        if IMAGE2_RESOLUTION != "1k":
+            raise RuntimeError(f"Refusing non-low-cost image2 resolution without explicit approval: {IMAGE2_RESOLUTION}")
         key = module.read_key(module.APIMART_KEY)
         source = Path(item["source_png"])
         prompt = custom_prompt(item, index_in_prefix, prefix_total)
@@ -135,8 +139,8 @@ def run(workers: int, limit: int) -> list[dict]:
             "model": IMAGE2_MODEL,
             "prompt": prompt,
             "size": "1:1",
-            "resolution": "2k",
-            "quality": "high",
+            "resolution": IMAGE2_RESOLUTION,
+            "quality": IMAGE2_QUALITY,
             "response_format": "url",
             "image_urls": [module.image_to_data_url(source)],
         }
@@ -178,8 +182,8 @@ def run(workers: int, limit: int) -> list[dict]:
         return {
             "provider": "APIMart",
             "model": IMAGE2_MODEL,
-            "apimart_resolution": "2k",
-            "apimart_quality": "high",
+            "apimart_resolution": IMAGE2_RESOLUTION,
+            "apimart_quality": IMAGE2_QUALITY,
             "d": item["d"],
             "prefix": item["prefix"],
             "rows": item["rows"],
@@ -190,7 +194,8 @@ def run(workers: int, limit: int) -> list[dict]:
             "local_path": str(target),
             "image_url": image_url,
             "prompt": prompt,
-            "cost_usd_est": 0.053,
+            "cost_usd_est": 0.006,
+            "cost_credits_est": 0.06,
             "elapsed_sec": round(time.time() - started, 2),
             "created_at": datetime.now().isoformat(timespec="seconds"),
             "raw_task": raw_final,
