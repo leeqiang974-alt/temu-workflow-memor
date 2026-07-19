@@ -1,0 +1,100 @@
+import json
+from pathlib import Path
+import pytest
+from release_guard.guard import ReleaseGuard, sha256_file
+from release_guard.conversation import ConversationAdapter
+from release_guard.artifacts import hash_map, write_execution_receipt
+from release_guard.gate import require_release
+from release_guard.runner import execute_confirmed
+
+def write(p, v):
+    p.parent.mkdir(parents=True, exist_ok=True); p.write_text(json.dumps(v, ensure_ascii=False), encoding='utf-8'); return p
+
+def approvals(tmp, batch, policy, workbook):
+    common = {'batch_id':batch, 'decision':'APPROVED', 'approver':'human@example', 'workbook_sha256':sha256_file(workbook), 'policy_sha256':sha256_file(policy)}
+    t1 = write(tmp/'t1.png', 't1'); badge = write(tmp/'badge.png', 'badge')
+    return [write(tmp/'t1.json', {**common, 'asset_paths':{str(t1):sha256_file(t1)}}), write(tmp/'badge.json', {**common, 'asset_paths':{str(badge):sha256_file(badge)}})]
+
+def evidence(tmp, batch):
+    j = {'physical_rows':[{'row':2,'D':'L095-00','G':'2格','SKU':'S2'}], 'rows':[{'row':2,'D':'L095-00','G':'2格','SKU':'S2','source_path':'/src/2/2.png','generated_asset':'/gen/j.png','oss_url':'https://oss/j.png','AC_previewImgUrls':'https://oss/j.png'}]}
+    cells = {'column_count':54,'cells':[{'cell':'A1','status':'PASS'}]}
+    locks = {'locks':[{'key':'L095-01','reason':'historical wrong mapping','source':'audit','active':True,'appears_in_output':False}]}
+    diff = {'reimport_verified':True,'protected_changed':[],'failures':[]}
+    return (write(tmp/'j.json',j), write(tmp/'cells.json',cells), write(tmp/'locks.json',locks), write(tmp/'diff.json',diff))
+
+def make_pass(tmp):
+    root=tmp/'guard'; wb=write(tmp/'input.json', {'candidate':1}); g=ReleaseGuard(root); b=g.init_batch('b1',wb)
+    proposal=write(tmp/'proposal.json', {'proposal_id':'p1','batch_id':'b1','requested_action':'replace J and T1'})
+    g.create_proposal('b1', proposal)
+    confirm=write(tmp/'confirm.json', {'proposal_id':'p1','batch_id':'b1','decision':'CONFIRMED','confirmer':'human@example','proposal_sha256':sha256_file(proposal)})
+    g.confirm_proposal('b1','p1',confirm)
+    output=write(tmp/'execution-output.json', {'result':'done'})
+    receipt=write(tmp/'receipt.json', {'proposal_id':'p1','batch_id':'b1','proposal_sha256':sha256_file(proposal),'input_paths':{str(wb):sha256_file(wb)},'output_paths':{str(output):sha256_file(output)}})
+    g.record_execution('b1','p1',receipt)
+    policy=root/'policy'/'v1.json'; approvals(tmp,'b1',policy,wb)
+    g.attest_approval('b1',tmp/'t1.json','t1_approval'); g.attest_approval('b1',tmp/'badge.json','badge_approval')
+    j,c,l,d=evidence(tmp,'b1'); g.audit_j('b1',j); g.audit_cells('b1',c); g.audit_negative_locks('b1',l); g.verify_diff('b1',d)
+    return g, wb
+
+def test_default_block_and_certificate(tmp_path):
+    root=tmp_path/'guard'; wb=write(tmp_path/'input.json', {'candidate':1}); g=ReleaseGuard(root); g.init_batch('b1',wb)
+    assert g.evaluate('b1')['status']=='BLOCK'
+    g.close()
+
+def test_full_evidence_certifies_and_registers(tmp_path):
+    g, wb=make_pass(tmp_path); assert g.evaluate('b1')['status']=='PASS'
+    cert=g.certify('b1', wb); assert cert['status']=='CERTIFIED'; entry=g.register_index('b1', tmp_path/'guard'/'batches'/'b1'/'release_certificate.json'); assert entry['batch_id']=='b1'; g.close()
+
+def test_workbook_hash_change_invalidates_approval(tmp_path):
+    g, wb=make_pass(tmp_path); wb.write_text('changed', encoding='utf-8'); result=g.evaluate('b1'); assert 'workbook_hash_changed' in result['reasons']; assert result['status']=='BLOCK'; g.close()
+
+def test_l095_wrong_mapping_is_blocked(tmp_path):
+    g, wb=make_pass(tmp_path); manifest=json.loads((tmp_path/'j.json').read_text(encoding='utf-8')); manifest['rows'][0]['source_path']=r'/src/3/3.png'; write(tmp_path/'bad-j.json',manifest); g.audit_j('b1',tmp_path/'bad-j.json')
+    assert g.evaluate('b1')['status']=='BLOCK'; g.close()
+
+def test_l095_01_must_use_three_grid_source(tmp_path):
+    g, wb=make_pass(tmp_path); manifest=json.loads((tmp_path/'j.json').read_text(encoding='utf-8'))
+    manifest['physical_rows'][0]['D']='L095-01'; manifest['rows'][0]['D']='L095-01'; manifest['rows'][0]['G']='3格'; manifest['rows'][0]['source_path']=r'/src/2/2.png'
+    write(tmp_path/'bad-l095-01.json',manifest); g.audit_j('b1',tmp_path/'bad-l095-01.json')
+    assert g.evaluate('b1')['status']=='BLOCK'; g.close()
+
+def test_approved_image_mutation_invalidates_release(tmp_path):
+    g, wb=make_pass(tmp_path); (tmp_path/'t1.png').write_text('mutated', encoding='utf-8')
+    result=g.evaluate('b1'); assert result['status']=='BLOCK'; assert any('approved_asset_hash_changed' in x for x in result['reasons']); g.close()
+
+def test_conversation_suggestion_needs_exact_confirmation(tmp_path):
+    root=tmp_path/'guard'; wb=write(tmp_path/'input.json', {'candidate':1}); g=ReleaseGuard(root); g.init_batch('b1',wb)
+    adapter=ConversationAdapter(g)
+    adapter.record_suggestion('b1','msg-1','建议修复 L095-01','p1','repair J',{'D':['L095-01']})
+    with pytest.raises(ValueError): adapter.confirm_command('b1','p1','可以提交','operator','msg-2')
+    result=adapter.confirm_command('b1','p1','CONFIRM p1','operator','msg-2')
+    assert result['status']=='PASS'; assert g.evaluate('b1')['status']=='BLOCK'; g.close()
+
+def test_artifact_helper_hashes_without_mutating_inputs(tmp_path):
+    inp=write(tmp_path/'source.json', {'x':1}); out=write(tmp_path/'result.json', {'ok':1})
+    before=inp.read_bytes(); receipt=tmp_path/'receipt.json'
+    write_execution_receipt(receipt,batch_id='b1',proposal_id='p1',proposal_sha256='abc',input_paths=[inp],output_paths=[out],operation='table-run')
+    assert inp.read_bytes()==before; assert hash_map([out])[str(out.resolve())]==sha256_file(out)
+
+def test_process_gate_raises_when_release_is_not_ready(tmp_path):
+    root=tmp_path/'guard'; wb=write(tmp_path/'source.json', {'candidate':1}); g=ReleaseGuard(root); g.init_batch('b1',wb); g.close()
+    with pytest.raises(RuntimeError, match='RELEASE_BLOCKED'):
+        require_release(root, 'b1', wb)
+
+def test_unconfirmed_operation_is_never_called(tmp_path):
+    root=tmp_path/'guard'; wb=write(tmp_path/'source.json', {'candidate':1}); g=ReleaseGuard(root); g.init_batch('b1',wb)
+    called=[]
+    with pytest.raises(RuntimeError, match='EXECUTION_BLOCKED'):
+        execute_confirmed(g,'b1','missing',lambda: called.append(True),operation_name='table-run',input_paths=[wb],output_paths=[tmp_path/'out.json'],receipt_path=tmp_path/'receipt.json')
+    assert called==[]; g.close()
+
+def test_batch_freeze_cannot_be_repointed(tmp_path):
+    root=tmp_path/'guard'; first=write(tmp_path/'first.json', {'x':1}); second=write(tmp_path/'second.json', {'x':2}); g=ReleaseGuard(root); g.init_batch('b1',first)
+    with pytest.raises(RuntimeError, match='IMMUTABLE_FREEZE'):
+        g.init_batch('b1',second)
+    g.close()
+
+def test_evidence_keeps_append_only_history(tmp_path):
+    g, wb=make_pass(tmp_path); first=g.db.execute("SELECT COUNT(*) FROM evidence_history WHERE batch_id='b1'").fetchone()[0]
+    g.audit_cells('b1',tmp_path/'cells.json'); second=g.db.execute("SELECT COUNT(*) FROM evidence_history WHERE batch_id='b1'").fetchone()[0]
+    assert second==first+1; g.close()

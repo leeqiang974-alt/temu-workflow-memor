@@ -30,8 +30,12 @@ STORE_ROOTS = {
     "dxxmall": Path(r"D:\Desktop\jit\DXXmall"),
     "cxxmall": Path(r"D:\Desktop\jit\CXXmall"),
     "fxxmall": Path(r"D:\Desktop\jit\FXXmall"),
+    "yeahf": Path(r"C:\Users\Administrator\Documents\temu自动化\outputs\yeahf_title_dedup_20260709"),
 }
+WORKBOOK_REGISTRY_PATH = WORK_DIR / "temu_workbook_registry.json"
 PRICE_COPY_LOG_PATH = WORK_DIR / "temu_price_copy_events.json"
+PASSED_D_LEDGER_PATH = WORK_DIR / "temu_passed_d_ledger.json"
+COPY_MATCH_VERSION = "exact-d-or-fingerprint-v2"
 STORE_PRUNED_STATE_PATH = WORK_DIR / "temu_store_pruned_state.json"
 EXCEL_SKIP_WORDS = (
     "过程",
@@ -67,7 +71,7 @@ def _now_text():
 
 def _normalize_store(store: str) -> str:
     value = (store or "DXXmall").strip() or "DXXmall"
-    known = {"dxxmall": "DXXmall", "cxxmall": "CXXmall", "fxxmall": "FXXmall"}
+    known = {"dxxmall": "DXXmall", "cxxmall": "CXXmall", "fxxmall": "FXXmall", "yeahf": "YeahF"}
     return known.get(value.lower(), value)
 
 
@@ -93,14 +97,120 @@ def _save_price_copy_events(events):
     _write_json(PRICE_COPY_LOG_PATH, events)
 
 
+def _eligible_passed_event(event, store: str) -> bool:
+    """Only exact v2 copy events may create a permanent passed-D record."""
+    return (
+        str(event.get("store") or "").lower() == _normalize_store(store).lower()
+        and bool(str(event.get("D") or "").strip())
+        and str(event.get("match_version") or "") == COPY_MATCH_VERSION
+    )
+
+
+def _upsert_passed_d_ledger_entry(ledger: dict, event: dict) -> bool:
+    stores = ledger.setdefault("stores", {})
+    store = _normalize_store(event.get("store") or "DXXmall")
+    by_d = stores.setdefault(store, {})
+    d_value = str(event.get("D") or "").strip().upper()
+    if not d_value:
+        return False
+    entry = by_d.setdefault(
+        d_value,
+        {
+            "D": d_value,
+            "first_copied_at": str(event.get("copied_at") or ""),
+            "last_copied_at": "",
+            "event_count": 0,
+            "event_ids": [],
+            "fingerprints": [],
+            "source_files": [],
+        },
+    )
+    changed = False
+    copied_at = str(event.get("copied_at") or "")
+    if copied_at and (not entry.get("first_copied_at") or copied_at < entry["first_copied_at"]):
+        entry["first_copied_at"] = copied_at
+        changed = True
+    if copied_at and copied_at > str(entry.get("last_copied_at") or ""):
+        entry["last_copied_at"] = copied_at
+        changed = True
+    fingerprint = str(event.get("fingerprint") or "").strip().upper()
+    if fingerprint and fingerprint not in entry["fingerprints"]:
+        entry["fingerprints"].append(fingerprint)
+        changed = True
+    source_file = str(event.get("source_file") or "").strip()
+    if source_file and source_file not in entry["source_files"]:
+        entry["source_files"].append(source_file)
+        changed = True
+    # A browser retry may submit the same copy event twice. Keep it auditable,
+    # but never inflate the permanent exact-D ledger count.
+    event_id = "|".join([
+        str(event.get("copied_at") or ""),
+        d_value,
+        fingerprint,
+        source_file,
+        str(event.get("row_count") or ""),
+    ])
+    event_ids = entry.setdefault("event_ids", [])
+    if event_id not in event_ids:
+        event_ids.append(event_id)
+        entry["event_count"] = int(entry.get("event_count") or 0) + 1
+        changed = True
+    return changed
+
+
+def _passed_d_ledger(store: str) -> dict:
+    """Build an exact-D ledger from qualified historic events.
+
+    The event log remains the audit trail. This derived ledger is deliberately
+    D-based so a later title/fingerprint/source-workbook change cannot make an
+    already-passed D look new again.
+    """
+    ledger = _read_json(PASSED_D_LEDGER_PATH, {"schema_version": 1, "stores": {}})
+    if not isinstance(ledger, dict):
+        ledger = {"schema_version": 1, "stores": {}}
+    ledger["schema_version"] = 2
+    stores = ledger.setdefault("stores", {})
+    normalized = _normalize_store(store)
+    # Rebuild this store from append-only qualified events. This corrects old
+    # inflated counts while preserving the event log as the audit source.
+    stores[normalized] = {}
+    for event in _load_price_copy_events():
+        if not _eligible_passed_event(event, store):
+            continue
+        _upsert_passed_d_ledger_entry(ledger, event)
+    ledger["updated_at"] = _now_text()
+    _write_json(PASSED_D_LEDGER_PATH, ledger)
+    return stores.get(normalized) or {}
+
+
 def _title_tracking_code(title: str) -> str:
     import re
 
     text = str(title or "").strip()
+    four_digit = re.search(r"(?<!\d)(\d{4})\s*$", text)
+    if four_digit:
+        return four_digit.group(1)
+    four_mixed = re.search(r"(?<![A-Z0-9])([A-Z0-9]{4})\s*$", text, re.IGNORECASE)
+    if four_mixed:
+        code = four_mixed.group(1).upper()
+        if re.search(r"[A-Z]", code) and re.search(r"\d", code):
+            return code
     candidates = re.findall(r"(?:^|[^A-Z0-9])([A-Z0-9]{3})(?=$|[^A-Z0-9])", text.upper())
     noise = {"CSS", "WEB", "BOX", "SKU", "SPU", "RMB", "CNY"}
     candidates = [c for c in candidates if c not in noise and any(ch.isalpha() for ch in c) and any(ch.isdigit() for ch in c)]
     return candidates[-1] if candidates else ""
+
+
+def _fingerprint_title_key(title: str) -> str:
+    """Exact-title key used only to disambiguate a repeated four-digit key."""
+    import re
+
+    text = str(title or "").strip()
+    code = _title_tracking_code(text)
+    if code:
+        text = re.sub(re.escape(code) + r"\s*$", "", text, flags=re.IGNORECASE)
+    text = text.casefold()
+    return re.sub(r"\s+", "", text)
 
 
 def _split_urls(value):
@@ -183,6 +293,29 @@ def _excel_score(path: Path) -> tuple:
 
 
 def _excel_files_for_store(store: str):
+    # Four-digit fingerprints are global system keys. The current Temu shop is
+    # not evidence of which workbook produced a title, so it must not narrow
+    # the lookup source. Store remains only event/display metadata.
+    registry = _read_json(WORKBOOK_REGISTRY_PATH, {}) or {}
+    records = registry.get("workbooks") or []
+    # Compatibility with the short-lived store-scoped registry shape. It is
+    # intentionally flattened rather than selected by the requested store.
+    if not records:
+        for store_records in (registry.get("stores") or {}).values():
+            if isinstance(store_records, list):
+                records.extend(store_records)
+    if records:
+        files = []
+        seen = set()
+        for record in records:
+            if not isinstance(record, dict) or not record.get("enabled_for_fingerprint_lookup"):
+                continue
+            path = Path(str(record.get("path") or "").strip())
+            path_key = str(path).lower()
+            if path_key not in seen and path.exists() and _should_scan_excel(path):
+                files.append(path)
+                seen.add(path_key)
+        return files
     root = _store_root(store)
     if not root.exists():
         return []
@@ -192,8 +325,30 @@ def _excel_files_for_store(store: str):
 
 
 def _latest_store_workbook(store: str):
-    files = _excel_files_for_store(store)
-    return files[0] if files else None
+    """Choose an explicit store-routed final workbook for D-pruning.
+
+    Fingerprint lookup is global, but a next-round prune must never inherit the
+    first global lookup file. The registry's explicit store metadata is the
+    routing authority for this operation.
+    """
+    normalized = _normalize_store(store)
+    registry = _read_json(WORKBOOK_REGISTRY_PATH, {}) or {}
+    records = registry.get("workbooks") or []
+    eligible = []
+    for record in records:
+        if not isinstance(record, dict):
+            continue
+        if _normalize_store(record.get("store_metadata") or "") != normalized:
+            continue
+        if str(record.get("status") or "") not in {"final_submission_ready", "submitted", "approved_preupload"}:
+            continue
+        path = Path(str(record.get("path") or "").strip())
+        if path.exists() and _should_scan_excel(path):
+            eligible.append((str(record.get("approved_at") or ""), path.stat().st_mtime, path))
+    if not eligible:
+        return None
+    eligible.sort(reverse=True)
+    return eligible[0][2]
 
 
 def _header_index(headers, names):
@@ -368,20 +523,36 @@ def _store_group_index(store: str):
     return index
 
 
-def _query_d_groups_from_index(query: str, store: str, index):
+def _query_d_groups_from_index(query: str, store: str, index, title: str = ""):
+    import re
+
     query_norm = str(query or "").strip()
     query_upper = query_norm.upper()
     if not query_norm:
         return {"items": [], "error_count": 0, "query": query_norm, "store": _normalize_store(store)}
     items = []
+    # A legacy numeric four-digit or a new mixed four-character code is a
+    # title fingerprint, not a general title search key.
+    fingerprint_only = bool(
+        re.fullmatch(r"\d{4}", query_upper)
+        or (
+            re.fullmatch(r"[A-Z0-9]{4}", query_upper)
+            and re.search(r"[A-Z]", query_upper)
+            and re.search(r"\d", query_upper)
+        )
+    )
     for entry in index.get("entries") or []:
         path = entry["path"]
         groups = entry["groups"]
         for d_value, group in groups.items():
             sku_hit = any(query_upper and query_upper in sku for sku in group["sku_values"])
-            if query_upper not in {d_value.upper(), group["fingerprint"].upper()} and not sku_hit and query_upper not in group["title"].upper():
+            if fingerprint_only:
+                if group["fingerprint"] != query_upper:
+                    continue
+            elif query_upper not in {d_value.upper(), group["fingerprint"].upper()} and not sku_hit and query_upper not in group["title"].upper():
                 continue
-            rows, sanitized_skc_count = _sanitize_skc_variant_rows(group["rows"], group.get("headers"))
+            rows = [list(row) for row in group["rows"]]
+            sanitized_skc_count = 0
             row_numbers = group["row_numbers"]
             items.append(
                 {
@@ -403,6 +574,23 @@ def _query_d_groups_from_index(query: str, store: str, index):
                 }
             )
     items.sort(key=lambda item: _excel_score(Path(item["file"])), reverse=True)
+    resolution = "fingerprint-only"
+    # A four-digit fingerprint can collide across separately finalized files.
+    # In that case, a complete title is a safe tie-breaker because it comes
+    # from the same product-title DOM node as the fingerprint. Cargo fields
+    # and SKU/SKC values are never used here.
+    title_key = _fingerprint_title_key(title)
+    if fingerprint_only and len(items) > 1 and title_key:
+        title_matches = [item for item in items if _fingerprint_title_key(item.get("title")) == title_key]
+        if len(title_matches) == 1:
+            items = title_matches
+            resolution = "fingerprint+exact-title"
+        elif len(title_matches) > 1:
+            resolution = "ambiguous-fingerprint+title"
+        else:
+            resolution = "ambiguous-fingerprint"
+    elif fingerprint_only and len(items) > 1:
+        resolution = "ambiguous-fingerprint"
     return {
         "items": items,
         "query": query_norm,
@@ -413,12 +601,13 @@ def _query_d_groups_from_index(query: str, store: str, index):
         "cache_hit": bool(index.get("cache_hit")),
         "cache_build_ms": int(index.get("build_ms") or 0),
         "indexed_file_count": int(index.get("file_count") or 0),
+        "resolution": resolution,
     }
 
 
-def _query_d_groups(query: str, store: str):
+def _query_d_groups(query: str, store: str, title: str = ""):
     index = _store_group_index(store)
-    return _query_d_groups_from_index(query, store, index)
+    return _query_d_groups_from_index(query, store, index, title)
 
 
 def _query_d_groups_batch(queries, store: str):
@@ -461,6 +650,7 @@ def _record_price_copy_event(payload):
         "source_file": str(payload.get("source_file") or payload.get("file") or "").strip(),
         "source_sheet": str(payload.get("source_sheet") or payload.get("sheet") or "").strip(),
         "row_count": int(payload.get("row_count") or 0),
+        "match_version": str(payload.get("match_version") or "").strip(),
         "declare_price": payload.get("declare_price"),
         "declare_reference_price": payload.get("declare_reference_price"),
         "lookup": query,
@@ -468,32 +658,96 @@ def _record_price_copy_event(payload):
     events = _load_price_copy_events()
     events.append(event)
     _save_price_copy_events(events)
+    if _eligible_passed_event(event, event["store"]):
+        ledger = _read_json(PASSED_D_LEDGER_PATH, {"schema_version": 1, "stores": {}})
+        if not isinstance(ledger, dict):
+            ledger = {"schema_version": 1, "stores": {}}
+        _upsert_passed_d_ledger_entry(ledger, event)
+        ledger["updated_at"] = _now_text()
+        _write_json(PASSED_D_LEDGER_PATH, ledger)
     return {"ok": True, "event": event, "count": len(events)}
 
 
-def _price_copy_status(store: str, fingerprint: str = "", d_value: str = ""):
+def _price_copy_status(store: str, fingerprint: str = "", d_value: str = "", title: str = ""):
     store_norm = _normalize_store(store).lower()
     fp = str(fingerprint or "").strip().upper()
     d_norm = str(d_value or "").strip().upper()
+    query = fp or d_norm
+    current = _query_d_groups(query, store, title).get("items") if query else []
+    if fp:
+        current = [item for item in current if str(item.get("fingerprint") or "").upper() == fp]
+    elif d_norm:
+        current = [item for item in current if str(item.get("D") or "").upper() == d_norm]
+    target = current[0] if len(current) == 1 else None
     matches = []
+    ignored_legacy = 0
+    ignored_mismatch = 0
     for event in _load_price_copy_events():
         if str(event.get("store") or "").lower() != store_norm:
             continue
-        if fp and str(event.get("fingerprint") or "").upper() == fp:
-            matches.append(event)
-        elif d_norm and str(event.get("D") or "").upper() == d_norm:
-            matches.append(event)
+        event_key_match = (
+            fp and str(event.get("fingerprint") or "").upper() == fp
+        ) or (
+            d_norm and str(event.get("D") or "").upper() == d_norm
+        )
+        if not event_key_match:
+            continue
+        if str(event.get("match_version") or "") != COPY_MATCH_VERSION:
+            ignored_legacy += 1
+            continue
+        if not target:
+            ignored_mismatch += 1
+            continue
+        if str(event.get("D") or "").upper() != str(target.get("D") or "").upper():
+            ignored_mismatch += 1
+            continue
+        matches.append(event)
     matches.sort(key=lambda item: str(item.get("copied_at") or ""))
-    return {"ok": True, "copied": bool(matches), "count": len(matches), "latest": matches[-1] if matches else None, "events": matches[-20:]}
+    ledger_entry = _passed_d_ledger(store).get(str((target or {}).get("D") or "").upper()) if target else None
+    copied = bool(ledger_entry)
+    return {
+        "ok": True,
+        "copied": copied,
+        "count": int((ledger_entry or {}).get("event_count") or len(matches)),
+        "latest": matches[-1] if matches else (ledger_entry or None),
+        "events": matches[-20:],
+        "target": target,
+        "status_scope": "same-d-ledger" if copied else "not-in-passed-d-ledger",
+        "ambiguous": bool(query and len(current) != 1),
+        "ignored_legacy_count": ignored_legacy,
+        "ignored_mismatch_count": ignored_mismatch,
+    }
 
 
 def _passed_d_events_for_store(store: str):
-    store_norm = _normalize_store(store).lower()
-    return [event for event in _load_price_copy_events() if str(event.get("store") or "").lower() == store_norm and str(event.get("D") or "").strip()]
+    return [event for event in _load_price_copy_events() if _eligible_passed_event(event, store)]
 
 
 def _passed_d_set_for_store(store: str):
-    return {str(event.get("D")).strip() for event in _passed_d_events_for_store(store)}
+    # Pruning must be D-ledger based, never fingerprint or source-file based.
+    return set(_passed_d_ledger(store))
+
+
+def _store_copy_coverage(store: str, d_values) -> dict:
+    """Explain a live scan without ever consulting Temu SKU/SKC/extCode."""
+    normalized = _normalize_store(store)
+    current = sorted({str(value or "").strip().upper() for value in (d_values or []) if str(value or "").strip()})
+    passed = _passed_d_set_for_store(normalized)
+    already = sorted(set(current) & passed)
+    first_time = sorted(set(current) - passed)
+    absent = sorted(passed - set(current))
+    return {
+        "ok": True,
+        "store": normalized,
+        "current_d_count": len(current),
+        "already_passed_in_current_count": len(already),
+        "first_time_in_current_count": len(first_time),
+        "passed_absent_from_current_count": len(absent),
+        "already_passed_d": already,
+        "first_time_d": first_time,
+        "passed_absent_d": absent,
+        "lookup_basis": "backend exact D resolved only from trailing title fingerprint",
+    }
 
 
 def _record_latest_pruned(store: str, path: Path):
@@ -594,7 +848,7 @@ def _preflight_store_full_workflow(store: str):
         if stats["duplicate_fingerprint_count"]:
             errors.append(f"发现重复指纹指向多个D：{stats['duplicate_fingerprint_count']} 个")
         if stats["missing_fingerprint_count"]:
-            warnings.append(f"标题缺少三位指纹：{stats['missing_fingerprint_count']} 个D")
+            warnings.append(f"标题缺少识别指纹：{stats['missing_fingerprint_count']} 个D")
     except Exception as exc:
         errors.append(f"读取底表失败：{exc}")
     return {"ok": not errors, "store": store, "source": str(source), "errors": errors, "warnings": warnings, "stats": stats}
@@ -741,7 +995,7 @@ T4 固定保留尺寸图；T 最多 10 张。
     <section id="dlookup" class="panel">
       <h2>D首图查行 / 指纹复制测试</h2>
       <div class="card">
-        <select id="store"><option>DXXmall</option><option>CXXmall</option><option>FXXmall</option></select>
+        <select id="store"><option>DXXmall</option><option>CXXmall</option><option>FXXmall</option><option>YeahF</option></select>
         <input id="lookup" placeholder="D值 / 标题指纹 / SKU" />
         <button onclick="queryD()">查询</button>
         <button class="secondary" onclick="copyFirst()">复制首个命中D行</button>
@@ -950,7 +1204,8 @@ class ControlPanelHandler(BaseHTTPRequestHandler):
             if path == "/api/d-groups":
                 lookup = (params.get("d") or params.get("fingerprint") or [""])[0]
                 store = (params.get("store") or ["DXXmall"])[0]
-                return _json_response(self, _query_d_groups(lookup, store))
+                title = (params.get("title") or [""])[0]
+                return _json_response(self, _query_d_groups(lookup, store, title))
 
             if path == "/api/d-groups-batch":
                 store = (params.get("store") or ["DXXmall"])[0]
@@ -965,12 +1220,14 @@ class ControlPanelHandler(BaseHTTPRequestHandler):
             if path == "/api/fingerprint-copy":
                 lookup = (params.get("fingerprint") or params.get("d") or [""])[0]
                 store = (params.get("store") or ["DXXmall"])[0]
-                return _json_response(self, _query_d_groups(lookup, store))
+                title = (params.get("title") or [""])[0]
+                return _json_response(self, _query_d_groups(lookup, store, title))
 
             if path in {"/api/copy-rows-by-fingerprint", "/api/search-rows", "/api/search"}:
                 lookup = (params.get("fingerprint") or params.get("d") or [""])[0]
                 store = (params.get("store") or ["DXXmall"])[0]
-                data = _query_d_groups(lookup, store)
+                title = (params.get("title") or [""])[0]
+                data = _query_d_groups(lookup, store, title)
                 if data.get("items"):
                     data["tsv"] = data["items"][0].get("tsv", "")
                     data["html"] = data["items"][0].get("html", "")
@@ -982,12 +1239,14 @@ class ControlPanelHandler(BaseHTTPRequestHandler):
                 store = (params.get("store") or ["DXXmall"])[0]
                 fingerprint = (params.get("fingerprint") or [""])[0]
                 d_value = (params.get("d") or [""])[0]
-                return _json_response(self, _price_copy_status(store, fingerprint, d_value))
+                title = (params.get("title") or [""])[0]
+                return _json_response(self, _price_copy_status(store, fingerprint, d_value, title))
 
             if path == "/api/store-passed-d":
                 store = (params.get("store") or ["DXXmall"])[0]
                 events = _passed_d_events_for_store(store)
-                d_values = sorted(_passed_d_set_for_store(store))
+                ledger = _passed_d_ledger(store)
+                d_values = sorted(ledger)
                 return _json_response(
                     self,
                     {
@@ -995,6 +1254,8 @@ class ControlPanelHandler(BaseHTTPRequestHandler):
                         "store": _normalize_store(store),
                         "event_count": len(events),
                         "d_count": len(d_values),
+                        "ledger_path": str(PASSED_D_LEDGER_PATH),
+                        "ledger_rule": "每个已出过的精确D永久排除后续新表；指纹仅用于定位D",
                         "d_values": d_values,
                         "events": events[-100:],
                     },
@@ -1081,6 +1342,18 @@ class ControlPanelHandler(BaseHTTPRequestHandler):
                 if not isinstance(payload, dict):
                     return _json_response(self, {"ok": False, "error": "body must be json object"}, 400)
                 return _json_response(self, _record_price_copy_event(payload))
+
+            if path == "/api/store-copy-coverage":
+                payload = json.loads(raw or "{}")
+                if not isinstance(payload, dict):
+                    return _json_response(self, {"ok": False, "error": "body must be json object"}, 400)
+                d_values = payload.get("d_values") or []
+                if not isinstance(d_values, list):
+                    return _json_response(self, {"ok": False, "error": "d_values must be a list"}, 400)
+                return _json_response(
+                    self,
+                    _store_copy_coverage(payload.get("store") or "DXXmall", d_values),
+                )
 
             if path == "/api/run":
                 return _json_response(
