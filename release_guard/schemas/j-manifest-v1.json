@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Temu Release Guard row-level J evidence",
+  "type": "object",
+  "required": ["physical_rows", "rows"],
+  "properties": {
+    "physical_rows": {"type": "array"},
+    "rows": {
+      "type": "array",
+      "items": {"type": "object", "required": ["row", "D", "G", "SKU", "source_path", "generated_asset", "oss_url", "AC_previewImgUrls"]}
+    }
+  }
+}
