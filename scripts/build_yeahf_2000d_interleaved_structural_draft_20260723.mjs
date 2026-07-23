@@ -11,6 +11,7 @@ const TITLE_ALLOCATION = `${ROOT}\\outputs\\yeahf_merged_d_0721\\YeahF_2000D_新
 const OUTPUT = `${ROOT}\\outputs\\yeahf_merged_d_0721\\YeahF_2000D_穿插结构预演_标题GJ54列联动_T1待视觉OSS_20260723.xlsx`;
 const REPORT = `${ROOT}\\outputs\\yeahf_merged_d_0721\\YeahF_2000D_穿插结构预演_验证_20260723.json`;
 const PREVIEW = `${ROOT}\\outputs\\yeahf_merged_d_0721\\YeahF_2000D_穿插结构预演_预览_20260723.png`;
+const L058_REQUIRED_T2 = "https://ozonshanghai.oss-cn-shanghai.aliyuncs.com/temu-jit/yeahf-375/t-carousel/20260710/b77468b5ec2ea489dfb1302ad97da2c3f29feacf.jpeg";
 
 const clean = (value) => value == null ? "" : String(value).trim();
 const sha256 = async (path) => crypto.createHash("sha256").update(await fs.readFile(path)).digest("hex");
@@ -42,6 +43,19 @@ function replaceInJson(value, oldD, finalD) {
     return Object.fromEntries(Object.entries(value).map(([key, item]) => [key, replaceInJson(item, oldD, finalD)]));
   }
   return value;
+}
+
+function enforceL058RequiredT2(raw) {
+  const urls = splitUrls(raw);
+  if (!urls.length) return raw;
+  const t1 = urls[0];
+  const protectedT4 = urls[3] || "";
+  const remaining = urls.slice(1).filter((url) => url !== L058_REQUIRED_T2 && url !== protectedT4);
+  const rebuilt = [t1, L058_REQUIRED_T2];
+  if (remaining.length) rebuilt.push(remaining.shift());
+  if (protectedT4) rebuilt.push(protectedT4);
+  rebuilt.push(...remaining);
+  return rebuilt.slice(0, 10).join("\n");
 }
 
 const base = await readWorkbook(BASE);
@@ -97,6 +111,10 @@ for (const mapRow of mappingPayload.mapping) {
     row[ix["产品货号"]] = finalD;
     row[ix["变种名称"]] = clean(row[ix["变种名称"]]).split(oldD).join(finalD);
     row[ix["变种属性值二"]] = clean(row[ix["变种属性值二"]]).split(oldD).join(finalD);
+    if (finalD.startsWith("L058")) {
+      row[ix["轮播图"]] = enforceL058RequiredT2(row[ix["轮播图"]]);
+      row[ix["产品素材图"]] = splitUrls(row[ix["轮播图"]])[0] || "";
+    }
 
     const currentJ = clean(row[ix["预览图"]]);
     let finalJ = currentJ;
@@ -188,6 +206,8 @@ let invalidSkuJson = 0;
 let staleLinkedD = 0;
 const mixedFingerprintPattern = /[A-Z0-9]{4}$/;
 let newFingerprintFailures = 0;
+let l058RequiredMissing = 0;
+let l058RequiredWrongPosition = 0;
 for (const [dValue, items] of groups) {
   const titles = new Set(items.map((item) => clean(item.row[ix["产品标题"]])));
   const tValues = new Set(items.map((item) => clean(item.row[ix["轮播图"]])));
@@ -200,6 +220,10 @@ for (const [dValue, items] of groups) {
     const tUrls = splitUrls(row[ix["轮播图"]]);
     if (clean(row[ix["产品素材图"]]) !== (tUrls[0] || "")) uT1Mismatch += 1;
     if (tUrls.length < 4 || !tUrls[3]) t4Missing += 1;
+    if (dValue.startsWith("L058")) {
+      if (!tUrls.includes(L058_REQUIRED_T2)) l058RequiredMissing += 1;
+      else if (tUrls[1] !== L058_REQUIRED_T2) l058RequiredWrongPosition += 1;
+    }
     try {
       const skc = parseJsonArray(row[ix["SKC属性"]], `${dValue} audit SKC`);
       if (skc.some((entry) => clean(entry.extCode) !== dValue)) extCodeMismatch += 1;
@@ -237,6 +261,8 @@ for (const [name, count] of Object.entries({
   invalidSkuJson,
   staleLinkedD,
   newFingerprintFailures,
+  l058RequiredMissing,
+  l058RequiredWrongPosition,
 })) {
   if (count) failures.push(`${name}=${count}`);
 }
@@ -282,6 +308,8 @@ const report = {
     SKU_JSON_model_mismatch: invalidSkuJson,
     linked_D_missing: staleLinkedD,
     new_fingerprint_failures: newFingerprintFailures,
+    L058_required_missing: l058RequiredMissing,
+    L058_required_wrong_position: l058RequiredWrongPosition,
     unexpected_D_columns: unexpectedDColumns.length,
     retained_asset_URL_old_D_references: retainedAssetUrlDReferences.length,
     formula_error_scan: errorScan.ndjson ?? String(errorScan),

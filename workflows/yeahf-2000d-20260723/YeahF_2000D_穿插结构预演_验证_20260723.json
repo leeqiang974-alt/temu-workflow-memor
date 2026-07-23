@@ -1,6 +1,6 @@
 {
   "schema": "yeahf-2000d-interleaved-structural-draft/v1",
-  "generated_at": "2026-07-23T15:28:45.173Z",
+  "generated_at": "2026-07-23T15:35:05.013Z",
   "inputs": {
     "base": {
       "path": "C:\\Users\\Administrator\\Documents\\temu自动化\\outputs\\yeahf_merged_d_0721\\YeahF_合并总表_追加补充144D_L043_20PCS_J回填_20260723.xlsx",
@@ -25,7 +25,7 @@
   },
   "output": {
     "path": "C:\\Users\\Administrator\\Documents\\temu自动化\\outputs\\yeahf_merged_d_0721\\YeahF_2000D_穿插结构预演_标题GJ54列联动_T1待视觉OSS_20260723.xlsx",
-    "sha256": "8475a5a5f53f9e759e8835cd4b2e93e0923cd08ee766edfacb0459ca54a6e665",
+    "sha256": "2ec50d30848812a0cdbdd7caa81fa1f4695d4e268fabcae06db06fcf426f2b32",
     "preview": "C:\\Users\\Administrator\\Documents\\temu自动化\\outputs\\yeahf_merged_d_0721\\YeahF_2000D_穿插结构预演_预览_20260723.png"
   },
   "counts": {
@@ -47,6 +47,8 @@
     "SKU_JSON_model_mismatch": 0,
     "linked_D_missing": 0,
     "new_fingerprint_failures": 0,
+    "L058_required_missing": 0,
+    "L058_required_wrong_position": 0,
     "unexpected_D_columns": 0,
     "retained_asset_URL_old_D_references": 537,
     "formula_error_scan": "{\"kind\":\"notice\",\"message\":\"Cell search matched 0 entries.\"}"
