@@ -1,0 +1,77 @@
+{
+  "schema": "temu-strict-release-audit/v1",
+  "audit_time": "2026-07-23T17:00:00+08:00",
+  "batch": "YeahF supplement 144D",
+  "decision": "BLOCKED",
+  "current_workbook": {
+    "path": "C:\\Users\\Administrator\\Documents\\temu自动化\\outputs\\yeahf_supplement_146d_0726_20260722\\YeahF_补充144D_J确认OSS回填_最终严格审.xlsx",
+    "last_read_sha256": "8ac8233d7b1026da768430c4bc7d1cdd9d91ddb04f3440dafe6171bcc48e1a6c",
+    "shape_last_verified": {
+      "columns": 54,
+      "physical_rows": 261,
+      "unique_d": 144
+    },
+    "current_hash_read": "BLOCKED_BY_OPEN_FILE",
+    "immutable_freeze_verified_now": false
+  },
+  "formal_release_guard": {
+    "batch_id": "yeahf-supplement-144d-20260723",
+    "status": "BLOCK",
+    "certificate": null,
+    "frozen_workbook_path": "C:\\Users\\Administrator\\Documents\\temu自动化\\outputs\\yeahf_supplement_146d_0726_20260722\\YeahF_补充144D_结构T4L058修正_T1已回填_待J严格审.xlsx",
+    "frozen_workbook_sha256": "854253cdf8ad02361e651b5ebd2688ad57748d05c863eaac93f8080d62c8cb8b",
+    "target_matches_frozen_workbook": false,
+    "required_evidence": {
+      "proposal_confirmation": "MISSING",
+      "execution_receipt": "MISSING",
+      "t1_approval": "MISSING",
+      "badge_approval": "MISSING",
+      "j_audit": "CHECK",
+      "cell_audit": "MISSING",
+      "negative_locks": "MISSING",
+      "writeback_diff": "MISSING"
+    }
+  },
+  "layer_results": {
+    "T1_badge": {
+      "status": "BLOCK",
+      "required_exact_d": 144,
+      "verified_badged_exact_d": 0,
+      "reason": "No source-to-badged-hash-to-human-approval-to-OSS-to-T1/U evidence manifest exists."
+    },
+    "J_zero_trust_formal": {
+      "status": "CHECK",
+      "physical_rows": 261,
+      "formal_checked_rows": 0,
+      "formal_failed_or_missing_rows": 261,
+      "reason": "The formal evidence database has no complete immutable row-level J evidence chain."
+    },
+    "J_ad_hoc_recheck": {
+      "status": "NON_CERTIFYING_PASS",
+      "rows": 261,
+      "reason": "A later temporary report verified a manifest chain, but it was not registered as PASS in the formal guard and cannot issue a certificate."
+    },
+    "T_U_T4_structural_recheck": {
+      "status": "NON_CERTIFYING_PASS",
+      "t1_manifest_d": 144,
+      "writeback_failures": 0,
+      "reason": "URL linkage and T4 checks do not prove T1 badge presence and do not replace formal evidence."
+    }
+  },
+  "hard_blockers": [
+    "Current final workbook is not the workbook frozen by the formal release guard.",
+    "Current workbook is open/locked, so its immutable SHA-256 could not be freshly verified.",
+    "T1 badge evidence coverage is 0/144.",
+    "Formal J audit evidence is CHECK with 0/261 complete evidence rows.",
+    "Seven of eight required formal evidence kinds are absent.",
+    "No formal release certificate exists."
+  ],
+  "release_rule": "Temporary HTML/JSON checks cannot override the formal guard. UNKNOWN, CHECK, missing evidence, target/freeze mismatch, or missing certificate means BLOCKED.",
+  "next_required_sequence": [
+    "Close or release the final workbook so its current SHA-256 can be frozen.",
+    "Create and visually approve square THIS IS THE PRODUCT badge assets for all 144 exact D values.",
+    "Upload only approved badged assets and write the badged OSS URLs to T1 and U.",
+    "Register complete J, cell, negative-lock, and writeback-diff evidence against the same frozen final workbook.",
+    "Run formal evaluate/certify and require a valid release certificate."
+  ]
+}

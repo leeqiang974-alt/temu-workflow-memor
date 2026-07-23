@@ -1,0 +1,453 @@
+{
+  "schema": "yeahf-2000d-interleave-requirements-audit/v1",
+  "generated_at": "2026-07-23T23:42:33.988Z",
+  "workbook": "C:\\Users\\Administrator\\Documents\\temu自动化\\outputs\\yeahf_merged_d_0721\\YeahF_2000D_穿插完成_昨晚通过289D_T1_OSS回填_20260724.xlsx",
+  "counts": {
+    "physical_rows": 3690,
+    "exact_D": 2000,
+    "old1711": 1711,
+    "new289": 289,
+    "old_D_renumbered": 1019,
+    "old_D_unchanged_by_coincidence": 692
+  },
+  "interleave": {
+    "policy": {
+      "target_dates_for_new_D": [
+        "0721",
+        "0722",
+        "0723",
+        "0724"
+      ],
+      "forbid_new_0726_assignments": true,
+      "allocation": "same-L0xx proportional by existing date population, balanced across dates",
+      "placement": "evenly interleave new complete D groups among old complete D groups",
+      "row_move": "all 54 columns as whole physical rows"
+    },
+    "sequence_issues": [
+      {
+        "segment": "L071-0726",
+        "missing": [
+          2
+        ]
+      }
+    ],
+    "old_changed_examples": [
+      {
+        "source_kind": "existing1711",
+        "source_D": "L042072102",
+        "final_D": "L042072101",
+        "L0xx": "L042",
+        "final_date": "0721",
+        "final_suffix": 1,
+        "source_rows": [
+          2,
+          3
+        ],
+        "inserted_new_group": false
+      },
+      {
+        "source_kind": "existing1711",
+        "source_D": "L042072103",
+        "final_D": "L042072102",
+        "L0xx": "L042",
+        "final_date": "0721",
+        "final_suffix": 2,
+        "source_rows": [
+          4,
+          5
+        ],
+        "inserted_new_group": false
+      },
+      {
+        "source_kind": "existing1711",
+        "source_D": "L042072104",
+        "final_D": "L042072103",
+        "L0xx": "L042",
+        "final_date": "0721",
+        "final_suffix": 3,
+        "source_rows": [
+          6,
+          7
+        ],
+        "inserted_new_group": false
+      },
+      {
+        "source_kind": "existing1711",
+        "source_D": "L042072108",
+        "final_D": "L042072109",
+        "L0xx": "L042",
+        "final_date": "0721",
+        "final_suffix": 9,
+        "source_rows": [
+          14,
+          15
+        ],
+        "inserted_new_group": false
+      },
+      {
+        "source_kind": "existing1711",
+        "source_D": "L042072109",
+        "final_D": "L042072110",
+        "L0xx": "L042",
+        "final_date": "0721",
+        "final_suffix": 10,
+        "source_rows": [
+          16,
+          17
+        ],
+        "inserted_new_group": false
+      },
+      {
+        "source_kind": "existing1711",
+        "source_D": "L042072113",
+        "final_D": "L042072112",
+        "L0xx": "L042",
+        "final_date": "0721",
+        "final_suffix": 12,
+        "source_rows": [
+          20,
+          21
+        ],
+        "inserted_new_group": false
+      },
+      {
+        "source_kind": "existing1711",
+        "source_D": "L042072117",
+        "final_D": "L042072118",
+        "L0xx": "L042",
+        "final_date": "0721",
+        "final_suffix": 18,
+        "source_rows": [
+          28,
+          29
+        ],
+        "inserted_new_group": false
+      },
+      {
+        "source_kind": "existing1711",
+        "source_D": "L042072118",
+        "final_D": "L042072119",
+        "L0xx": "L042",
+        "final_date": "0721",
+        "final_suffix": 19,
+        "source_rows": [
+          30,
+          31
+        ],
+        "inserted_new_group": false
+      },
+      {
+        "source_kind": "existing1711",
+        "source_D": "L042072119",
+        "final_D": "L042072120",
+        "L0xx": "L042",
+        "final_date": "0721",
+        "final_suffix": 20,
+        "source_rows": [
+          32,
+          33
+        ],
+        "inserted_new_group": false
+      },
+      {
+        "source_kind": "existing1711",
+        "source_D": "L042072120",
+        "final_D": "L042072122",
+        "L0xx": "L042",
+        "final_date": "0721",
+        "final_suffix": 22,
+        "source_rows": [
+          34,
+          35
+        ],
+        "inserted_new_group": false
+      },
+      {
+        "source_kind": "existing1711",
+        "source_D": "L042072122",
+        "final_D": "L042072123",
+        "L0xx": "L042",
+        "final_date": "0721",
+        "final_suffix": 23,
+        "source_rows": [
+          36,
+          37
+        ],
+        "inserted_new_group": false
+      },
+      {
+        "source_kind": "existing1711",
+        "source_D": "L042072123",
+        "final_D": "L042072124",
+        "L0xx": "L042",
+        "final_date": "0721",
+        "final_suffix": 24,
+        "source_rows": [
+          38,
+          39
+        ],
+        "inserted_new_group": false
+      }
+    ]
+  },
+  "T1_badge": {
+    "status": "BLOCK",
+    "reason": "No exact-D badge manifest or badge approval exists for the final workbook; Release Guard reports badge approval missing."
+  },
+  "J_matching_review": {
+    "status": "BLOCK",
+    "physical_rows": 3690,
+    "positive_lineage_rows": 529,
+    "missing_positive_lineage_rows": 3161
+  },
+  "title_and_fingerprint": {
+    "new_D_title_allocations": 289,
+    "new_D_title_exact_match": 289,
+    "new_D_valid_mixed_fingerprint": 289,
+    "allocation_failures": 0,
+    "duplicate_fingerprints_in_final_workbook": 0,
+    "duplicate_fingerprint_examples": [],
+    "old1711_titles_reconstructed": false,
+    "old1711_policy": "Preserved title/fingerprint while D-dependent workbook fields were renumbered."
+  },
+  "G_differentiation": {
+    "new_D_groups_changed_vs_clone_source": 289,
+    "new_D_groups_unchanged_vs_clone_source": 0,
+    "compared_physical_rows": 529,
+    "prefix_only_changed_rows": 529,
+    "prefix_only_ratio": 1,
+    "prefix_counts": {
+      "优选": 261,
+      "升级": 252,
+      "焕新": 16
+    },
+    "malformed_or_D_embedded_G_rows": 181,
+    "malformed_or_D_embedded_new_G_rows": 0,
+    "malformed_examples": [
+      {
+        "D": "L047072110",
+        "G": "经典L047040801-8",
+        "SKU": "L047-00"
+      },
+      {
+        "D": "L047072112",
+        "G": "简约L047040801-8",
+        "SKU": "L047-00"
+      },
+      {
+        "D": "L047072210",
+        "G": "经典L047040801-8",
+        "SKU": "L047-00"
+      },
+      {
+        "D": "L047072212",
+        "G": "简约L047040801-8",
+        "SKU": "L047-00"
+      },
+      {
+        "D": "L047072310",
+        "G": "经典L047040801-8",
+        "SKU": "L047-00"
+      },
+      {
+        "D": "L047072312",
+        "G": "简约L047040801-8",
+        "SKU": "L047-00"
+      },
+      {
+        "D": "L047072410",
+        "G": "经典L047040801-8",
+        "SKU": "L047-00"
+      },
+      {
+        "D": "L047072412",
+        "G": "简约L047040801-8",
+        "SKU": "L047-00"
+      },
+      {
+        "D": "L058072103",
+        "G": "L058030504-1",
+        "SKU": "L058-00"
+      },
+      {
+        "D": "L058072104",
+        "G": "L058122502-1",
+        "SKU": "L058-00"
+      },
+      {
+        "D": "L058072105",
+        "G": "L058122502-6",
+        "SKU": "L058-00"
+      },
+      {
+        "D": "L058072106",
+        "G": "L058122502-3",
+        "SKU": "L058-00"
+      },
+      {
+        "D": "L058072107",
+        "G": "经典L058122502-10",
+        "SKU": "L058-00"
+      },
+      {
+        "D": "L058072109",
+        "G": "简约L058122502-10",
+        "SKU": "L058-00"
+      },
+      {
+        "D": "L058072110",
+        "G": "轻雅L058122502-10",
+        "SKU": "L058-00"
+      },
+      {
+        "D": "L058072126",
+        "G": "L058030504-1",
+        "SKU": "L058-00"
+      },
+      {
+        "D": "L058072127",
+        "G": "L058122502-1",
+        "SKU": "L058-00"
+      },
+      {
+        "D": "L058072203",
+        "G": "L058030504-1",
+        "SKU": "L058-00"
+      },
+      {
+        "D": "L058072204",
+        "G": "L058122502-1",
+        "SKU": "L058-00"
+      },
+      {
+        "D": "L058072205",
+        "G": "L058122502-6",
+        "SKU": "L058-00"
+      }
+    ],
+    "examples": [
+      {
+        "final_D": "L042072104",
+        "clone_source_D": "L042072601",
+        "source_G": [
+          "哑光黑",
+          "明亮绿"
+        ],
+        "final_G": [
+          "优选哑光黑",
+          "优选明亮绿"
+        ]
+      },
+      {
+        "final_D": "L042072108",
+        "clone_source_D": "L042072602",
+        "source_G": [
+          "森林黑",
+          "10米森林绿"
+        ],
+        "final_G": [
+          "优选森林黑",
+          "优选10米森林绿"
+        ]
+      },
+      {
+        "final_D": "L042072113",
+        "clone_source_D": "L042072603",
+        "source_G": [
+          "1set八黑",
+          "八绿"
+        ],
+        "final_G": [
+          "优选1set八黑",
+          "优选八绿"
+        ]
+      },
+      {
+        "final_D": "L042072117",
+        "clone_source_D": "L042072604",
+        "source_G": [
+          "一款曜石黑-10Mx5cm/33FTx2inch",
+          "一款森林绿-10Mx5cm/33FTx2inch"
+        ],
+        "final_G": [
+          "优选一款曜石黑-10Mx5cm/33FTx2inch",
+          "优选一款森林绿-10Mx5cm/33FTx2inch"
+        ]
+      },
+      {
+        "final_D": "L042072121",
+        "clone_source_D": "L042072605",
+        "source_G": [
+          "深空黑",
+          "松石绿"
+        ],
+        "final_G": [
+          "优选深空黑",
+          "优选松石绿"
+        ]
+      },
+      {
+        "final_D": "L042072125",
+        "clone_source_D": "L042072606",
+        "source_G": [
+          "一卷墨黑色经典款",
+          "一卷青柠绿经典款"
+        ],
+        "final_G": [
+          "优选一卷墨黑色经典款",
+          "优选一卷青柠绿经典款"
+        ]
+      },
+      {
+        "final_D": "L042072129",
+        "clone_source_D": "L042072607",
+        "source_G": [
+          "10米一款黑色-10Mx5cm/33FTx2inch",
+          "一款绿色-10Mx5cm/33FTx2inch"
+        ],
+        "final_G": [
+          "优选10米一款黑色-10Mx5cm/33FTx2inch",
+          "优选一款绿色-10Mx5cm/33FTx2inch"
+        ]
+      },
+      {
+        "final_D": "L042072133",
+        "clone_source_D": "L042072608",
+        "source_G": [
+          "1set经典哑光黑",
+          "经典明亮绿"
+        ],
+        "final_G": [
+          "优选1set经典哑光黑",
+          "优选经典明亮绿"
+        ]
+      }
+    ]
+  },
+  "description_differentiation": {
+    "header": "产品描述",
+    "new_D_groups_changed_vs_clone_source": 289,
+    "new_D_groups_unchanged_vs_clone_source": 0
+  },
+  "D_linkage": {
+    "rows_checked": 3690,
+    "final_D_missing_from_mapping": 0,
+    "variant_name_missing_final_D": 0,
+    "model_missing_final_D": 0,
+    "SKC_extCode_mismatch": 0,
+    "SKC_preview_mismatch": 0,
+    "SKU_JSON_missing_final_D": 0,
+    "stale_source_D_outside_asset_URLs": 0,
+    "stale_examples": [],
+    "retained_asset_URL_old_D_references": 537
+  },
+  "release_guard": {
+    "expected_status": "BLOCK",
+    "blockers": [
+      "badge approval missing",
+      "J full visual positive evidence incomplete",
+      "cell audit contains CHECK records",
+      "proposal confirmation and execution receipt absent"
+    ]
+  }
+}

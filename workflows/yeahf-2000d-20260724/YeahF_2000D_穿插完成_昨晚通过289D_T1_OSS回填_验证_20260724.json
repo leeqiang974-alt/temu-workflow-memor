@@ -1,0 +1,34 @@
+{
+  "schema": "yeahf-2000d-approved-289d-t1-writeback/v1",
+  "generated_at": "2026-07-23T23:11:05.758Z",
+  "source": {
+    "path": "C:\\Users\\Administrator\\Documents\\temu自动化\\outputs\\yeahf_merged_d_0721\\YeahF_2000D_穿插结构预演_标题GJ54列联动_T1待视觉OSS_20260723.xlsx",
+    "sha256": "2ec50d30848812a0cdbdd7caa81fa1f4695d4e268fabcae06db06fcf426f2b32"
+  },
+  "url_map": {
+    "path": "C:\\Users\\Administrator\\Documents\\temu自动化\\outputs\\yeahf_merged_d_0721\\YeahF_2000D_昨晚通过289D_T1_OSS映射_20260724.json",
+    "sha256": "549715dbae69f1b7558f5a5ddbf869bc633876ff14b8579b8f7948000b9d54fd",
+    "count": 289
+  },
+  "output": {
+    "path": "C:\\Users\\Administrator\\Documents\\temu自动化\\outputs\\yeahf_merged_d_0721\\YeahF_2000D_穿插完成_昨晚通过289D_T1_OSS回填_20260724.xlsx",
+    "sha256": "861796e55f12b9d9dffcc114ccdd214c23b90fdffed54a459fc2a51bdd670851",
+    "preview": "C:\\Users\\Administrator\\Documents\\temu自动化\\outputs\\yeahf_merged_d_0721\\YeahF_2000D_穿插完成_昨晚通过289D_T1_OSS回填_预览_20260724.png"
+  },
+  "counts": {
+    "rows": 3690,
+    "columns": 54,
+    "exact_D": 2000,
+    "target_D": 289,
+    "target_physical_rows": 529,
+    "changed_T": 529,
+    "changed_U": 529,
+    "protected_changed": 0,
+    "T4_mismatch": 0,
+    "same_D_title_T_U_mismatch": 0,
+    "L058_required_T2_missing": 0
+  },
+  "formula_error_scan": "{\"kind\":\"notice\",\"message\":\"Cell search matched 0 entries.\"}",
+  "failures": [],
+  "status": "PASS"
+}

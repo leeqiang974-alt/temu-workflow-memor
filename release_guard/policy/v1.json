@@ -1,0 +1,12 @@
+{
+  "schema": "temu-release-policy/v1",
+  "default_status": "BLOCK",
+  "required_evidence": ["proposal_confirmation", "execution_receipt", "t1_approval", "badge_approval", "j_audit", "cell_audit", "negative_locks", "writeback_diff"],
+  "required_columns": 54,
+  "j_required_fields": ["row", "D", "G", "SKU", "source_path", "generated_asset", "oss_url", "AC_previewImgUrls"],
+  "sentinels": {
+    "L095-00": "2\\2.png",
+    "L095-01": "3\\3.png"
+  },
+  "release_rules": ["all_required_evidence_pass", "frozen_workbook_hash_unchanged", "frozen_policy_hash_unchanged", "no_active_negative_lock_conflict", "no_protected_cell_diff", "certificate_required_for_index"]
+}

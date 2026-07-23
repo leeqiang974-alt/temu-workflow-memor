@@ -1,0 +1,23 @@
+{
+  "schema": "yeahf-2000d-release-guard-submission/v1",
+  "batch_id": "YEAHF-2000D-INTERLEAVE-WRITEBACK-20260724",
+  "workbook": "C:\\Users\\Administrator\\Documents\\temu自动化\\outputs\\yeahf_merged_d_0721\\YeahF_2000D_穿插完成_昨晚通过289D_T1_OSS回填_20260724.xlsx",
+  "workbook_sha256": "861796e55f12b9d9dffcc114ccdd214c23b90fdffed54a459fc2a51bdd670851",
+  "rows": 3690,
+  "columns": 54,
+  "cells": 199260,
+  "J_rows": 3690,
+  "J_rows_with_positive_lineage": 529,
+  "J_rows_missing_positive_lineage": 3161,
+  "pending_counts": {
+    "J_visual_positive_evidence_pending": 7380,
+    "new_T1_visual_OSS_writeback_pending": 0
+  },
+  "expected_release_status": "BLOCK",
+  "expected_blockers": [
+    "badge approval missing",
+    "J full visual positive evidence incomplete",
+    "cell audit contains CHECK records",
+    "proposal confirmation and execution receipt absent"
+  ]
+}
