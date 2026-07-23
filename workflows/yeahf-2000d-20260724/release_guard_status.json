@@ -1,0 +1,19 @@
+{
+  "batch_id": "YEAHF-2000D-INTERLEAVE-WRITEBACK-20260724",
+  "workbook_sha256": "861796e55f12b9d9dffcc114ccdd214c23b90fdffed54a459fc2a51bdd670851",
+  "status": "BLOCK",
+  "evidence": {
+    "t1_approval": "PASS",
+    "writeback_diff": "PASS",
+    "j_audit": "CHECK",
+    "cell_audit": "CHECK"
+  },
+  "reasons": [
+    "proposal_confirmation:UNKNOWN",
+    "execution_receipt:UNKNOWN",
+    "badge_approval:UNKNOWN",
+    "j_audit:CHECK",
+    "cell_audit:CHECK",
+    "negative_locks:UNKNOWN"
+  ]
+}

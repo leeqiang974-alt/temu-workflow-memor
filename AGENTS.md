@@ -171,6 +171,7 @@
 ## 2026-07-23 2000D Expansion T1 Source Rule
 
 - For the 2000-D expansion, every new D T1 must use a visually approved **original/reference manuscript image** as its `reference_edit` anchor. Never use any previously generated T1, Cangyuan/APIMart output, redo output, or output-library image as a new reference anchor. Record `target_D -> source_original_D -> approved original reference path/SHA-256`, and reject the plan before paid generation if that original-reference chain is missing or cross-`L0xx`.
+- 2026-07-24 batch-role isolation correction: never infer workbook writeback authority from a shared count such as `289D`, a similar batch name, or a newer generation timestamp. The user-approved `YeahF_2000D_苍猿GPTImage2_重新生成闭环_20260723` batch is the authoritative T1 source for the interleaved 2000D workbook. The later `YeahF_2000D_苍猿GPTImage2_构图差异化重做闭环_20260723` batch is a separate reusable material-library task and is forbidden as the 2000D writeback source. Every paid batch manifest must declare `batch_role`, `authorized_workbook`, and `writeback_forbidden_for`; final writers must require an exact approved batch ID/path + manifest SHA-256, never “latest 289”.
 
 ## Paid Async Image Generation Zero-Loss Gate
 
