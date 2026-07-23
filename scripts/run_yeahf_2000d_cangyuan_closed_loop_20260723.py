@@ -81,6 +81,14 @@ def append(record: dict) -> None:
             handle.flush()
 
 
+def emit(record: dict) -> None:
+    """Best-effort console logging must never change a durable task state."""
+    try:
+        print(json.dumps(record, ensure_ascii=False), flush=True)
+    except (BrokenPipeError, OSError, ValueError):
+        pass
+
+
 def load_progress() -> dict[str, dict]:
     latest: dict[str, dict] = {}
     if not PROGRESS.is_file():
@@ -238,7 +246,7 @@ def process_one(record: dict, prior: dict | None = None) -> dict:
                 "writeback": "blocked_until_user_visual_approval",
             }
             append(submitted)
-            print(json.dumps({"submitted": d_value, "task_id": submitted["task_id"]}, ensure_ascii=False), flush=True)
+            emit({"submitted": d_value, "task_id": submitted["task_id"]})
 
         task_id = str(submission["task_id"])
         completed = client.poll_image_tasks([submission], ERROR_KEY, initial_delay_seconds=3)
@@ -282,7 +290,7 @@ def process_one(record: dict, prior: dict | None = None) -> dict:
             "writeback": "blocked_until_user_visual_approval",
         }
         append(validated)
-        print(json.dumps({"validated": d_value, "bytes": len(content), "local_path": str(target)}, ensure_ascii=False), flush=True)
+        emit({"validated": d_value, "bytes": len(content), "local_path": str(target)})
         return validated
     except Exception as exc:
         category, systemic = classify_failure(exc)
@@ -302,7 +310,7 @@ def process_one(record: dict, prior: dict | None = None) -> dict:
             "auto_resubmit": False,
         }
         append(failed)
-        print(json.dumps({"failed": d_value, "category": category, "systemic": systemic}, ensure_ascii=False), flush=True)
+        emit({"failed": d_value, "category": category, "systemic": systemic})
         return failed
 
 
@@ -348,18 +356,14 @@ def main() -> None:
         payload = write_manifest(plan)
         if result.get("status") != "validated":
             raise RuntimeError(f"smoke task did not validate locally: {result}")
-        print(
-            json.dumps(
-                {
-                    "smoke": "passed",
-                    "D": first["target_D"],
-                    "local_path": result["local_path"],
-                    "manifest": str(MANIFEST),
-                    "counts": payload["counts"],
-                },
-                ensure_ascii=False,
-            ),
-            flush=True,
+        emit(
+            {
+                "smoke": "passed",
+                "D": first["target_D"],
+                "local_path": result["local_path"],
+                "manifest": str(MANIFEST),
+                "counts": payload["counts"],
+            }
         )
         return
 
@@ -392,19 +396,15 @@ def main() -> None:
             for row in plan
             if (prior.get(row["target_D"]) or {}).get("status") not in terminal
         ]
-    print(
-        json.dumps(
-            {
-                "run": "bulk",
-                "planned": len(plan),
-                "already_terminal": len(plan) - len(todo),
-                "todo": len(todo),
-                "workers": args.workers,
-                "retry_failed": args.retry_failed,
-            },
-            ensure_ascii=False,
-        ),
-        flush=True,
+    emit(
+        {
+            "run": "bulk",
+            "planned": len(plan),
+            "already_terminal": len(plan) - len(todo),
+            "todo": len(todo),
+            "workers": args.workers,
+            "retry_failed": args.retry_failed,
+        }
     )
     with ThreadPoolExecutor(max_workers=args.workers) as pool:
         futures = {
@@ -414,17 +414,13 @@ def main() -> None:
         for future in as_completed(futures):
             future.result()
     payload = write_manifest(plan)
-    print(
-        json.dumps(
-            {
-                "run": "finished",
-                "counts": payload["counts"],
-                "circuit_open": circuit_open.is_set(),
-                "manifest": str(MANIFEST),
-            },
-            ensure_ascii=False,
-        ),
-        flush=True,
+    emit(
+        {
+            "run": "finished",
+            "counts": payload["counts"],
+            "circuit_open": circuit_open.is_set(),
+            "manifest": str(MANIFEST),
+        }
     )
 
 
