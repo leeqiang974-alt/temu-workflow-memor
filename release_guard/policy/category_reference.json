@@ -1,0 +1,12 @@
+{
+  "schema": "temu-category-reference/v1",
+  "description": "Correct 分类id for L0xx that are NOT in the certified 398D reference workbook. The Release Guard category_attribute_audit merges these with the 398D reference so 1999D-only families (e.g. L085, L088) are still cid-validated.",
+  "L0xx_cid": {
+    "L085": "15481",
+    "L088": "11393"
+  },
+  "source_notes": {
+    "L085": "consistent across 74 source workbooks, never reported invalid by Temu",
+    "L088": "corrected from invalid 9482 to 11393 per v14 source (是否可用于食品接触=否 + 材料=金属); 9482 caused Temu 产品分类/属性为空 error"
+  }
+}

@@ -165,6 +165,8 @@ Prefer local review outputs first. Upload/write back only after user approval.
 - Do not upload or write back unreviewed AI images.
 - If the page is too heavy to browse, rebuild it with lazy loading, pagination, or per-D loading.
 
+- 分类id 与产品属性一致性是发布前置门（2026-08-06 新增）。分类id（产品分类）必须与 产品属性 JSON 的 templatePid 对应，且与认证参考工作簿（398D）及 release_guard/policy/category_reference.json 登记的 L0xx cid 一致。Release Guard 的 category_attribute_audit evidence 必过；audit_category_attributes() 的 failure_count=0 才可交付。曾发生 L071/L072/L081/L088 cid 被写错（12429/12832/15069/9482）导致 Temu 产品分类、属性为空 报错，原审计因不读这两列而漏过。
+
 ## Deliverables
 
 For a complete run, create:
