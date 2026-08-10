@@ -11,6 +11,7 @@
   var DEFAULT_MIN = 0;
   var DEFAULT_MAX = 100;
   var DEFAULT_STORE = "DXXmall";
+  var PLUGIN_VERSION = "3.5";
   var ROW_SELECTORS = [
     "tr[data-testid=\"beast-core-table-body-tr\"]",
     "tbody tr",
@@ -215,12 +216,25 @@
     return "row|" + pct + "|" + text.replace(/\s+/g, " ").slice(0, 500);
   }
 
+  function getKnownSkuCodes(text) {
+    return extractCargoCodes(text).filter(function (code) {
+      return getConfiguredComparePrice(code) !== null;
+    });
+  }
+
   function getDeclareReferenceMatchesFromRow(row, headerIndexes) {
     var declareCell = getCellByIndex(row, headerIndexes.declare);
     var skuCell = getCellByIndex(row, headerIndexes.sku);
-    if (!declareCell || !skuCell) return [];
-    var skuCodes = extractCargoCodes(skuCell.innerText || skuCell.textContent || "");
-    var groups = parseDeclarePriceGroups(declareCell.innerText || declareCell.textContent || "");
+    var rowText = row.innerText || row.textContent || "";
+    // Child SKU rows do not have the same cell layout as their product row.
+    // Use their complete row text when the header-position cell is absent or
+    // contains only a row-spanned neighbour.
+    var skuCodes = skuCell ? getKnownSkuCodes(skuCell.innerText || skuCell.textContent || "") : [];
+    var groups = declareCell ? parseDeclarePriceGroups(declareCell.innerText || declareCell.textContent || "") : [];
+    if (!skuCodes.length) skuCodes = getKnownSkuCodes(rowText);
+    if (!groups.length || groups.every(function (group) { return group.reference === null; })) {
+      groups = parseDeclarePriceGroups(rowText);
+    }
     var matches = [];
     for (var i = 0; i < Math.max(skuCodes.length, groups.length); i++) {
       var skuCode = skuCodes[i] || "";
@@ -239,19 +253,36 @@
     return matches;
   }
 
+  function getProductRowContext(row, headerIndexes) {
+    var productCell = findProductInfoCell(row, headerIndexes);
+    var fingerprint = extractProductFingerprint(productCell);
+    if (!fingerprint) return null;
+    var skcCell = getCellByIndex(row, headerIndexes.skc);
+    var skcCodes = skcCell ? extractCargoCodes(skcCell.innerText || skcCell.textContent || "") : [];
+    return {
+      title: extractProductTitle(productCell),
+      fingerprint: fingerprint,
+      image: extractProductImage(productCell),
+      skcCode: skcCodes[0] || "",
+    };
+  }
+
   function collectMatchingRowsFromVisible(minPct, maxPct, seen) {
     var rows = getVisibleRows();
     var headerIndexes = getHeaderIndexes();
     var result = [];
+    var activeProduct = null;
     rows.forEach(function (row, index) {
+      var productContext = getProductRowContext(row, headerIndexes);
+      if (productContext) activeProduct = productContext;
       var priceMatches = getDeclareReferenceMatchesFromRow(row, headerIndexes);
-      if (priceMatches.length > 0) {
-        var key = getRowIdentity(row, "ref-" + priceMatches.map(function (item) {
+      if (priceMatches.length > 0 && activeProduct) {
+        var key = "fp:" + activeProduct.fingerprint + "|" + getRowIdentity(row, "ref-" + priceMatches.map(function (item) {
           return item.skuCode + ":" + item.reference + ">=" + item.floorPrice;
         }).join("/"), index);
         if (!seen || !seen[key]) {
           if (seen) seen[key] = true;
-          result.push({ row: row, pct: null, allPcts: [], priceMatches: priceMatches, key: key, cells: snapshotRowCells(row) });
+          result.push({ row: row, pct: null, allPcts: [], priceMatches: priceMatches, key: key, cells: snapshotRowCells(row), productContext: activeProduct });
         }
       }
     });
@@ -364,6 +395,14 @@
 
   function extractProductTitle(productCell) {
     if (!productCell) return "";
+    // Temu renders the actual title in this leaf node.  The surrounding cell
+    // additionally contains category, SPU and historical extCode text, so it
+    // must not be used as the title source.
+    var titleNode = productCell.querySelector('[class*="productName"]');
+    if (titleNode) {
+      var exactTitle = String(titleNode.innerText || titleNode.textContent || "").replace(/\s+/g, " ").trim();
+      if (exactTitle) return exactTitle;
+    }
     var rawText = productCell.innerText || productCell.textContent || "";
     var lines = (productCell.innerText || productCell.textContent || "")
       .split(/\n+/)
@@ -446,6 +485,24 @@
     }).join("").slice(0, 180);
   }
 
+  function extractProductFingerprint(productCell) {
+    if (!productCell) return "";
+    // The exact title node ends with the four-digit workbook fingerprint.
+    // The parent cell does not: Temu appends category/SPU/extCode afterwards.
+    var titleNode = productCell.querySelector('[class*="productName"]');
+    if (titleNode) {
+      var exactFingerprint = extractTitleFingerprint(titleNode.innerText || titleNode.textContent || "");
+      if (exactFingerprint) return exactFingerprint;
+    }
+    // Compatibility fallback for older Temu layouts without productName.
+    var rawText = String(productCell.innerText || productCell.textContent || "");
+    var titleRegion = rawText.split(/SPU[:：]/i)[0].replace(/\s+/g, " ").trim();
+    var titleFingerprint = extractTitleFingerprint(titleRegion);
+    if (titleFingerprint) return titleFingerprint;
+    var candidates = titleRegion.match(/(?<!\d)(\d{4})(?!\d)/g) || [];
+    return candidates.length ? candidates[candidates.length - 1] : "";
+  }
+
   function extractProductImage(productCell) {
     if (!productCell) return "";
     var imgs = Array.from(productCell.querySelectorAll("img"));
@@ -509,58 +566,42 @@
     return base;
   }
 
-  function getGlobalScanRecord(row, headerIndexes, minPct, maxPct) {
-    var productCell = findProductInfoCell(row, headerIndexes);
-    var skcCell = getCellByIndex(row, headerIndexes.skc);
-    var skuCell = getCellByIndex(row, headerIndexes.sku);
-    var declareCell = getCellByIndex(row, headerIndexes.declare);
-    if (!productCell || !skcCell || !skuCell || !declareCell) return null;
-
-    var skcCodes = extractCargoCodes(skcCell.innerText || skcCell.textContent || "");
-    var skcCode = skcCodes[0] || "";
-    if (!skcCode) return null;
-
-    var skuCodes = extractCargoCodes(skuCell.innerText || skuCell.textContent || "");
-    var priceGroups = parseDeclarePriceGroups(declareCell.innerText || declareCell.textContent || "");
-    if (priceGroups.length === 0) return null;
-
-    var qualifiedRecords = [];
-    for (var i = 0; i < Math.max(skuCodes.length, priceGroups.length); i++) {
-      var skuCode = skuCodes[i] || "";
-      var comparePrice = getConfiguredComparePrice(skuCode);
-      var group = priceGroups.length === 1 ? priceGroups[0] : (priceGroups[i] || priceGroups[priceGroups.length - 1]);
-      if (!skuCode || comparePrice === null || !group || group.reference === null || group.reference < comparePrice) continue;
-
-      var record = {
-        title: extractProductTitle(productCell),
-        image: extractProductImage(productCell),
-        skcCode: skcCode,
-        declarePrice: group.declared,
-        referencePrice: comparePrice,
-        declareReferencePrice: group.reference,
-        diffPrice: Math.round((group.reference - comparePrice) * 100) / 100,
-        diffDeclareReferencePrice: Math.round((group.reference - comparePrice) * 100) / 100,
-        skuCode: skuCode,
+  function getGlobalScanRecord(row, headerIndexes, productContext) {
+    if (!productContext || !productContext.fingerprint) return null;
+    var priceMatches = getDeclareReferenceMatchesFromRow(row, headerIndexes);
+    return priceMatches.map(function (match) {
+      return {
+        title: productContext.title,
+        fingerprint: productContext.fingerprint,
+        image: productContext.image,
+        skcCode: productContext.skcCode,
+        declarePrice: match.declared,
+        referencePrice: match.floorPrice,
+        declareReferencePrice: match.reference,
+        diffPrice: match.diff,
+        diffDeclareReferencePrice: match.diff,
+        skuCode: match.skuCode,
         pct: "",
         status: "参考申报价高于最低参考价",
-        key: skcCode + "|" + skuCode + "|ref:" + group.reference + "|floor:" + comparePrice,
+        key: "fp:" + productContext.fingerprint + "|" + match.skuCode + "|ref:" + match.reference + "|floor:" + match.floorPrice,
       };
-      qualifiedRecords.push(record);
-    }
-    return qualifiedRecords.length ? qualifiedRecords : null;
+    });
   }
 
   function collectGlobalScanRecordsFromVisible(seen, minPct, maxPct, pageIdentity) {
     var rows = getVisibleRows();
     var headerIndexes = getHeaderIndexes();
     var records = [];
+    var activeProduct = null;
     rows.forEach(function (row, rowIndex) {
-      var rowRecords = getGlobalScanRecord(row, headerIndexes, minPct, maxPct);
+      var productContext = getProductRowContext(row, headerIndexes);
+      if (productContext) activeProduct = productContext;
+      var rowRecords = getGlobalScanRecord(row, headerIndexes, activeProduct);
       if (!rowRecords) return;
       rowRecords.forEach(function (record) {
         if (record) {
           var rowSignature = (row.innerText || row.textContent || "").replace(/\s+/g, " ").slice(0, 220);
-          var dedupeKey = [pageIdentity || "page?", rowIndex, record.key, rowSignature].join("|");
+          var dedupeKey = [record.key, rowSignature].join("|");
           if (seen[dedupeKey]) return;
           seen[dedupeKey] = true;
           record.key = dedupeKey;
@@ -575,8 +616,11 @@
     var rows = getVisibleRows();
     var headerIndexes = getHeaderIndexes();
     var records = [];
+    var activeProduct = null;
     rows.forEach(function (row) {
-      var rowRecords = getGlobalScanRecord(row, headerIndexes, 0, 100);
+      var productContext = getProductRowContext(row, headerIndexes);
+      if (productContext) activeProduct = productContext;
+      var rowRecords = getGlobalScanRecord(row, headerIndexes, activeProduct);
       if (!rowRecords) return;
       rowRecords.forEach(function (record) {
         if (record && (!seen || !seen[record.key])) {
@@ -905,7 +949,10 @@
     var x = Math.max(0, Math.min(window.innerWidth - 1, rect.left + rect.width / 2));
     var y = Math.max(0, Math.min(window.innerHeight - 1, rect.top + rect.height / 2));
     var target = document.elementFromPoint(x, y) || el;
-    try { el.click(); } catch (e1) {}
+    // One pointer/mouse sequence only. The old implementation additionally
+    // called el.click() before and (for SVG children) after this sequence,
+    // which could invoke Temu pagination handlers two or three times and
+    // leave the selected page number ahead of the loaded product table.
     ["pointerdown", "mousedown", "pointerup", "mouseup", "click"].forEach(function (type) {
       var eventOptions = {
         bubbles: true,
@@ -924,7 +971,6 @@
       }
       target.dispatchEvent(event);
     });
-    if (target !== el) try { el.click(); } catch (e2) {}
   }
 
   function clickAtPoint(x, y) {
@@ -1220,22 +1266,23 @@
     timeoutMs = timeoutMs || 15000;
     while (Date.now() - start < timeoutMs) {
       await wait(500);
-      var container = findPaginationContainer();
-      var currentPage = getStableCurrentPageNumber(container);
       var signature = getTableSignatureForWait();
-      if ((currentPage && currentPage !== beforePage) || (signature && signature !== beforeSignature)) {
+      var visibleCount = getVisibleRows().length;
+      // A changed page number alone is not sufficient.  Wait until Temu has
+      // rendered actual rows whose content differs from the preceding page.
+      if (visibleCount > 0) {
         if (signature === stableSignature) stableCount++;
         else {
           stableSignature = signature;
           stableCount = 1;
         }
-        if (stableCount >= 2) {
-          console.log("[TemuFilter v9] page loaded:", currentPage, signature.slice(0, 80));
+        if (stableCount >= 2 && stableSignature !== beforeSignature) {
+          console.log("[TemuFilter v9] page loaded (content changed):", stableSignature.slice(0, 80));
           return true;
         }
       }
     }
-    console.warn("[TemuFilter v9] wait page load timeout");
+    console.warn("[TemuFilter v9] wait page load timeout (table content unchanged)");
     return false;
   }
 
@@ -1310,6 +1357,16 @@
     scrollToPageBottomForPagination();
     await wait(800);
 
+    // "全局" must always begin at page 1.  The old code defined
+    // goFirstPageAndWait() but never called it, so a scan could silently
+    // begin from whatever page the operator happened to be viewing.
+    var firstPage = await goFirstPageAndWait();
+    if (firstPage !== 1) {
+      throw new Error("无法返回第 1 页，请先手动点分页栏的第 1 页后重试");
+    }
+    scrollToPageBottomForPagination();
+    await wait(800);
+
     for (var loopPage = 1; loopPage <= GLOBAL_SCAN_MAX_PAGES; loopPage++) {
       var pagination = findPaginationContainer();
       var currentPage = getStableCurrentPageNumber(pagination);
@@ -1349,16 +1406,19 @@
 
       var beforeSignature = getTableSignatureForWait();
       console.log("[TemuFilter v9] click sequential page:", currentPage, "=>", nextPageNumber);
-      if (nextPageButton) {
-        realClick(nextPageButton);
-      } else {
-        console.warn("[TemuFilter v9] sequential page button not found, refuse jump paging:", nextPageNumber);
-        break;
+      // Always use Temu's native right-arrow first.  Around three-digit page
+      // numbers the current pager window may not render N+1 as a numeric item;
+      // the old code nevertheless ignored nextButton and stopped/clicked the
+      // wrong element at page 100.  The native arrow advances 100 -> 101 and
+      // continues through the final page regardless of the visible number set.
+      if (nextButton) realClick(nextButton);
+      else if (nextPageButton) realClick(nextPageButton);
+      else {
+        throw new Error("未找到 Temu 原生下一页箭头，无法从第 " + currentPage + " 页继续");
       }
       var moved = await waitForProductTableChanged(beforeSignature, currentPage, 18000);
       if (!moved) {
-        console.warn("[TemuFilter v9] stop global scan because next page did not load");
-        break;
+        throw new Error("第 " + currentPage + " 页点击下一页后商品表格未加载，请刷新页面后重试");
       }
       var afterPagination = findPaginationContainer();
       var afterPage = getStableCurrentPageNumber(afterPagination) || getCurrentPageNumber();
@@ -1974,6 +2034,10 @@
 
   function extractTitleFingerprint(title) {
     var text = String(title || "").replace(/\s+/g, " ").trim();
+    var fourDigit = text.match(/(?<!\d)(\d{4})$/);
+    if (fourDigit) return fourDigit[1];
+    var fourMixed = text.match(/(?<![A-Z0-9])([A-Z0-9]{4})$/i);
+    if (fourMixed && /[A-Z]/i.test(fourMixed[1]) && /\d/.test(fourMixed[1])) return fourMixed[1].toUpperCase();
     var match = text.match(/(?:^|[\s，,、。])([A-Z0-9]{3})$/i);
     if (!match) match = text.match(/([A-Z0-9]{3})$/i);
     if (match && /[A-Z]/i.test(match[1]) && /\d/.test(match[1])) return match[1].toUpperCase();
@@ -2010,16 +2074,96 @@
     return value;
   }
 
-  async function fetchFingerprintRowsData(fingerprint) {
+  function inferStoreFromPage() {
+    var visibleText = document.body && (document.body.innerText || document.body.textContent) || "";
+    var domText = document.documentElement && document.documentElement.innerHTML || "";
+    return /yeahf/i.test(visibleText) || /yeahf/i.test(domText) ? "YeahF" : "";
+  }
+
+  // Temu renders the logged-in shop asynchronously.  The first content-script
+  // pass can therefore see an old store saved in localStorage before YeahFmini
+  // appears.  Once the visible identity is available, it is authoritative.
+  function syncStoreWithPageIdentity() {
+    var inferredStore = inferStoreFromPage();
+    var input = document.getElementById("temu-filter-store");
+    if (!inferredStore || !input || input.value === inferredStore) return false;
+    input.value = inferredStore;
+    localStorage.setItem(STORAGE_KEY_STORE, inferredStore);
+    var indicator = document.getElementById("temu-filter-store-indicator");
+    if (indicator) indicator.textContent = "指纹库：" + inferredStore + " / v" + PLUGIN_VERSION;
+    console.log("[TemuFilter v" + PLUGIN_VERSION + "] shop identity synchronized:", inferredStore);
+    return true;
+  }
+
+  function recordQueryKey(record) {
+    if (!record) return "";
+    // Seller-page SKC (for example L058060501) is not the workbook 产品货号 D.
+    // Only a parsed title fingerprint is a safe automatic lookup key.
+    return String(record.fingerprint || record.lookupKey || "").trim();
+  }
+
+  function recordCopyIdentity(record) {
+    var fingerprint = String(record && record.fingerprint ? record.fingerprint : "").trim().toUpperCase();
+    var query = String(recordQueryKey(record)).trim().toUpperCase();
+    if (fingerprint) return "FP:" + fingerprint + "|TITLE:" + fingerprintTitleKey(record && record.title);
+    return query ? "KEY:" + query : "";
+  }
+
+  function fingerprintTitleKey(title) {
+    var text = String(title || "").replace(/\s+/g, " ").trim();
+    var code = extractTitleFingerprint(text);
+    if (code) text = text.replace(new RegExp(code.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "\\s*$", "i"), "");
+    return text
+      .replace(/\s+/g, "")
+      .toLocaleLowerCase();
+  }
+
+  function recordCopyLabel(record) {
+    var dValue = String(record && record.dValue ? record.dValue : "").trim();
+    var fingerprint = String(record && record.fingerprint ? record.fingerprint : "").trim();
+    if (dValue && fingerprint) return dValue + " / " + fingerprint;
+    if (dValue) return dValue;
+    if (fingerprint) return fingerprint;
+    return String(recordQueryKey(record) || "-");
+  }
+
+  function chooseDGroupItem(items, record) {
+    if (!Array.isArray(items) || !items.length) return null;
+    var fingerprint = String(record && record.fingerprint ? record.fingerprint : "").trim().toUpperCase();
+    var matches = items.filter(function (item) {
+      var itemFp = String(item && item.fingerprint ? item.fingerprint : "").trim().toUpperCase();
+      return !!fingerprint && itemFp === fingerprint;
+    });
+    if (matches.length === 1) return matches[0];
+    // Only resolve a repeated fingerprint when the full product title is an
+    // exact match. Seller-page cargo numbers never participate.
+    var titleKey = fingerprintTitleKey(record && record.title);
+    var titleMatches = matches.filter(function (item) {
+      return titleKey && fingerprintTitleKey(item && item.title) === titleKey;
+    });
+    return titleMatches.length === 1 ? titleMatches[0] : null;
+  }
+
+  function rowsDataFromDGroupResponse(data, record, source) {
+    if (!data || !Array.isArray(data.items) || !data.items.length) return null;
+    var item = chooseDGroupItem(data.items, record);
+    if (!item || !item.tsv) return null;
+    return {
+      text: item.tsv,
+      html: item.html || data.html || "",
+      htmlRows: item.htmlRows || data.htmlRows || "",
+      item: item,
+      source: source || "d-groups",
+      cache_hit: !!data.cache_hit,
+      cache_build_ms: data.cache_build_ms || 0,
+    };
+  }
+
+  async function fetchFingerprintRowsData(fingerprint, record) {
     var fp = encodeURIComponent(fingerprint);
     var store = encodeURIComponent(getCurrentStoreName());
-    var urls = [
-      "http://127.0.0.1:8765/api/d-groups?d=" + fp + "&store=" + store,
-      "http://127.0.0.1:8765/api/fingerprint-copy?fingerprint=" + fp,
-      "http://127.0.0.1:8765/api/copy-rows-by-fingerprint?fingerprint=" + fp,
-      "http://127.0.0.1:8765/api/search-rows?fingerprint=" + fp,
-      "http://127.0.0.1:8765/api/search?fingerprint=" + fp,
-    ];
+    var title = encodeURIComponent(String(record && record.title || ""));
+    var urls = ["http://127.0.0.1:8765/api/d-groups?d=" + fp + "&store=" + store + "&title=" + title];
     for (var i = 0; i < urls.length; i++) {
       try {
         var res = await fetch(urls[i], { method: "GET", cache: "no-store" });
@@ -2027,20 +2171,8 @@
         var contentType = res.headers.get("content-type") || "";
         if (contentType.indexOf("application/json") >= 0) {
           var data = await res.json();
-          if (Array.isArray(data.items) && data.items.length && data.items[0].tsv) {
-            return {
-              text: data.items[0].tsv,
-              html: data.items[0].html || data.html || "",
-              htmlRows: data.items[0].htmlRows || data.htmlRows || "",
-              item: data.items[0],
-              source: "d-groups"
-            };
-          }
-          var text = data.clipboardText || data.tsv || data.text || recordsToTsv(data.rows || data.records || data.data);
-          if (text && String(text).trim()) return { text: String(text), html: data.html || "", htmlRows: data.htmlRows || "", item: data, source: "generic-json" };
-        } else {
-          var raw = await res.text();
-          if (raw && raw.trim()) return { text: raw, item: null, source: "text" };
+          var dGroupRows = rowsDataFromDGroupResponse(data, record, "d-groups");
+          if (dGroupRows) return dGroupRows;
         }
       } catch (err) {
         // D 值查询后台没开或接口名不一致时，继续尝试下一个地址。
@@ -2049,10 +2181,34 @@
     return null;
   }
 
-  async function fetchFingerprintRowsBatch(lookupKeys) {
+  // Resolve the target D before rendering global results. This is display-only
+  // and makes the fingerprint -> workbook D relationship auditable before any
+  // user presses Copy.
+  async function attachResolvedDToGlobalRecords(records) {
+    var cache = {};
+    for (var i = 0; i < records.length; i++) {
+      var record = records[i];
+      var fingerprint = String(record && record.fingerprint || "").trim();
+      if (!fingerprint) continue;
+      var cacheKey = recordCopyIdentity(record);
+      if (!Object.prototype.hasOwnProperty.call(cache, cacheKey)) {
+        var rowsData = await fetchFingerprintRowsData(fingerprint, record);
+        cache[cacheKey] = rowsData && rowsData.item ? rowsData.item : null;
+      }
+      var target = cache[cacheKey];
+      if (target && target.D) {
+        record.dValue = target.D;
+        record.targetRowCount = target.row_count || 0;
+      }
+    }
+    return records;
+  }
+
+  async function fetchFingerprintRowsBatch(records) {
     var keys = [];
     var seen = {};
-    (lookupKeys || []).forEach(function (key) {
+    (records || []).forEach(function (record) {
+      var key = recordQueryKey(record);
       key = String(key || "").trim();
       if (!key || seen[key]) return;
       seen[key] = true;
@@ -2070,18 +2226,15 @@
       var data = await res.json();
       var results = data.results || {};
       var mapped = {};
-      keys.forEach(function (key) {
+      (records || []).forEach(function (record) {
+        var key = recordQueryKey(record);
+        key = String(key || "").trim();
+        var identity = recordCopyIdentity(record);
+        if (!key || !identity || mapped[identity]) return;
         var itemData = results[key] || results[key.toUpperCase()] || null;
-        if (!itemData || !Array.isArray(itemData.items) || !itemData.items.length || !itemData.items[0].tsv) return;
-        mapped[key] = {
-          text: itemData.items[0].tsv,
-          html: itemData.items[0].html || itemData.html || "",
-          htmlRows: itemData.items[0].htmlRows || itemData.htmlRows || "",
-          item: itemData.items[0],
-          source: "d-groups-batch",
-          cache_hit: !!data.cache_hit,
-          cache_build_ms: data.cache_build_ms || 0,
-        };
+        var rowsData = rowsDataFromDGroupResponse(itemData, record, "d-groups-batch");
+        if (!rowsData) return;
+        mapped[identity] = rowsData;
       });
       return mapped;
     } catch (err) {
@@ -2099,6 +2252,7 @@
       source_file: matchedItem && matchedItem.file ? matchedItem.file : "",
       source_sheet: matchedItem && matchedItem.sheet ? matchedItem.sheet : "",
       row_count: matchedItem && matchedItem.row_count ? matchedItem.row_count : 0,
+      match_version: "exact-d-or-fingerprint-v2",
       declare_price: record && record.priceMatches && record.priceMatches[0] ? record.priceMatches[0].declared : null,
       declare_reference_price: record && record.priceMatches && record.priceMatches[0] ? record.priceMatches[0].reference : null,
     };
@@ -2118,6 +2272,7 @@
     try {
       var url = "http://127.0.0.1:8765/api/price-copy-status?store=" +
         encodeURIComponent(getCurrentStoreName()) +
+        "&title=" + encodeURIComponent(String(record && record.title || "")) +
         (record.fingerprint
           ? "&fingerprint=" + encodeURIComponent(record.fingerprint)
           : "&d=" + encodeURIComponent(record.lookupKey));
@@ -2129,21 +2284,47 @@
     }
   }
 
+  // This is a scan explanation only. `dValue` has already been resolved by
+  // the backend from the trailing title fingerprint; page SKU/SKC/extCode is
+  // intentionally never sent here.
+  async function getStoreCopyCoverage(records) {
+    var dValues = [];
+    var seen = {};
+    (records || []).forEach(function (record) {
+      var dValue = String(record && record.dValue || "").trim().toUpperCase();
+      if (!dValue || seen[dValue]) return;
+      seen[dValue] = true;
+      dValues.push(dValue);
+    });
+    if (!dValues.length) return null;
+    try {
+      var res = await fetch("http://127.0.0.1:8765/api/store-copy-coverage", {
+        method: "POST",
+        cache: "no-store",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ store: getCurrentStoreName(), d_values: dValues }),
+      });
+      if (!res.ok) return null;
+      return await res.json();
+    } catch (err) {
+      return null;
+    }
+  }
+
   async function copyFingerprintRows(record) {
-    var lookupKey = record && record.lookupKey ? record.lookupKey : "";
+    var lookupKey = recordQueryKey(record);
     if (!lookupKey) {
-      showToast("没有识别到标题指纹或D值，无法定位表格行");
+      showToast("没有识别到标题末尾四位指纹，无法定位表格行");
       return;
     }
-    var rowsData = await fetchFingerprintRowsData(lookupKey);
+    var rowsData = await fetchFingerprintRowsData(lookupKey, record);
     if (rowsData && rowsData.text) {
-      await copyRowsPayloadAsTsv(rowsDataToClipboardPayload(rowsData));
+      var method = await copyRowsPayloadAsTsv(rowsDataToClipboardPayload(rowsData));
       await recordCopiedEvent(record, rowsData.item);
-      showToast("已复制并记录：" + getCurrentStoreName() + " / " + lookupKey + (rowsData.item && rowsData.item.D ? " / " + rowsData.item.D : ""));
+      showToast("已复制并记录：" + getCurrentStoreName() + " / " + recordCopyLabel(record) + (method ? " / " + method : ""));
       return;
     }
-    await copyText(lookupKey);
-    showToast("8765 后台未返回行，已先复制查行键：" + lookupKey);
+    showToast("已拦截：当前页面的 D/指纹未与底表精确匹配，未复制任何表格行");
   }
 
   async function openDSearchBackend() {
@@ -2245,8 +2426,8 @@
     function buildSimpleRecord(item, index) {
       if (!item.row && item.skuCode !== undefined) {
         var globalTitle = item.title || "";
-        var globalFingerprint = extractTitleFingerprint(globalTitle);
-        var globalLookupKey = globalFingerprint || item.skcCode || item.skuCode || "";
+        var globalFingerprint = String(item.fingerprint || "") || extractTitleFingerprint(globalTitle);
+        var globalLookupKey = globalFingerprint || "";
         var globalDeclare = "原申报价：￥" + (item.declarePrice ?? "") +
           "\n卖家当前报价：￥" + (item.declarePrice ?? "") +
           "\n参考申报价：￥" + (item.declareReferencePrice ?? "") +
@@ -2256,8 +2437,9 @@
           key: "global-" + (globalLookupKey || index) + "-" + index,
           title: globalTitle,
           fingerprint: globalFingerprint,
+          dValue: item.dValue || "",
           lookupKey: globalLookupKey,
-          lookupKind: globalFingerprint ? "指纹" : (globalLookupKey ? "D值" : "无查行键"),
+          lookupKind: globalFingerprint ? "指纹" : "无可验证指纹",
           image: item.image || "",
           skc: String(item.skc || item.skcCode || ""),
           sku: String(item.sku || item.skuCode || ""),
@@ -2275,22 +2457,22 @@
       var skcText = skcCell ? (skcCell.innerText || skcCell.textContent || "") : "";
       var skuText = skuCell ? (skuCell.innerText || skuCell.textContent || "") : "";
       var skuCodes = extractCargoCodes(skuText);
-      var skcCodes = extractCargoCodes(skcText);
       var refs = skuCodes.map(function (code) {
         var price = getConfiguredComparePrice(code);
         return price === null ? code + "：-" : code + "：¥" + price;
       });
-      var title = extractProductTitle(productCell);
-      var fingerprint = extractTitleFingerprint(title) || extractTitleFingerprint(row.innerText || row.textContent || "");
-      var fallbackD = skcCodes[0] || "";
+      var productContext = item.productContext || null;
+      var title = productContext ? productContext.title : extractProductTitle(productCell);
+      var fingerprint = productContext ? productContext.fingerprint : (extractProductFingerprint(productCell) || extractTitleFingerprint(title));
       return {
         key: item.key || getRowIdentity(row, item.pct || "", index) || ("match-" + index),
         title: title,
         fingerprint: fingerprint,
-        lookupKey: fingerprint || fallbackD,
-        lookupKind: fingerprint ? "指纹" : (fallbackD ? "D值" : "无查行键"),
-        image: extractProductImage(productCell),
-        skc: skcText.trim(),
+        dValue: "",
+        lookupKey: fingerprint || "",
+        lookupKind: fingerprint ? "指纹" : "无可验证指纹",
+        image: productContext ? productContext.image : extractProductImage(productCell),
+        skc: productContext ? productContext.skcCode : skcText.trim(),
         sku: skuText.trim(),
         declare: declareCell ? (declareCell.innerText || declareCell.textContent || "").trim() : "",
         reference: refs.join("\n"),
@@ -2352,6 +2534,7 @@
           "<td style=\"padding:8px 12px;border:1px solid #eee;white-space:pre-wrap;min-width:130px;\">" + highlightReferenceDeclare(record.declare) + "</td>" +
           "<td style=\"padding:8px 12px;border:1px solid #eee;white-space:pre-wrap;min-width:120px;\">" + escapeHTML(record.reference) + "</td>" +
           "<td style=\"padding:8px 12px;border:1px solid #eee;min-width:112px;\">" +
+            (record.dValue ? "<div style=\"font-size:12px;color:#237804;font-weight:700;margin-bottom:4px;\">表D：" + escapeHTML(record.dValue) + "</div>" : "") +
             "<div style=\"font-size:12px;color:#722ed1;font-weight:700;margin-bottom:6px;\">" + escapeHTML(record.lookupKind + "：" + (record.lookupKey || "-")) + "</div>" +
             "<div id=\"temu-copy-status-" + escapeHTML(record.key) + "\" style=\"font-size:11px;color:#8c8c8c;margin-bottom:6px;\">检查中...</div>" +
             "<button class=\"temu-copy-fingerprint\" data-key=\"" + escapeHTML(record.key) + "\" style=\"padding:5px 10px;background:#13a8a8;color:#fff;border:none;border-radius:6px;cursor:pointer;margin-right:6px;margin-bottom:6px;\">复制</button>" +
@@ -2481,13 +2664,19 @@
           return;
         }
         getCopiedStatus(record).then(function (status) {
+          var targetPrefix = status && status.target && status.target.D ? "表D：" + status.target.D + "\n" : "";
           if (!status || !status.copied) {
-            badge.textContent = "未复制";
-            badge.style.color = "#8c8c8c";
+            if (status && status.ambiguous) {
+              badge.textContent = targetPrefix + "待核对指纹";
+              badge.style.color = "#cf1322";
+            } else {
+              badge.textContent = targetPrefix + "未复制" + (status && status.ignored_legacy_count ? "（已忽略旧记录 " + status.ignored_legacy_count + " 次）" : "");
+              badge.style.color = "#8c8c8c";
+            }
             return;
           }
           var latest = status.latest || {};
-          badge.textContent = "已复制 " + status.count + " 次" + (latest.copied_at ? " / " + latest.copied_at : "");
+          badge.textContent = targetPrefix + "已出过此D（永久跳过）" + (latest.last_copied_at || latest.copied_at ? " / " + (latest.last_copied_at || latest.copied_at) : "");
           badge.style.color = "#fa8c16";
         });
       });
@@ -2523,23 +2712,40 @@
           copyUncopiedBtn.textContent = originalUncopiedText || "一键复制未复制";
         }
       }
-      var targets = simpleRecords.filter(function (record) {
-        return !removedKeys[record.key] && record.lookupKey;
+      var visibleRecords = simpleRecords.filter(function (record) {
+        return !removedKeys[record.key];
       });
-      var seenLookup = {};
+      var noLookupRecords = visibleRecords.filter(function (record) {
+        return !recordQueryKey(record);
+      });
+      var targets = visibleRecords.filter(function (record) {
+        return !!recordQueryKey(record);
+      });
+      var seenIdentity = {};
       var payloads = [];
       var matchedRecords = [];
       var lookupRecords = [];
+      var duplicateRecords = [];
+      var copiedSkippedRecords = [];
+      var notFoundRecords = [];
       try {
         setBatchBusy(onlyUncopied ? "正在检查未复制..." : "正在查行...");
         for (var i = 0; i < targets.length; i++) {
           var record = targets[i];
-          if (seenLookup[record.lookupKey]) continue;
-          seenLookup[record.lookupKey] = true;
-          setBatchBusy("准备查行 " + (lookupRecords.length + 1) + " / " + targets.length + "：" + record.lookupKey);
+          var identity = recordCopyIdentity(record);
+          if (identity && seenIdentity[identity]) {
+            duplicateRecords.push(record);
+            continue;
+          }
+          if (identity) seenIdentity[identity] = true;
+          setBatchBusy("准备查行 " + (lookupRecords.length + 1) + " / " + targets.length + "：" + recordCopyLabel(record));
           if (onlyUncopied) {
             var status = await getCopiedStatus(record);
-            if (status && status.copied) continue;
+            if (status && status.target && status.target.D) record.dValue = status.target.D;
+            if (status && status.copied) {
+              copiedSkippedRecords.push(record);
+              continue;
+            }
           }
           lookupRecords.push(record);
         }
@@ -2548,16 +2754,21 @@
           setNewWorkbookStatus(onlyUncopied ? "没有未复制的可复制记录" : "没有可复制记录", true);
           return;
         }
-        setBatchBusy("正在批量查行：" + lookupRecords.length + " 个D/指纹");
-        var batchRows = await fetchFingerprintRowsBatch(lookupRecords.map(function (record) { return record.lookupKey; }));
+        setBatchBusy("正在批量查行：" + lookupRecords.length + " 个D+指纹");
+        var batchRows = await fetchFingerprintRowsBatch(lookupRecords);
         for (var b = 0; b < lookupRecords.length; b++) {
           var batchRecord = lookupRecords[b];
-          setBatchBusy("整理结果 " + (b + 1) + " / " + lookupRecords.length + "：" + batchRecord.lookupKey);
-          var rowsData = batchRows && batchRows[batchRecord.lookupKey] ? batchRows[batchRecord.lookupKey] : null;
+          var batchIdentity = recordCopyIdentity(batchRecord);
+          setBatchBusy("整理结果 " + (b + 1) + " / " + lookupRecords.length + "：" + recordCopyLabel(batchRecord));
+          var rowsData = batchRows && batchRows[batchIdentity] ? batchRows[batchIdentity] : null;
           if (!rowsData) {
-            rowsData = await fetchFingerprintRowsData(batchRecord.lookupKey);
+            rowsData = await fetchFingerprintRowsData(recordQueryKey(batchRecord), batchRecord);
           }
-          if (!rowsData || !rowsData.text) continue;
+          if (!rowsData || !rowsData.text) {
+            notFoundRecords.push(batchRecord);
+            continue;
+          }
+          if (rowsData.item && rowsData.item.D) batchRecord.dValue = rowsData.item.D;
           payloads.push(rowsDataToClipboardPayload(rowsData));
           matchedRecords.push({ record: batchRecord, item: rowsData.item });
         }
@@ -2566,7 +2777,8 @@
           setNewWorkbookStatus(onlyUncopied ? "没有未复制的可复制记录" : "没有可复制记录", true);
           return;
         }
-        setBatchBusy("正在写入剪贴板：" + matchedRecords.length + " 组D行");
+        var coverage = await getStoreCopyCoverage(targets);
+        setBatchBusy("正在写入剪贴板：" + matchedRecords.length + " 组D+指纹行");
         var combinedPayload = combineRowsPayloads(payloads);
         var copyMethod = "";
         try {
@@ -2576,19 +2788,58 @@
           showToast("批量数据已准备好，请点击状态栏里的“立即复制已准备数据”");
           return;
         }
-        await markBatchCopied(matchedRecords, copyMethod);
+        await markBatchCopied(matchedRecords, copyMethod, {
+          visibleCount: visibleRecords.length,
+          queryableCount: targets.length,
+          identityCount: lookupRecords.length + copiedSkippedRecords.length,
+          duplicateRecords: duplicateRecords,
+          noLookupRecords: noLookupRecords,
+          copiedSkippedRecords: copiedSkippedRecords,
+          notFoundRecords: notFoundRecords,
+          coverage: coverage,
+        });
       } finally {
         clearBatchBusy();
       }
     }
 
-    async function markBatchCopied(matchedRecords, copyMethod) {
+    function summarizeRecords(records, limit) {
+      limit = limit || 8;
+      return (records || []).slice(0, limit).map(recordCopyLabel).join("、") +
+        ((records || []).length > limit ? " 等" + (records || []).length + "个" : "");
+    }
+
+    function batchCopySummary(matchedRecords, copyMethod, stats) {
+      stats = stats || {};
+      var duplicateRecords = stats.duplicateRecords || [];
+      var noLookupRecords = stats.noLookupRecords || [];
+      var copiedSkippedRecords = stats.copiedSkippedRecords || [];
+      var notFoundRecords = stats.notFoundRecords || [];
+      var coverage = stats.coverage || null;
+      var lines = [
+        "筛选可见：" + (stats.visibleCount || 0) + " 条",
+        "有D/指纹：" + (stats.queryableCount || 0) + " 条",
+        "按 D+指纹 去重后：" + (stats.identityCount || matchedRecords.length) + " 组",
+        "本次首次复制：" + matchedRecords.length + " 组D行",
+      ];
+      if (coverage) {
+        lines.push("本次已解析表D：" + coverage.current_d_count + " 组；历史已出且本次出现：" + coverage.already_passed_in_current_count + " 组；本次首次：" + coverage.first_time_in_current_count + " 组；历史已出但本次未出现：" + coverage.passed_absent_from_current_count + " 组");
+      }
+      if (duplicateRecords.length) lines.push("同D同指纹重复合并：" + duplicateRecords.length + " 条：" + summarizeRecords(duplicateRecords));
+      if (copiedSkippedRecords.length) lines.push("已复制跳过：" + copiedSkippedRecords.length + " 条：" + summarizeRecords(copiedSkippedRecords));
+      if (noLookupRecords.length) lines.push("无D/指纹未复制：" + noLookupRecords.length + " 条");
+      if (notFoundRecords.length) lines.push("后台查不到：" + notFoundRecords.length + " 条：" + summarizeRecords(notFoundRecords));
+      if (copyMethod) lines.push("复制方式：" + copyMethod);
+      return lines.join("\n");
+    }
+
+    async function markBatchCopied(matchedRecords, copyMethod, stats) {
       setNewWorkbookStatus("剪贴板已写入，正在记录复制状态...", false);
       for (var j = 0; j < matchedRecords.length; j++) {
         await recordCopiedEvent(matchedRecords[j].record, matchedRecords[j].item);
       }
       showToast("已复制并记录 " + matchedRecords.length + " 组D行");
-      setNewWorkbookStatus("已复制并记录 " + matchedRecords.length + " 组D行" + (copyMethod ? "\n复制方式：" + copyMethod : ""), false);
+      setNewWorkbookStatus(batchCopySummary(matchedRecords, copyMethod, stats), false);
       refreshCopiedBadges();
     }
 
@@ -2641,8 +2892,9 @@
       var dValues = data.d_values || [];
       setNewWorkbookStatus(
         "店铺：" + data.store + "\n" +
-        "复制事件：" + data.event_count + " 条\n" +
-        "唯一D：" + data.d_count + " 个\n" +
+        "历史复制事件：" + data.event_count + " 条（仅审计）\n" +
+        "永久排除D台账：" + data.d_count + " 个\n" +
+        "规则：这些D不会再次进入后续新表\n" +
         "将剔除：\n" + (dValues.join("\n") || "-"),
         false
       );
@@ -2949,14 +3201,21 @@
     var savedMin = localStorage.getItem(STORAGE_KEY_MIN);
     var savedMax = localStorage.getItem(STORAGE_KEY_MAX);
     var savedStore = localStorage.getItem(STORAGE_KEY_STORE) || DEFAULT_STORE;
+    var inferredStore = inferStoreFromPage();
+    // A visible YeahF identity is authoritative for this seller page. Do not
+    // let an old DXXmall value in localStorage select the wrong workbook.
+    if (inferredStore) {
+      savedStore = inferredStore;
+      localStorage.setItem(STORAGE_KEY_STORE, savedStore);
+    }
     var minVal = savedMin !== null ? savedMin : DEFAULT_MIN;
     var maxVal = savedMax !== null ? savedMax : DEFAULT_MAX;
 
-    // fixed 定位在页面最顶部，但用 padding 推开内容
+    // Keep the tool at the top in normal document flow so it reserves space
+    // instead of covering the seller page header.
     Object.assign(wrapper.style, {
-      position: "fixed",
+      position: "sticky",
       top: "0",
-      left: "0",
       width: "100%",
       zIndex: 9999,
       display: "flex",
@@ -2971,10 +3230,14 @@
       boxShadow: "0 2px 8px rgba(114,46,209,0.15)",
     });
 
+    var storeOptions = ["DXXmall", "CXXmall", "FXXmall", "YeahF"].map(function (name) {
+      return "<option value=\"" + name + "\"" + (name === savedStore ? " selected" : "") + ">" + name + "</option>";
+    }).join("");
+
     wrapper.innerHTML =
       "<span style=\"color:#531dab;font-weight:700;white-space:nowrap;\">⚡ 参考价筛选</span>" +
-      "<input id=\"temu-filter-store\" type=\"text\" value=\"" + escapeHTML(savedStore) + "\" list=\"temu-store-list\" title=\"当前店铺，用于记录已复制D\" style=\"width:92px;padding:4px 8px;border-radius:6px;border:1px solid #d3adf7;font-size:13px;text-align:center;font-weight:700;color:#531dab;\" />" +
-      "<datalist id=\"temu-store-list\"><option value=\"DXXmall\"><option value=\"CXXmall\"><option value=\"FXXmall\"></datalist>" +
+      "<select id=\"temu-filter-store\" title=\"当前店铺，用于选择对应的指纹表\" style=\"width:110px;padding:4px 8px;border-radius:6px;border:1px solid #d3adf7;font-size:13px;text-align:center;font-weight:700;color:#531dab;background:#fff;\">" + storeOptions + "</select>" +
+      "<span id=\"temu-filter-store-indicator\" style=\"color:#237804;font-size:12px;font-weight:600;white-space:nowrap;\">指纹库：" + savedStore + " / v" + PLUGIN_VERSION + "</span>" +
       "<input id=\"temu-filter-min\" type=\"hidden\" value=\"" + minVal + "\" />" +
       "<input id=\"temu-filter-max\" type=\"hidden\" value=\"" + maxVal + "\" />" +
       "<span style=\"color:#531dab;font-weight:600;background:#fff;border:1px solid #d3adf7;border-radius:999px;padding:3px 10px;\">参考申报价 ≥ 最低参考价</span>" +
@@ -2986,13 +3249,11 @@
       "<button id=\"temu-filter-reset-btn\" style=\"padding:4px 16px;background:#fff;color:#722ed1;border:1px solid #722ed1;border-radius:6px;font-size:13px;cursor:pointer;white-space:nowrap;\">重置</button>" +
       "<span id=\"temu-filter-count\" style=\"color:#8c8c8c;font-size:12px;margin-left:auto;\"></span>";
 
-    console.log("[TemuFilter v9] Panel created, min=" + minVal + " max=" + maxVal);
+    console.log("[TemuFilter v" + PLUGIN_VERSION + "] Panel created, min=" + minVal + " max=" + maxVal);
     return wrapper;
   }
 
   // ── 插入面板 ──────────────────────────────────────
-  var PANEL_HEIGHT = 45;
-
   function insertPanel() {
     if (document.getElementById("temu-filter-panel")) {
       console.log("[TemuFilter v9] Panel exists, skip");
@@ -3001,23 +3262,14 @@
 
     var panel = createPanel();
 
-    // 1. 面板加到 body
-    document.body.appendChild(panel);
+    // Insert before the seller page so the sticky panel occupies real space.
+    document.body.insertBefore(panel, document.body.firstChild);
+    // The account badge may be rendered after the panel. Re-check twice so a
+    // stale saved store cannot keep this page on the wrong workbook index.
+    setTimeout(syncStoreWithPageIdentity, 800);
+    setTimeout(syncStoreWithPageIdentity, 2500);
 
-    // 2. 找到主滚动容器，给它加 padding-top 把内容推下去
-    var container = findMainContentContainer();
-    if (container !== document.body) {
-      var currentPad = parseInt(getComputedStyle(container).paddingTop) || 0;
-      container.style.paddingTop = (currentPad + PANEL_HEIGHT) + "px";
-      container.dataset.temuFilterPad = "1";
-      console.log("[TemuFilter v9] Added padding-top to scroll container");
-    } else {
-      // 如果找不到滚动容器，尝试给 html/body 加
-      document.documentElement.style.paddingTop = PANEL_HEIGHT + "px";
-      console.log("[TemuFilter v9] Added padding-top to html (fallback)");
-    }
-
-    // 3. 绑定事件
+    // 绑定事件
     var inputMin = document.getElementById("temu-filter-min");
     var inputMax = document.getElementById("temu-filter-max");
     var storeInput = document.getElementById("temu-filter-store");
@@ -3033,6 +3285,8 @@
     if (storeInput) {
       storeInput.addEventListener("change", function () {
         localStorage.setItem(STORAGE_KEY_STORE, getCurrentStoreName());
+        var indicator = document.getElementById("temu-filter-store-indicator");
+        if (indicator) indicator.textContent = "指纹库：" + getCurrentStoreName() + " / v" + PLUGIN_VERSION;
         showToast("当前店铺：" + getCurrentStoreName());
       });
       storeInput.addEventListener("blur", function () {
@@ -3104,11 +3358,18 @@
         });
         count.textContent = "全局扫描完成，命中 " + records.length + " 条";
         if (records.length > 0) {
+          count.textContent = "正在按四位指纹回查表D...";
+          await attachResolvedDToGlobalRecords(records);
+          count.textContent = "全局扫描完成，命中 " + records.length + " 条";
           downloadGlobalScanExcel(records);
           showResults(minV, maxV, records);
           showToast("全局扫描完成，已打开结果并导出 Excel：" + records.length + " 条");
         } else {
-          showToast("未找到参考申报价达到最低参考价的数据");
+          // Always open the result window. A completed zero-result scan must
+          // be visible and auditable instead of looking like a silent failure.
+          showResults(minV, maxV, []);
+          setNewWorkbookStatus("全局扫描完成：0 条命中。没有商品同时满足当前 SKU 最低参考价与页面参考申报价条件。", false);
+          showToast("全局扫描完成：0 条，已打开结果窗口说明原因");
         }
       } catch (err) {
         console.error("[TemuFilter v9] global scan failed:", err);
@@ -3167,8 +3428,10 @@
     [500, 1500, 3000, 5000].forEach(function (delay) {
       setTimeout(function () {
         if (!document.getElementById("temu-filter-panel")) {
-          console.log("[TemuFilter v9] Retry after " + delay + "ms");
+          console.log("[TemuFilter v" + PLUGIN_VERSION + "] Retry after " + delay + "ms");
           insertPanel();
+        } else {
+          syncStoreWithPageIdentity();
         }
       }, delay);
     });
@@ -3191,5 +3454,5 @@
     }
   }).observe(document.body, { childList: true, subtree: true });
 
-  console.log("[TemuFilter v9] init complete");
+  console.log("[TemuFilter v" + PLUGIN_VERSION + "] init complete");
 })();
