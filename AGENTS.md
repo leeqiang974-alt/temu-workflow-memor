@@ -90,6 +90,7 @@
 - Copy event counts are audit metadata only. Do not use a historical event count as a count of D that should appear in the current dynamic price filter. For every scan show four separate values: resolved current D, historical passed D present now, first-time D now, and historical passed D absent now.
 - Verify this rule with a deliberately unmatched D/fingerprint: it must copy zero table rows and create no copy event.
 - When generating a pruned workbook, choose the latest explicitly store-routed final submission from `temu_workbook_registry.json`, then remove the entire store D ledger by exact D. Never use the global fingerprint registry ordering to choose a pruning source.
+- 2026-08-11 待创建首单采集复制：Temu“上新生命周期管理 > 待创建首单”页不要求参考申报价命中。插件当前页按钮应切换为“指纹采集复制”，遍历当前页完整 DOM/虚拟滚动商品，只从实际 `productName` 标题末尾解析指纹，按 `指纹 + 标准化完整标题` 去重并自动执行“一键复制未复制”。仍须通过全局指纹库精确解析 D、遵守永久已复制 D 跳过和店铺身份门；不得用页面 SKU/SKC/货号代替指纹。普通价格页面继续使用参考申报价筛选，不受此模式影响。验证应覆盖：激活标签识别、按钮模式切换、虚拟滚动采集、全部样本指纹可解析、未匹配零复制、插件实际加载版本。
 
 ## Canonical Plugin Location
 
