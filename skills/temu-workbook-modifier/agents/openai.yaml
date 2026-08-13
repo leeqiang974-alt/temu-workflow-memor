@@ -1,0 +1,4 @@
+interface:
+  display_name: "Temu 表格修改指导"
+  short_description: "识别任务模式、联动字段并安全修改 Temu 店小秘工作簿"
+  default_prompt: "Use $temu-workbook-modifier to inspect this Temu workbook, declare the modification scope, preserve linked fields, and produce an auditable candidate."

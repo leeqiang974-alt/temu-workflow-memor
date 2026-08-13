@@ -1,0 +1,34 @@
+{
+  "schema": "temu-release-policy/v1",
+  "default_status": "BLOCK",
+  "required_evidence": ["proposal_confirmation", "execution_receipt", "t1_approval", "badge_approval", "badge_coverage_audit", "j_audit", "cell_audit", "negative_locks", "writeback_diff", "category_attribute_audit"],
+  "release_profiles": {
+    "audit-only": {
+      "certifiable": false,
+      "required_evidence": ["cell_audit", "category_attribute_audit"]
+    },
+    "targeted-repair": {
+      "certifiable": true,
+      "required_evidence": ["proposal_confirmation", "execution_receipt", "cell_audit", "negative_locks", "writeback_diff", "category_attribute_audit"]
+    },
+    "full-rebuild": {
+      "certifiable": true,
+      "required_evidence": ["proposal_confirmation", "execution_receipt", "t1_approval", "badge_approval", "badge_coverage_audit", "j_audit", "cell_audit", "negative_locks", "writeback_diff", "category_attribute_audit"]
+    },
+    "upload-finalization": {
+      "certifiable": true,
+      "required_evidence": ["proposal_confirmation", "execution_receipt", "t1_approval", "badge_approval", "badge_coverage_audit", "j_audit", "cell_audit", "negative_locks", "writeback_diff", "category_attribute_audit"]
+    },
+    "already-uploaded-record-repair": {
+      "certifiable": true,
+      "required_evidence": ["proposal_confirmation", "execution_receipt", "cell_audit", "negative_locks", "writeback_diff", "category_attribute_audit"]
+    }
+  },
+  "required_columns": 54,
+  "j_required_fields": ["row", "D", "G", "SKU", "source_path", "generated_asset", "oss_url", "AC_previewImgUrls"],
+  "sentinels": {
+    "L095-00": "2\\2.png",
+    "L095-01": "3\\3.png"
+  },
+  "release_rules": ["all_required_evidence_pass", "all_exact_D_have_verified_final_badged_T1", "frozen_workbook_hash_unchanged", "frozen_policy_hash_unchanged", "no_active_negative_lock_conflict", "no_protected_cell_diff", "certificate_required_for_index"]
+}

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Temu 独立审查关门"
+  short_description: "独立复核 Temu 工作簿证据并阻止未通过的交付上传"
+  default_prompt: "Use $temu-release-gate to independently audit this Temu candidate and block upload, writeback, or registry use unless every required gate passes."

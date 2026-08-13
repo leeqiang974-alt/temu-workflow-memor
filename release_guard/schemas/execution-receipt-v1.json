@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Temu Release Guard execution receipt",
+  "type": "object",
+  "required": ["batch_id", "proposal_id", "proposal_sha256", "input_paths", "output_paths"],
+  "properties": {
+    "batch_id": {"type": "string"},
+    "proposal_id": {"type": "string"},
+    "proposal_sha256": {"type": "string"},
+    "operation": {"type": "string"},
+    "input_paths": {"type": "object", "additionalProperties": {"type": "string"}},
+    "output_paths": {"type": "object", "additionalProperties": {"type": "string"}}
+  }
+}
