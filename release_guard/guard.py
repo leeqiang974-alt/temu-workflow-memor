@@ -379,7 +379,7 @@ class ReleaseGuard:
     def verify_category_attributes(self, batch_id: str, audit_file: str | Path) -> dict[str, Any]:
         """Record category/attribute consistency evidence from workbook_probe.audit_category_attributes."""
         data = load_json(audit_file)
-        failures = (data.get("empty_cid_rows", []) + data.get("parse_error_rows", [])
+        failures = (data.get("empty_cid_rows", []) + data.get("empty_attribute_rows", []) + data.get("parse_error_rows", [])
                     + data.get("cid_templatepid_mismatches", []) + data.get("cid_vs_reference_mismatches", []))
         ok = not failures and data.get("failure_count", 0) == 0
         return self._record(batch_id, "category_attribute_audit", audit_file, _status(ok, unknown=not data, block=bool(failures)), data)

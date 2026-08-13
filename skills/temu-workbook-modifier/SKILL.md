@@ -36,7 +36,7 @@ Read [task modes and scope](references/task-modes.md) for the declaration contra
 - D changes require parsed updates to every D-dependent display/JSON/registry field declared by policy. Preserve historical extCode only for an explicitly identified already-uploaded-record mode.
 - G is a real variant fact. Preserve color/count/size/material/set semantics; do not turn it into scene marketing text. When G changes, update E, SKU spec JSON and J/SKC linkage together.
 - T parsers split both commas and CR/LF. T has at most 10 URLs; U equals T1; protected T4 remains the size-image slot.
-- Category ID and product-attribute `templatePid` must come from certified reference evidence or the category registry, never a guessed neighboring L0xx.
+- Category ID and product-attribute `templatePid` must come from certified reference evidence or the category registry, never a guessed neighboring L0xx. A non-empty product-attribute JSON must contain at least one `templatePid`; empty lists are invalid unless the certified category policy explicitly allows attribute-free products.
 - Product descriptions may contain valid rich HTML/image URLs. Do not rewrite them merely because they are not plain Chinese text.
 - 店小秘 upload copies keep the current header structure but clear `来源url`, `所属店铺`, `创建时间`, and `更新时间` data cells.
 - X `外包装图片` uses the workbook's own universal majority OSS package image. Do not hard-code a historical batch URL or retain `kwcdn`.
@@ -66,4 +66,3 @@ Call the output **candidate**, **review-ready**, or **technically validated** un
 - Re-imported changed-cell diff with allowed and protected changes separated.
 - Review HTML/JSON and rejection locks when visual work exists.
 - Machine audit reports requested by the release gate.
-

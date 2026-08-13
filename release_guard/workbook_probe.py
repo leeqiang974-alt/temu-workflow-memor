@@ -99,11 +99,13 @@ def audit_category_attributes(path: str | Path, reference_path: str | Path | Non
         _reg = json.loads(Path(category_registry_path).read_text(encoding="utf-8"))
         for _lxx, _cid in _reg.get("L0xx_cid", {}).items():
             ref_lxx_cid.setdefault(_lxx, str(_cid))
-    empty_cid, parse_errors, tp_mismatches, ref_mismatches = [], [], [], []
+    empty_cid, empty_attributes, parse_errors, tp_mismatches, ref_mismatches = [], [], [], [], []
     tp_to_cid: dict[str, str] = {}
     for r in rows:
         if not r["cid"]:
             empty_cid.append({"row": r["row"], "D": r["D"]})
+        if not r["templatePids"]:
+            empty_attributes.append({"row": r["row"], "D": r["D"]})
         if "__PARSE_ERROR__" in r["templatePids"]:
             parse_errors.append({"row": r["row"], "D": r["D"]})
         for tp in r["templatePids"]:
@@ -117,10 +119,11 @@ def audit_category_attributes(path: str | Path, reference_path: str | Path | Non
         if m and m.group(1) in ref_lxx_cid and ref_lxx_cid[m.group(1)] != r["cid"]:
             ref_mismatches.append({"row": r["row"], "D": r["D"], "L0xx": m.group(1),
                                    "cid": r["cid"], "reference_cid": ref_lxx_cid[m.group(1)]})
-    failures = empty_cid + parse_errors + tp_mismatches + ref_mismatches
+    failures = empty_cid + empty_attributes + parse_errors + tp_mismatches + ref_mismatches
     return {"schema": "temu-category-attribute-audit/v1", "workbook_path": probe["path"],
             "workbook_sha256": probe["sha256"], "reference_path": str(reference_path) if reference_path else None,
-            "row_count": len(rows), "empty_cid_rows": empty_cid, "parse_error_rows": parse_errors,
+            "row_count": len(rows), "empty_cid_rows": empty_cid, "empty_attribute_rows": empty_attributes,
+            "parse_error_rows": parse_errors,
             "cid_templatepid_mismatches": tp_mismatches, "cid_vs_reference_mismatches": ref_mismatches,
             "failure_count": len(failures)}
 
