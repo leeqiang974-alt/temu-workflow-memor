@@ -32,8 +32,18 @@ def badge_coverage(tmp, workbook):
                      'final_asset':str(asset),'final_asset_sha256':sha256_file(asset)}]
     })
 
+def scope_audit(tmp, workbook, profile='full-rebuild'):
+    return write(tmp/'scope.json', {
+        'schema':'temu-workbook-change-scope/v1','mode':profile,
+        'source_workbook':str(workbook),'source_sha256':sha256_file(workbook),
+        'candidate_workbook':str(workbook),'candidate_sha256':sha256_file(workbook),
+        'allowed_changed_headers':['*'],'observed_changed_headers':[],
+        'protected_changed':[],'linked_failures':[],'reimport_verified':True
+    })
+
 def make_pass(tmp):
     root=tmp/'guard'; wb=write(tmp/'input.json', {'candidate':1}); g=ReleaseGuard(root); b=g.init_batch('b1',wb)
+    g.verify_scope('b1',scope_audit(tmp,wb))
     proposal=write(tmp/'proposal.json', {'proposal_id':'p1','batch_id':'b1','requested_action':'replace J and T1'})
     g.create_proposal('b1', proposal)
     confirm=write(tmp/'confirm.json', {'proposal_id':'p1','batch_id':'b1','decision':'CONFIRMED','confirmer':'human@example','proposal_sha256':sha256_file(proposal)})
@@ -169,4 +179,24 @@ def test_required_evidence_comes_from_policy_profile(tmp_path):
     result=g.evaluate('b1')
     assert result['required_evidence']==['cell_audit']
     assert 'j_audit:UNKNOWN' not in result['reasons']
+    g.close()
+
+def test_scope_change_outside_allowed_headers_blocks(tmp_path):
+    root=tmp_path/'guard'; source=write(tmp_path/'source.json', {'source':1}); candidate=write(tmp_path/'candidate.json', {'candidate':1})
+    g=ReleaseGuard(root); g.init_batch('b1',candidate,'targeted-repair')
+    scope=write(tmp_path/'scope-bad.json', {
+        'schema':'temu-workbook-change-scope/v1','mode':'targeted-repair',
+        'source_workbook':str(source),'source_sha256':sha256_file(source),
+        'candidate_workbook':str(candidate),'candidate_sha256':sha256_file(candidate),
+        'allowed_changed_headers':['申报价格'],'observed_changed_headers':['申报价格','轮播图'],
+        'protected_changed':[],'linked_failures':[],'reimport_verified':True})
+    record=g.verify_scope('b1',scope)
+    assert record['status']=='BLOCK'
+    assert record['details']['failures'][0]['reason']=='changes_outside_scope'
+    g.close()
+
+def test_certificate_target_must_be_frozen_candidate(tmp_path):
+    g, wb=make_pass(tmp_path); other=write(tmp_path/'other.json', {'other':1})
+    with pytest.raises(RuntimeError, match='not the frozen final candidate'):
+        g.certify('b1',other)
     g.close()

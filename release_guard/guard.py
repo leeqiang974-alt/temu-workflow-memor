@@ -338,6 +338,44 @@ class ReleaseGuard:
         ok = data.get("reimport_verified") is True and not protected and not failures
         return self._record(batch_id, "writeback_diff", diff_file, _status(ok, unknown=not data, block=bool(protected)), data)
 
+    def verify_scope(self, batch_id: str, scope_file: str | Path) -> dict[str, Any]:
+        """Bind declared task mode and allowed changes to the frozen final candidate."""
+        data = load_json(scope_file)
+        batch = self._batch(batch_id)
+        failures: list[dict[str, Any]] = []
+        if data.get("schema") != "temu-workbook-change-scope/v1":
+            failures.append({"reason": "wrong_scope_schema"})
+        if data.get("mode") != batch["profile"]:
+            failures.append({"reason": "profile_mismatch", "declared": data.get("mode"), "frozen": batch["profile"]})
+        if str(Path(str(data.get("candidate_workbook", ""))).resolve()) != batch["workbook_path"]:
+            failures.append({"reason": "candidate_path_mismatch"})
+        if data.get("candidate_sha256") != batch["workbook_sha256"]:
+            failures.append({"reason": "candidate_hash_mismatch"})
+        source = Path(str(data.get("source_workbook", "")))
+        if not source.is_file() or sha256_file(source) != data.get("source_sha256"):
+            failures.append({"reason": "source_hash_invalid"})
+        allowed = data.get("allowed_changed_headers")
+        observed = data.get("observed_changed_headers")
+        if not isinstance(allowed, list) or not allowed:
+            failures.append({"reason": "allowed_changed_headers_missing"})
+            allowed = []
+        if not isinstance(observed, list):
+            failures.append({"reason": "observed_changed_headers_missing"})
+            observed = []
+        if "*" not in allowed:
+            outside = sorted(set(str(x) for x in observed) - set(str(x) for x in allowed))
+            if outside:
+                failures.append({"reason": "changes_outside_scope", "headers": outside})
+        if data.get("protected_changed"):
+            failures.append({"reason": "protected_cells_changed", "cells": data.get("protected_changed")})
+        if data.get("linked_failures"):
+            failures.append({"reason": "linked_field_failures", "items": data.get("linked_failures")})
+        if data.get("reimport_verified") is not True:
+            failures.append({"reason": "candidate_not_reimport_verified"})
+        details = {**data, "failures": failures}
+        return self._record(batch_id, "scope_audit", scope_file,
+                            _status(not failures, unknown=not data, block=bool(failures)), details)
+
     def verify_category_attributes(self, batch_id: str, audit_file: str | Path) -> dict[str, Any]:
         """Record category/attribute consistency evidence from workbook_probe.audit_category_attributes."""
         data = load_json(audit_file)
@@ -392,8 +430,12 @@ class ReleaseGuard:
         if result["status"] != "PASS": raise RuntimeError("release blocked: " + ", ".join(result["reasons"]))
         out = Path(output_workbook).resolve()
         if not out.is_file(): raise FileNotFoundError(out)
+        batch = self._batch(batch_id)
+        if str(out) != batch["workbook_path"] or sha256_file(out) != batch["workbook_sha256"]:
+            raise RuntimeError("release blocked: certificate target is not the frozen final candidate")
         cert = {"schema": "temu-release-certificate/v1", "batch_id": batch_id, "status": "CERTIFIED",
-                "workbook_path": str(out), "workbook_sha256": sha256_file(out), "source_frozen_sha256": self._batch(batch_id)["workbook_sha256"],
+                "workbook_path": str(out), "workbook_sha256": sha256_file(out),
+                "candidate_frozen_sha256": batch["workbook_sha256"], "source_frozen_sha256": batch["workbook_sha256"],
                 "policy_sha256": self._policy_hash(), "evidence": result["evidence"], "issued_at": time.time()}
         path = self.root / "batches" / batch_id / "release_certificate.json"; write_json(path, cert)
         self.db.execute("UPDATE batches SET certificate_path=? WHERE batch_id=?", (str(path), batch_id)); self.db.commit()

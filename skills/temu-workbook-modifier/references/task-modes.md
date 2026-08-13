@@ -32,10 +32,16 @@ Repair an existing marketplace record. Historical SKC extCode or cargo associati
   "mode": "targeted-repair",
   "source_workbook": "D:/path/source.xlsx",
   "source_sha256": "...",
+  "candidate_workbook": "D:/path/candidate.xlsx",
+  "candidate_sha256": "...",
   "requested_changes": ["申报价格"],
   "linked_changes": [],
   "allowed_changed_headers": ["申报价格"],
+  "observed_changed_headers": ["申报价格"],
   "protected_headers": ["* except allowed_changed_headers"],
+  "protected_changed": [],
+  "linked_failures": [],
+  "reimport_verified": true,
   "identity_policy": "preserve row order + D + G + SKU",
   "skc_extcode_policy": "preserve|equals_D|already_uploaded",
   "price_rule": {"source": "D:/path/prices.txt", "multiplier": 2.5},
@@ -45,4 +51,3 @@ Repair an existing marketplace record. Historical SKC extCode or cargo associati
 ```
 
 The changed-column list is not permission to break linked invariants. If a requested change needs linked changes, expand the scope before editing and state why.
-

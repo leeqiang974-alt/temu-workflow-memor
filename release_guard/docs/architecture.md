@@ -14,12 +14,15 @@ init/freeze -> evidence attestations -> evaluate -> certify -> validate_for_inde
 
 - `t1_approval` and `badge_approval`: `decision=APPROVED`, human `approver`, batch and policy hashes, and a non-empty `asset_paths` map of local asset path to SHA-256.
 - `badge_coverage_audit`: exact workbook-D coverage with one final badged local asset and SHA-256 per D; `badge_status=applied` and the required label must be explicit. A generic badge approval or URL path does not satisfy coverage.
+- `scope_audit`: frozen task profile, source/candidate paths and hashes, allowed versus observed changed headers, linked-field failures, protected-cell drift and re-import verification.
 - `j_audit`: `physical_rows` plus one row record for every physical row. Each record contains exact `D`, `G`, `SKU`, `source_path`, `generated_asset`, `oss_url`, and `AC_previewImgUrls`; AC must equal the written OSS URL. L095-00 and L095-01 source suffixes are hard-coded policy sentinels.
 - `cell_audit`: `column_count=54`, and every listed cell has `status=PASS`.
 - `negative_locks`: machine-readable active locks; a lock with `appears_in_output=true` blocks.
 - `writeback_diff`: `reimport_verified=true`, no protected-cell changes, and no failures.
 
 Profiles split `audit-only`, `targeted-repair`, `full-rebuild`, `upload-finalization`, and `already-uploaded-record-repair`; they prevent a one-field repair from requiring irrelevant paid-image evidence while keeping broad rebuilds under full visual/badge gates. The SQLite database is the durable state ledger. JSON records under `batches/<batch_id>/` are evidence snapshots for independent review. The release certificate records both the frozen input hash and the exact final output hash. The plugin-facing adapter rechecks the certificate, current state, policy hash, frozen hash, output existence, and output hash immediately before an external index transaction.
+
+`init` freezes the final candidate, not an earlier source workbook. `scope_audit` separately binds that candidate to its source lineage. `certify` refuses any output path/hash other than the frozen candidate, preventing evidence gathered for one file from certifying another.
 
 ## Security boundary
 

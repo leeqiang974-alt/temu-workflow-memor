@@ -3,6 +3,7 @@
 ## Universal evidence
 
 - Frozen candidate workbook hash and frozen policy hash.
+- Scope audit binding source and frozen candidate hashes, task mode, allowed/observed changed headers, linked failures and protected-cell drift.
 - Confirmed task scope and execution receipt.
 - Re-imported workbook integrity audit.
 - Changed-cell diff: allowed changes, dependency closure and protected zero-drift.
@@ -26,5 +27,4 @@ Every evidence file and every approved asset is hashed. Evaluation must recheck 
 
 ## Certificate
 
-The certificate binds batch ID, final workbook path/hash, frozen source/policy hashes, evidence states and issue time. Upload and registry adapters must revalidate it immediately before acting.
-
+The certificate binds batch ID, exact frozen final-candidate path/hash, frozen policy hash, evidence states and issue time. Source lineage is held by scope evidence. The gate refuses to certify a different output path/hash. Upload and registry adapters must revalidate it immediately before acting.

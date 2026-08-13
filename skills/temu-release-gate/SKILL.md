@@ -20,7 +20,7 @@ The construction workflow may submit evidence, but cannot declare PASS. The gate
 
 ## Gate order
 
-1. Freeze exact candidate path, SHA-256, policy SHA-256, mode, scope and source lineage.
+1. Freeze exact **final candidate** path, SHA-256, policy SHA-256 and mode. Record source lineage separately in `scope_audit`.
 2. Validate scope/diff: allowed changes are complete; protected cells have zero drift; candidate is re-imported.
 3. Validate workbook structure and field linkage independently.
 4. Validate semantic/reference evidence: category attributes, price source, title fingerprint registry, special L0xx sentinels.
@@ -61,4 +61,3 @@ Every physical J row and every exact-D final T1 requiring human judgment must ha
 ## Special rule: badge coverage
 
 Do not infer a badge from filename, OSS prefix, prompt, URL, or a few samples. Exact-D coverage, local hashes, required label/style decision, human approval, durable URL and workbook linkage are mandatory. One missing D blocks the entire final release.
-

@@ -14,6 +14,12 @@ def put(path, value):
 def test_conversational_release_to_index_smoke(tmp_path):
     root=tmp_path/"guard"; source=put(tmp_path/"source.xlsx", {"input":1}); final=put(tmp_path/"final.xlsx", {"output":1})
     g=ReleaseGuard(root); g.init_batch("b1", source)
+    scope=put(tmp_path/"scope.json",{"schema":"temu-workbook-change-scope/v1","mode":"full-rebuild",
+        "source_workbook":str(source),"source_sha256":sha256_file(source),
+        "candidate_workbook":str(source),"candidate_sha256":sha256_file(source),
+        "allowed_changed_headers":["*"],"observed_changed_headers":[],"protected_changed":[],
+        "linked_failures":[],"reimport_verified":True})
+    g.verify_scope("b1",scope)
     adapter=ConversationAdapter(g)
     adapter.record_suggestion("b1","m1","建议生成最终表","p1","generate final workbook",{"D":["L095-00","L095-01"]})
     adapter.confirm_command("b1","p1","CONFIRM p1","operator","m2")
@@ -40,7 +46,7 @@ def test_conversational_release_to_index_smoke(tmp_path):
     cat=put(tmp_path/"cat.json",{"empty_cid_rows":[],"parse_error_rows":[],"cid_templatepid_mismatches":[],"cid_vs_reference_mismatches":[],"failure_count":0})
     g.verify_category_attributes("b1",cat)
     g.close()
-    cert=require_release(root,"b1",final)
+    cert=require_release(root,"b1",source)
     assert cert["status"]=="CERTIFIED"
     checked=require_index_registration(root,"b1",root/"batches"/"b1"/"release_certificate.json")
     assert checked["status"]=="VALID_FOR_INDEX"

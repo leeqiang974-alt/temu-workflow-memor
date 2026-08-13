@@ -1,27 +1,27 @@
 {
   "schema": "temu-release-policy/v1",
   "default_status": "BLOCK",
-  "required_evidence": ["proposal_confirmation", "execution_receipt", "t1_approval", "badge_approval", "badge_coverage_audit", "j_audit", "cell_audit", "negative_locks", "writeback_diff", "category_attribute_audit"],
+  "required_evidence": ["scope_audit", "proposal_confirmation", "execution_receipt", "t1_approval", "badge_approval", "badge_coverage_audit", "j_audit", "cell_audit", "negative_locks", "writeback_diff", "category_attribute_audit"],
   "release_profiles": {
     "audit-only": {
       "certifiable": false,
-      "required_evidence": ["cell_audit", "category_attribute_audit"]
+      "required_evidence": ["scope_audit", "cell_audit", "category_attribute_audit"]
     },
     "targeted-repair": {
       "certifiable": true,
-      "required_evidence": ["proposal_confirmation", "execution_receipt", "cell_audit", "negative_locks", "writeback_diff", "category_attribute_audit"]
+      "required_evidence": ["scope_audit", "proposal_confirmation", "execution_receipt", "cell_audit", "negative_locks", "writeback_diff", "category_attribute_audit"]
     },
     "full-rebuild": {
       "certifiable": true,
-      "required_evidence": ["proposal_confirmation", "execution_receipt", "t1_approval", "badge_approval", "badge_coverage_audit", "j_audit", "cell_audit", "negative_locks", "writeback_diff", "category_attribute_audit"]
+      "required_evidence": ["scope_audit", "proposal_confirmation", "execution_receipt", "t1_approval", "badge_approval", "badge_coverage_audit", "j_audit", "cell_audit", "negative_locks", "writeback_diff", "category_attribute_audit"]
     },
     "upload-finalization": {
       "certifiable": true,
-      "required_evidence": ["proposal_confirmation", "execution_receipt", "t1_approval", "badge_approval", "badge_coverage_audit", "j_audit", "cell_audit", "negative_locks", "writeback_diff", "category_attribute_audit"]
+      "required_evidence": ["scope_audit", "proposal_confirmation", "execution_receipt", "t1_approval", "badge_approval", "badge_coverage_audit", "j_audit", "cell_audit", "negative_locks", "writeback_diff", "category_attribute_audit"]
     },
     "already-uploaded-record-repair": {
       "certifiable": true,
-      "required_evidence": ["proposal_confirmation", "execution_receipt", "cell_audit", "negative_locks", "writeback_diff", "category_attribute_audit"]
+      "required_evidence": ["scope_audit", "proposal_confirmation", "execution_receipt", "cell_audit", "negative_locks", "writeback_diff", "category_attribute_audit"]
     }
   },
   "required_columns": 54,
