@@ -26,6 +26,10 @@ HIGH_RISK_REASONS = {
     "L081": "wrong_product_appearance_inheritance",
     "L043": "product_appearance_changed",
     "L072": "product_appearance_hallucinated",
+    "L068": "product_appearance_changed_and_proportion_wrong",
+    "L082": "wrong_product_appearance",
+    "L083": "product_appearance_detail_error",
+    "L091": "product_appearance_detail_error",
 }
 
 
