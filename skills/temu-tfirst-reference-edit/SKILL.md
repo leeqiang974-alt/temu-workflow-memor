@@ -224,6 +224,17 @@ saturation; after a 60-second cooldown, two workers completed every remaining it
 Default to two workers, use bounded cooldown/retry, and treat 503 queue-full as provider
 capacity rather than a prompt/product failure. Do not default to eight workers.
 
+The 2026-09-14 V2 human review adds three cross-batch locks. First, cast diversity is a
+batch property: rotate young adults, adults, middle-aged people and selected no-person
+scenes; do not let elderly people dominate merely because each single prompt says
+`different person`. Second, physical support is product truth: every foot/base must
+visibly contact one continuous surface with plausible contact shadows, the complete
+product must stay inside the supporting tabletop/counter boundary, and no generated
+floor stand, cart base, caster, rail or hidden support may be added. Third, when scale
+or proportion is rejected, lock both the product's intrinsic width/height/depth ratios
+and its intended frame occupancy/real-world relationship to a person or pet; a correct
+silhouette at an implausible size still fails.
+
 ### Compositing Boundary
 
 Do **not** default to “cutout PNG pasted onto a ComfyUI background.” It is rejected for normal T-first reconstruction because it commonly looks synthetic and produces weak differentiation.

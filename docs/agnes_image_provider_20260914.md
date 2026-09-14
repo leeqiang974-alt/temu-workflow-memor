@@ -110,3 +110,24 @@ Agnes queue capacity is dynamic and provider-wide. On 2026-09-14:
 Use `--workers 2` as the safe default for this batch. Four workers may be tried only
 when the queue is clearly free and with bounded retry/cooldown. Do not use eight as the
 default, and do not classify queue-full 503 responses as prompt or product failures.
+
+## V3 four-image correction
+
+Human review approved the V2 direction overall and rejected four exact candidates:
+
+- `L077080826`: product scale/proportion was implausible;
+- `L081080846`: an extra stand appeared and the product extended beyond its table;
+- `L081080910`: product appearance changed and the frame appeared suspended;
+- `L083080809`: the desktop organiser was suspended instead of resting on a surface.
+
+The four V2 files were added to immutable negative evidence and excluded from every V3
+request. V3 again submitted only the exact-D product material, but additionally locked
+intrinsic proportions, frame occupancy, all-feet/base surface contact, contact shadows,
+support-surface boundaries, and no-extra-support rules. Its cast schedule deliberately
+rotated a woman in her twenties, a man in his thirties, a woman in her forties, and one
+no-person scene so elderly people did not dominate the batch.
+
+The V3 run completed `4 selected -> 4 validated local -> 0 failed`. One item encountered
+queue-full 503 responses and succeeded after cooldown at one worker. These candidates
+remain blocked from badge, OSS and workbook writeback until the new four-image review is
+human-approved.
