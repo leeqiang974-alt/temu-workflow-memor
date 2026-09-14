@@ -235,6 +235,13 @@ or proportion is rejected, lock both the product's intrinsic width/height/depth 
 and its intended frame occupancy/real-world relationship to a person or pet; a correct
 silhouette at an implausible size still fails.
 
+Physical-support repair must not erase a useful task scene. When the product's value is
+best demonstrated by loading, sorting, pulling, installing, cleaning or another clear
+interaction, a static no-person display is not an acceptable fallback merely because it
+avoids floating geometry. Preserve both requirements: the product remains fully planted
+and structurally exact, while hands interact with the contents or controls without
+lifting, obscuring or deforming the product itself.
+
 ### Compositing Boundary
 
 Do **not** default to “cutout PNG pasted onto a ComfyUI background.” It is rejected for normal T-first reconstruction because it commonly looks synthetic and produces weak differentiation.

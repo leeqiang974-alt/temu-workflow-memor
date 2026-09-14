@@ -131,3 +131,10 @@ The V3 run completed `4 selected -> 4 validated local -> 0 failed`. One item enc
 queue-full 503 responses and succeeded after cooldown at one worker. These candidates
 remain blocked from badge, OSS and workbook writeback until the new four-image review is
 human-approved.
+
+`L083080809` then received a second correction: the V3 static desktop display fixed the
+floating geometry but removed the product-use task. That output is also negative
+evidence. V4 keeps the complete base planted on one desk while a young adult performs a
+clear sorting task by placing supplies into the lower caddy and upper basket. Support
+validity and task value are simultaneous requirements; one may not be repaired by
+discarding the other.
