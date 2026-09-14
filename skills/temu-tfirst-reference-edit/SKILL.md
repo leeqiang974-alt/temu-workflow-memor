@@ -211,6 +211,19 @@ with a product-first, strong-differentiation prompt, and one conflicting D such 
 `L082080805` with no full old-product scene reference. Human approval of both tests is
 required before batch submission.
 
+For the 2026-09-14 V2 diagnostic, product-only submission removed the old-scene freeze
+and the L082 black/white product fusion: submit only the visually verified exact-D
+product image, keep old T1/rejected outputs as hashed evidence but not model inputs,
+and express the new scene/person/camera/depth recipe in text. This is a diagnostic
+strategy, not automatic approval; exact count, mechanism, proportion and fine detail
+still require human visual review before badge, OSS or workbook writeback.
+
+Agnes concurrency is queue-sensitive. In the verified 23-D run, eight workers caused
+HTTP 503 `image queue is full`; four workers remained unstable immediately after that
+saturation; after a 60-second cooldown, two workers completed every remaining item.
+Default to two workers, use bounded cooldown/retry, and treat 503 queue-full as provider
+capacity rather than a prompt/product failure. Do not default to eight workers.
+
 ### Compositing Boundary
 
 Do **not** default to “cutout PNG pasted onto a ComfyUI background.” It is rejected for normal T-first reconstruction because it commonly looks synthetic and produces weak differentiation.

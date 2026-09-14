@@ -77,3 +77,36 @@ For the next diagnostic:
    use a verified scene-only derivative or product-only generation with textual scene
    guidance.
 5. Test one non-conflicting D and one conflicting D before any bulk retry.
+
+## V2 product-only redo result
+
+The second 23-D diagnostic used only one submitted image reference per request: the
+visually verified exact-D product material. The current-workbook T1 and both earlier
+rejected candidates remained hash-recorded evidence, but were not sent to Agnes. The
+old T1's useful function was translated into text while every D received an explicit
+new setting, person, camera lane, product position, and foreground/midground/background
+recipe.
+
+Artifacts:
+
+- Plan builder: `scripts/build_yeahf_1999d_agnes_v2_redo23_plan_20260914.py`
+- Runner: `scripts/run_yeahf_1999d_agnes_v2_redo23_20260914.py`
+- Review builder: `scripts/build_yeahf_1999d_agnes_v2_review_20260914.py`
+- Quiet local server: `scripts/serve_review_quiet.py`
+
+The run reconciled as `23 selected -> 23 validated local -> 0 failed`. All candidates
+are still review-only: they have no final badge, no OSS upload, and no workbook
+writeback. The review page exposes original T1, exact-D product, rejected V1, and V2
+side by side and must show 23 cards / 92 successfully decoded images.
+
+## Concurrency finding
+
+Agnes queue capacity is dynamic and provider-wide. On 2026-09-14:
+
+- eight concurrent requests caused ten HTTP 503 `image queue is full` responses;
+- an immediate retry at four workers remained unstable after the saturation event;
+- after a 60-second cooldown, two workers completed all eight remaining requests.
+
+Use `--workers 2` as the safe default for this batch. Four workers may be tried only
+when the queue is clearly free and with bounded retry/cooldown. Do not use eight as the
+default, and do not classify queue-full 503 responses as prompt or product failures.
