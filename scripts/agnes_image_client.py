@@ -65,8 +65,8 @@ def generate_edit(
         raise RuntimeError(f"Unexpected Agnes model: {model}")
     if size != "1K" or ratio != "1:1":
         raise RuntimeError("This Temu runner permits only Agnes 1K square output")
-    if len(image_paths) != 2:
-        raise RuntimeError("The 1999D redo contract requires exactly two references")
+    if not 1 <= len(image_paths) <= 3:
+        raise RuntimeError("Agnes image editing requires 1-3 validated references")
     for path in image_paths:
         if not path.is_file():
             raise FileNotFoundError(path)
@@ -134,4 +134,3 @@ def generate_edit(
         "ratio": ratio,
         "key_path": str(key_path) if key_path else "AGNES_API_KEY",
     }
-

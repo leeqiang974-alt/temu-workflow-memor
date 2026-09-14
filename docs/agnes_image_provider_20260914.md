@@ -52,5 +52,28 @@ python scripts\build_yeahf_1999d_agnes23_review_20260914.py
 ```
 
 The 2026-09-14 run reconciled as `23 submitted -> 23 validated local -> 0 failed`.
-The generated candidates remain `pending_human_review`.
+The generated candidates were subsequently human-reviewed and rejected `23/23`.
 
+## Human-review correction
+
+The first Agnes batch preserved product appearance reasonably well, but failed the
+differentiation objective: scenes, people, camera angle, foreground/background layers,
+and depth relationships stayed too close to the old T1. The prompt itself caused much
+of this by simultaneously preserving composition/camera/person logic and allowing only
+a small crop or safe scene change.
+
+`L082080805` is a permanent product-fusion sentinel. The full old T1 contained a white
+pull-out shelf while the exact-D material showed a dark shelf. Agnes rendered both
+products together despite role wording. Never rely on prompt-only `scene image` role
+separation when references contain conflicting product appearances.
+
+For the next diagnostic:
+
+1. Put the exact-D product image first.
+2. Require a measurably new person, setting, camera lane, product position/scale, and
+   foreground/midground/background structure.
+3. Preserve only equivalent use/task logic, not the original composition or person.
+4. If the old T1 product conflicts with exact-D material, do not submit that full T1;
+   use a verified scene-only derivative or product-only generation with textual scene
+   guidance.
+5. Test one non-conflicting D and one conflicting D before any bulk retry.
