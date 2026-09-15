@@ -242,6 +242,31 @@ avoids floating geometry. Preserve both requirements: the product remains fully 
 and structurally exact, while hands interact with the contents or controls without
 lifting, obscuring or deforming the product itself.
 
++### Final T1 Badge Coverage And Writeback Gate
+
+A reviewed unbadged T1 candidate is not the final workbook asset. For a batch that
+requires the circular product-identification inset, render one local final badged
+asset for every exact D, using the visually verified exact-D product material and the
+outlined transparent `THIS IS THE PRODUCT` label. Record the base hash, inset hash,
+rendered hash, placement and badge status per D.
+
+Do not infer badge approval from approval of the underlying generated image. Badge
+placement can cover the product, person, hands, task or important source text, so the
+final badged images require their own complete human review. OSS upload and T/U
+writeback are blocked until the review JSON contains exactly the workbook D set and
+all decisions are approved. After approval, upload content-addressed objects, HEAD
+verify every URL, then update only carousel T1 and U; preserve T2+, protected T4,
+carousel count, same-D consistency and all unrelated workbook cells. Re-import the
+exported workbook and run the independent release gate.
+
+For large Agnes batches, a short concurrency probe is not proof of sustained capacity.
+Ramp gradually, save every successful response immediately, and persist a resumable
+per-D ledger. On the first queue-full, timeout or transient upstream error, pause for a
+bounded cooldown, reduce to the previous successful worker count, and requeue every
+failed D. Continue stepping down if the lower level also saturates. Never discard a
+returned image and never restart already validated D values.
+
+
 ### Compositing Boundary
 
 Do **not** default to “cutout PNG pasted onto a ComfyUI background.” It is rejected for normal T-first reconstruction because it commonly looks synthetic and produces weak differentiation.
